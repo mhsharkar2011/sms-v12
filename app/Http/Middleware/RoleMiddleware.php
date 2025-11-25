@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class RoleMiddleware
+{
+    public function handle(Request $request, Closure $next, $role, $guard = null): Response
+    {
+        $authGuard = app('auth')->guard($guard);
+
+        if ($authGuard->guest()) {
+            return redirect()->route('login');
+        }
+
+        $roles = is_array($role)
+            ? $role
+            : explode('|', $role);
+
+        if (! $authGuard->user()->hasAnyRole($roles)) {
+            abort(403);
+        }
+
+        return $next($request);
+    }
+}
