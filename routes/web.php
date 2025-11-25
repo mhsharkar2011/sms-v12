@@ -26,8 +26,15 @@ Route::middleware(['auth'])->group(function () {
     // Student Routes
     Route::prefix('student')->name('student.')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
-        Route::get('/courses', [StudentDashboard::class, 'courses'])->name('courses')->middleware('permission:view courses');
-        Route::get('/grades', [StudentDashboard::class, 'grades'])->name('grades')->middleware('permission:view grades');
+        Route::get('/attendance', [StudentDashboard::class, 'attendance'])->name('attendance');
+        Route::get('/timetable', [StudentDashboard::class, 'timetable'])->name('timetable');
+        Route::get('/subjects', [StudentDashboard::class, 'subjects'])->name('subjects');
+        Route::get('/homework', [StudentDashboard::class, 'homework'])->name('homework');
+        Route::get('/grades', [StudentDashboard::class, 'grades'])->name('grades');
+        Route::get('/events', [StudentDashboard::class, 'events'])->name('events');
+        Route::get('/messages', [StudentDashboard::class, 'messages'])->name('messages');
+        Route::get('/settings', [StudentDashboard::class, 'settings'])->name('settings');
+        Route::get('/exams', [StudentDashboard::class, 'exams'])->name('exams');
     });
 
     // Teacher Routes
