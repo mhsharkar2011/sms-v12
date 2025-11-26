@@ -6,6 +6,7 @@ use App\Http\Controllers\Parent\DashboardController as ParentDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
@@ -56,8 +57,11 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
-        // User Route
+        // User Management Route
         Route::resource('/users', UserManagementController::class);
+        // Student Management Route
+        Route::resource('/students', StudentManagementController::class);
+
         // In your routes file
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
         // Route::put('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');

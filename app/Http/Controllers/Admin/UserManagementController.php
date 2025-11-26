@@ -14,6 +14,9 @@ class UserManagementController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = User::role('admin')->first();
+        // $admin->notify(new NewUserRegistration($user));
+
         // Get filter parameters
         $roleFilter = $request->get('role');
         $status = $request->get('status');
@@ -82,6 +85,15 @@ class UserManagementController extends Controller
                 'status' => $validated['status'],
             ]);
 
+            // Notify admins about new user registration
+            $admins = User::role('admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new UserRegistered($user));
+            }
+
+            // Notify the user about their account creation
+            $user->notify(new \App\Notifications\AccountCreated($user, $validated['password']));
+            
             // Assign role using Spatie
             $user->assignRole($validated['role']);
         });

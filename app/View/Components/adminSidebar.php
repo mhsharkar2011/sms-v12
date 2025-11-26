@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\User;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Route;
 
@@ -30,34 +31,55 @@ class AdminSidebar extends Component
 
     protected function getMenuItems()
     {
+        $user = auth()->user();
+        $pendingUsersCount = User::where('status', 'active')->count();
+        $totalUserCount = User::count();
+        $adminUserCount = User::role('admin')->count();
+        $studentUserCount = User::role('student')->count();
+        $teacherUserCount = User::role('teacher')->count();
+        $parentUserCount = User::role('parent')->count();
+
         $items = [
+            [
+                'route' => 'admin.notifications',
+                'icon' => '🔔',
+                'label' => 'Notifications',
+                'description' => 'Alerts & messages',
+                'badge' => $user->unreadNotifications->count(),
+                'badgeColor' => 'bg-blue-500'
+            ],
+
             [
                 'route' => 'admin.dashboard',
                 'icon' => '📊',
                 'label' => 'Dashboard',
                 'description' => 'Overview & Analytics',
-                'badge' => null
+                'badge' => $adminUserCount,
+
             ],
             [
                 'route' => 'admin.users.index',
                 'icon' => '👥',
                 'label' => 'User Management',
                 'description' => 'Manage all users',
-                'badge' => '12'
+                'badge' => $pendingUsersCount > 0 ? $pendingUsersCount : null,
+                'badgeColor' => $pendingUsersCount > 0 ? 'bg-gray-400' : null
             ],
             [
                 'route' => 'admin.students',
                 'icon' => '🎓',
                 'label' => 'Students',
                 'description' => 'Student records',
-                'badge' => '245'
+                'badge' => $studentUserCount,
+                'badgeColor' => 'bg-blue-500'
             ],
             [
                 'route' => 'admin.teachers',
                 'icon' => '👨‍🏫',
                 'label' => 'Teachers',
                 'description' => 'Faculty management',
-                'badge' => '32'
+                'badge' => $teacherUserCount,
+                'badgeColor' => 'bg-green-500'
             ],
             [
                 'route' => 'admin.classes',
@@ -175,11 +197,14 @@ class AdminSidebar extends Component
 
     protected function getQuickStats()
     {
+        $totalStudent = User::role('student')->count();
+        $totalTeacher = User::role('student')->count();
+        $totalUserPending = User::where('status', 'pending')->count();
         return [
-            'total_students' => 1245,
-            'total_teachers' => 45,
+            'total_students' => $totalStudent,
+            'total_teachers' => $totalTeacher,
             'attendance_today' => '94%',
-            'pending_requests' => 8,
+            'pending_requests' => $totalUserPending,
         ];
     }
 

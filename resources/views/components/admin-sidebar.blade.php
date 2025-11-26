@@ -56,7 +56,7 @@
         <!-- Main Navigation -->
         <div class="mb-4">
             @if(!$compact && count($menuItems) > 0)
-            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 mb-2">Main Navigation</p>
+            <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 mb-2">Admin Panel</p>
             @endif
 
             @foreach($menuItems as $item)
@@ -79,7 +79,7 @@
                         <div class="flex items-center justify-between">
                             <span class="text-sm font-medium truncate">{{ $item['label'] }}</span>
                             @if($item['badge'])
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white bg-red-500">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium text-white {{ $item['badgeColor'] ?? 'bg-red-500' }}">
                                     {{ $item['badge'] }}
                                 </span>
                             @endif
