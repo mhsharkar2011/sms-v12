@@ -43,6 +43,59 @@
                 </div>
             </header>
 
+            <!-- Add this after the header section -->
+            <div class="notification-wrapper">
+                @if (session('success'))
+                    <div
+                        class="alert alert-success mb-6 flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-check-circle text-green-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="alert-dismiss" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times text-green-400 hover:text-green-600"></i>
+                        </button>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div
+                        class="alert alert-error mb-6 flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-exclamation-circle text-red-400"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                            </div>
+                        </div>
+                        <button type="button" class="alert-dismiss" onclick="this.parentElement.remove()">
+                            <i class="fas fa-times text-red-400 hover:text-red-600"></i>
+                        </button>
+                    </div>
+                @endif
+            </div>
+
+            @section('scripts')
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Auto-hide alerts after 5 seconds
+                        const alerts = document.querySelectorAll('.alert');
+                        alerts.forEach(alert => {
+                            setTimeout(() => {
+                                if (alert.parentElement) {
+                                    alert.remove();
+                                }
+                            }, 5000);
+                        });
+                    });
+                </script>
+            @endsection
+            
             <!-- Page Content -->
             <main class="flex-1 overflow-y-auto p-6">
                 @yield('content')

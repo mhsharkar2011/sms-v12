@@ -5,6 +5,7 @@ namespace App\View\Components;
 use App\Models\User;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 
 class AdminSidebar extends Component
 {
@@ -40,15 +41,6 @@ class AdminSidebar extends Component
         $parentUserCount = User::role('parent')->count();
 
         $items = [
-            [
-                'route' => 'admin.notifications',
-                'icon' => '🔔',
-                'label' => 'Notifications',
-                'description' => 'Alerts & messages',
-                'badge' => $user->unreadNotifications->count(),
-                'badgeColor' => 'bg-blue-500'
-            ],
-
             [
                 'route' => 'admin.dashboard',
                 'icon' => '📊',
@@ -163,36 +155,38 @@ class AdminSidebar extends Component
 
     protected function getAccountItems()
     {
-        $items = [
+        $unreadCount = 0;
+        try {
+            if (Schema::hasTable('notifications')) {
+                $unreadCount = auth()->user()->unreadNotifications->count();
+            }
+        } catch (\Exception $e) {
+            $unreadCount = 0;
+        }
+
+        return [
             [
                 'route' => 'admin.profile',
                 'icon' => '👤',
                 'label' => 'My Profile',
                 'description' => 'Account settings'
             ],
-        ];
-
-        // Only include notifications if route exists
-        if (Route::has('admin.notifications')) {
-            $items[] = [
+            [
                 'route' => 'admin.notifications',
                 'icon' => '🔔',
                 'label' => 'Notifications',
                 'description' => 'Alerts & messages',
-                'badge' => '7'
-            ];
-        }
-
-        // Always include logout
-        $items[] = [
-            'route' => 'logout',
-            'icon' => '🚪',
-            'label' => 'Logout',
-            'description' => 'Sign out securely',
-            'method' => 'POST'
+                'badge' => $unreadCount > 0 ? $unreadCount : null,
+                'badgeColor' => 'bg-red-500'
+            ],
+            [
+                'route' => 'logout',
+                'icon' => '🚪',
+                'label' => 'Logout',
+                'description' => 'Sign out securely',
+                'method' => 'POST'
+            ],
         ];
-
-        return $items;
     }
 
     protected function getQuickStats()

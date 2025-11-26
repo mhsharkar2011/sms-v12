@@ -9,14 +9,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\UserRegistered;
+use App\Notifications\AccountCreated;
+use App\Notifications\UserStatusChanged;
+use App\Notifications\UserDeleted;
 
 class UserManagementController extends Controller
 {
+    /**
+     * Display a listing of the users.
+     */
     public function index(Request $request)
     {
-        $admin = User::role('admin')->first();
-        // $admin->notify(new NewUserRegistration($user));
-
         // Get filter parameters
         $roleFilter = $request->get('role');
         $status = $request->get('status');
@@ -43,7 +47,7 @@ class UserManagementController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        // Calculate statistics using Spatie roles
+        // Calculate statistics
         $stats = [
             'totalUsers' => User::count(),
             'activeUsers' => User::where('status', 'active')->count(),
@@ -58,26 +62,32 @@ class UserManagementController extends Controller
         // Get available roles for filter
         $roles = Role::all();
 
-        return view('admin.users', compact('users', 'stats', 'roles'));
+        return view('admin.users.index', compact('users', 'stats', 'roles'));
     }
 
+    /**
+     * Show the form for creating a new user.
+     */
     public function create()
     {
         $roles = Role::all();
         return view('admin.users.create', compact('roles'));
     }
 
+    /**
+     * Store a newly created user in storage.
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => 'required|min:8|confirmed',
             'role' => 'required|exists:roles,name',
-            'status' => 'required|in:active,inactive,pending'
+            'status' => 'required|in:active,inactive,pending',
         ]);
 
-        DB::transaction(function () use ($validated) {
+        try {
             $user = User::create([
                 'name' => $validated['name'],
                 'email' => $validated['email'],
@@ -85,33 +95,37 @@ class UserManagementController extends Controller
                 'status' => $validated['status'],
             ]);
 
-            // Notify admins about new user registration
-            $admins = User::role('admin')->get();
-            foreach ($admins as $admin) {
-                $admin->notify(new UserRegistered($user));
-            }
-
-            // Notify the user about their account creation
-            $user->notify(new \App\Notifications\AccountCreated($user, $validated['password']));
-            
-            // Assign role using Spatie
             $user->assignRole($validated['role']);
-        });
 
-        return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
+            return redirect()->route('admin.users.index')
+                ->with('success', 'User created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
+    /**
+     * Display the specified user.
+     */
     public function show(User $user)
     {
         return view('admin.users.show', compact('user'));
     }
 
+    /**
+     * Show the form for editing the specified user.
+     */
     public function edit(User $user)
     {
         $roles = Role::all();
         return view('admin.users.edit', compact('user', 'roles'));
     }
 
+    /**
+     * Update the specified user in storage.
+     */
     public function update(Request $request, User $user)
     {
         $validated = $request->validate([
@@ -120,77 +134,125 @@ class UserManagementController extends Controller
             'password' => 'nullable|min:8|confirmed',
             'role' => 'required|exists:roles,name',
             'status' => 'required|in:active,inactive,pending',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max, added webp
-            'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500'
-        ], [
-            'avatar.image' => 'The avatar must be a valid image file.',
-            'avatar.mimes' => 'The avatar must be a JPEG, PNG, JPG, GIF, or WEBP file.',
-            'avatar.max' => 'The avatar may not be greater than 5MB.',
-            'phone.regex' => 'Please enter a valid phone number.',
         ]);
 
-        try {
-            DB::transaction(function () use ($validated, $user, $request) {
-                $updateData = [
-                    'name' => $validated['name'],
-                    'email' => $validated['email'],
-                    'status' => $validated['status'],
-                    'phone' => $validated['phone'] ?? null,
-                    'address' => $validated['address'] ?? null,
-                ];
+        $oldStatus = $user->status;
 
-                // Handle password update
-                if ($request->filled('password')) {
-                    $updateData['password'] = Hash::make($validated['password']);
+        DB::transaction(function () use ($validated, $user, $request, $oldStatus) {
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'status' => $validated['status'],
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+            ];
+
+            if ($request->filled('password')) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            if ($request->hasFile('avatar')) {
+                if ($user->avatar) {
+                    Storage::disk('public')->delete($user->avatar);
+                }
+                $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            $user->update($updateData);
+            $user->syncRoles([$validated['role']]);
+
+            // Notify if status changed
+            if ($oldStatus !== $validated['status']) {
+                // Notify admins about status change
+                $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+                foreach ($admins as $admin) {
+                    $admin->notify(new UserStatusChanged($user, $oldStatus, $validated['status']));
                 }
 
-                // Handle avatar upload
-                if ($request->hasFile('avatar')) {
-                    // Delete old avatar if exists
-                    if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
-                        Storage::disk('public')->delete($user->avatar);
-                    }
+                // Notify user about status change
+                $user->notify(new UserStatusChanged($user, $oldStatus, $validated['status']));
+            }
+        });
 
-                    // Store new avatar with unique filename
-                    $avatarFile = $request->file('avatar');
-                    $filename = 'avatar_' . $user->id . '_' . time() . '.' . $avatarFile->getClientOriginalExtension();
-                    $avatarPath = $avatarFile->storeAs('avatars', $filename, 'public');
-                    $updateData['avatar'] = $avatarPath;
-                }
-
-                // Update user data
-                $user->update($updateData);
-
-                // Sync roles using Spatie
-                $user->syncRoles([$validated['role']]);
-            });
-
-            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
-        } catch (\Exception $e) {
-            // Log the error
-            \Log::error('User update failed: ' . $e->getMessage());
-
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Failed to update user. Please try again.');
-        }
+        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
+    /**
+     * Remove the specified user from storage.
+     */
     public function destroy(User $user)
     {
-        // Prevent deletion of last admin
+        // Prevent deletion of current user
+        if ($user->id === auth()->id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Prevent deletion of the last admin
         if ($user->hasRole('admin') && User::role('admin')->count() <= 1) {
             return redirect()->back()->with('error', 'Cannot delete the last admin user.');
         }
 
-        // Prevent users from deleting themselves
-        if ($user->id === auth()->id()) {
-            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        // Notify admins about user deletion
+        $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new UserDeleted($user));
+        }
+
+        // Delete avatar if exists
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar);
         }
 
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+    }
+
+    /**
+     * Update user status via AJAX.
+     */
+    public function updateStatus(Request $request, User $user)
+    {
+        $request->validate([
+            'status' => 'required|in:active,inactive,pending'
+        ]);
+
+        $oldStatus = $user->status;
+        $user->update(['status' => $request->status]);
+
+        // Notify about status change
+        if ($oldStatus !== $request->status) {
+            $admins = User::role('admin')->where('id', '!=', auth()->id())->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new UserStatusChanged($user, $oldStatus, $request->status));
+            }
+            $user->notify(new UserStatusChanged($user, $oldStatus, $request->status));
+        }
+
+        return response()->json(['message' => 'User status updated successfully.']);
+    }
+
+    /**
+     * Remove user avatar.
+     */
+    public function removeAvatar(User $user)
+    {
+        try {
+            if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                Storage::disk('public')->delete($user->avatar);
+
+                $user->update(['avatar' => null]);
+
+                return redirect()->back()->with('success', 'Avatar removed successfully.');
+            }
+
+            return redirect()->back()->with('error', 'No avatar found to remove.');
+        } catch (\Exception $e) {
+            \Log::error('Avatar removal failed: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to remove avatar.');
+        }
     }
 }

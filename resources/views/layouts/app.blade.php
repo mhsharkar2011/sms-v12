@@ -39,6 +39,8 @@
         <!-- Page Content -->
         <main>
             @yield('content')
+            <!-- Notifications -->
+            <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div>
         </main>
     </div>
 </body>

@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
 use App\Http\Controllers\Parent\DashboardController as ParentDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentManagementController;
@@ -61,6 +63,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/users', UserManagementController::class);
         // Student Management Route
         Route::resource('/students', StudentManagementController::class);
+        // Teacher Management
+        Route::resource('/teachers', TeacherManagementController::class);
 
         // In your routes file
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
@@ -69,13 +73,18 @@ Route::middleware(['auth'])->group(function () {
         // Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
         // Dashboard Route
         Route::get('/students', [AdminDashboard::class, 'students'])->name('students');
-        Route::get('/teachers', [AdminDashboard::class, 'teachers'])->name('teachers');
+        Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers');
         Route::get('/classes', [AdminDashboard::class, 'classes'])->name('classes');
         Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');
+
+        //Admin Notifications Route
+        Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
+        Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
+        Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
     });
 
 
@@ -115,3 +124,32 @@ Route::middleware(['auth'])->group(function () {
         return redirect('/');
     })->name('dashboard');
 });
+
+
+Route::get('/notifications/unread-count', function () {
+    return response()->json([
+        'unread_count' => auth()->user()->unreadNotifications->count()
+    ]);
+})->name('notifications.unread-count');
+
+// Notifications Routes
+Route::prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::get('/unread-count', [NotificationController::class, 'unreadCount'])->name('unreadCount');
+    Route::get('/recent', [NotificationController::class, 'recent'])->name('recent');
+    Route::get('/type/{type}', [NotificationController::class, 'byType'])->name('byType');
+
+    Route::post('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('markAsRead');
+    Route::post('/{notification}/unread', [NotificationController::class, 'markAsUnread'])->name('markAsUnread');
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('markAllAsRead');
+
+    Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
+    Route::delete('/', [NotificationController::class, 'clearAll'])->name('clearAll');
+});
+
+// routes/web.php
+Route::get('/notifications/unread-count', function () {
+    return response()->json([
+        'unread_count' => auth()->check() ? auth()->user()->unreadNotifications->count() : 0
+    ]);
+})->name('notifications.unread-count')->middleware('auth');
