@@ -41,7 +41,7 @@ class Teacher extends Model
     public function classes()
     {
         return $this->belongsToMany(SchoolClass::class, 'teacher_class')
-                    ->withTimestamps();
+            ->withTimestamps();
     }
 
     // Relationship with subjects (if using the teacher_subject table)
@@ -75,5 +75,63 @@ class Teacher extends Model
     public function scopeOnLeave($query)
     {
         return $query->where('status', 'on_leave');
+    }
+
+    public function teacherSubjects()
+    {
+        return $this->hasMany(TeacherSubject::class);
+    }
+
+    /**
+     * Get the primary subject of the teacher
+     */
+    public function primarySubject()
+    {
+        return $this->hasOne(TeacherSubject::class)->where('is_primary', true);
+    }
+
+    /**
+     * Get active subjects the teacher can teach
+     */
+    public function activeSubjects()
+    {
+        return $this->teacherSubjects()->active();
+    }
+
+    /**
+     * Accessor for all subject names as array
+     */
+    public function getSubjectNamesAttribute()
+    {
+        return $this->teacherSubjects->pluck('subject_name')->toArray();
+    }
+
+    /**
+     * Accessor for primary subject name
+     */
+    public function getPrimarySubjectNameAttribute()
+    {
+        return $this->primarySubject?->subject_name ?? $this->subject;
+    }
+
+    /**
+     * Check if teacher can teach a specific subject
+     */
+    public function canTeach($subjectName, $minProficiency = 'intermediate'): bool
+    {
+        return TeacherSubject::isQualified($this->id, $subjectName, $minProficiency);
+    }
+
+    /**
+     * Get teacher's proficiency level for a subject
+     */
+    public function getProficiencyForSubject($subjectName)
+    {
+        $subject = $this->teacherSubjects()
+            ->where('subject_name', $subjectName)
+            ->active()
+            ->first();
+
+        return $subject?->proficiency_level;
     }
 }

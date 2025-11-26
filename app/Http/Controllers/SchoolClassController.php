@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolClass;
+use App\Models\Teacher;
+use App\Models\TeacherSubject;
 use Illuminate\Http\Request;
 
 class SchoolClassController extends Controller
@@ -61,5 +63,38 @@ class SchoolClassController extends Controller
     public function destroy(SchoolClass $schoolClass)
     {
         //
+    }
+
+
+    public function assignTeacher(Request $request, SchoolClass $class)
+    {
+        $validated = $request->validate([
+            'teacher_id' => 'required|exists:teachers,id',
+            'subject' => 'required|string'
+        ]);
+
+        $teacher = Teacher::find($validated['teacher_id']);
+
+        // Check if teacher is qualified to teach this subject
+        $isQualified = $teacher->canTeach($validated['subject'], 'intermediate');
+
+        if (!$isQualified) {
+            return redirect()->back()->with('error', 'Teacher is not qualified to teach this subject!');
+        }
+
+        // Assign teacher to class
+        $class->teachers()->attach($teacher->id, ['subject' => $validated['subject']]);
+
+        return redirect()->back()->with('success', 'Teacher assigned successfully!');
+    }
+
+    public function getSubjectTeachers(Request $request)
+    {
+        $subject = $request->get('subject');
+
+        // Get all teachers who can teach the selected subject
+        $teachers = TeacherSubject::canTeach($subject)->get();
+
+        return response()->json($teachers);
     }
 }

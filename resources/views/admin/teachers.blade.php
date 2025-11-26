@@ -83,7 +83,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm text-gray-600">Total Teachers</p>
-                                <p class="text-2xl font-bold text-gray-900">{{ $stats['total_teachers'] }}</p>
+                                <p class="text-2xl font-bold text-gray-900">{{ $total_teachers }}</p>
                             </div>
                             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                                 <i class="fas fa-users text-blue-600"></i>
@@ -128,7 +128,6 @@
                     </div>
                 </div>
 
-                <!-- Rest of your view remains the same -->
                 <!-- Filters -->
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
                     <form method="GET" action="{{ route('admin.teachers.index') }}"
@@ -139,8 +138,7 @@
                                 <input type="text" name="search" value="{{ request('search') }}"
                                     placeholder="Search teachers..."
                                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <i
-                                    class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
                         </div>
 
@@ -193,8 +191,11 @@
                         <div class="flex justify-between items-center">
                             <h2 class="text-xl font-bold text-gray-900">All Teachers</h2>
                             <div class="text-sm text-gray-600">
-                                Showing {{ $teachers->firstItem() ?? 0 }} to {{ $teachers->lastItem() ?? 0 }} of
-                                {{ $teachers->total() ?? 0 }} teachers
+                                @php
+                                    $teachers = $teachers ?? null;
+                                @endphp
+                                Showing {{ $teachers?->firstItem() ?? 0 }} to {{ $teachers?->lastItem() ?? 0 }} of
+                                {{ $teachers?->total() ?? 0 }} teachers
                             </div>
                         </div>
                     </div>
@@ -216,9 +217,8 @@
                                     <tr class="hover:bg-gray-50 transition-colors group">
                                         <td class="py-4 px-6">
                                             <div class="flex items-center space-x-3">
-                                                <div
-                                                    class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                                                    @if (isset($teacher->avatar) && $teacher->avatar)
+                                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                    @if($teacher->avatar && Storage::exists($teacher->avatar))
                                                         <img src="{{ asset('storage/' . $teacher->avatar) }}"
                                                             alt="{{ $teacher->name }}"
                                                             class="w-10 h-10 rounded-full object-cover">
@@ -236,7 +236,7 @@
                                             {{ $teacher->subject }}
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-900">
-                                            @if (isset($teacher->classes) && $teacher->classes->count() > 0)
+                                            @if($teacher->classes && $teacher->classes->count() > 0)
                                                 {{ $teacher->classes->pluck('name')->implode(', ') }}
                                             @else
                                                 <span class="text-gray-400">Not assigned</span>
@@ -244,7 +244,7 @@
                                         </td>
                                         <td class="py-4 px-6 text-sm text-gray-900">
                                             <div>{{ $teacher->email }}</div>
-                                            @if ($teacher->phone)
+                                            @if($teacher->phone)
                                                 <div class="text-gray-600">{{ $teacher->phone }}</div>
                                             @endif
                                         </td>
@@ -255,17 +255,14 @@
                                                     'on_leave' => 'bg-yellow-100 text-yellow-800',
                                                     'inactive' => 'bg-red-100 text-red-800',
                                                 ];
-                                                $statusColor =
-                                                    $statusColors[$teacher->status] ?? 'bg-gray-100 text-gray-800';
+                                                $statusColor = $statusColors[$teacher->status] ?? 'bg-gray-100 text-gray-800';
                                             @endphp
-                                            <span
-                                                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusColor }}">
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $statusColor }}">
                                                 {{ ucfirst(str_replace('_', ' ', $teacher->status)) }}
                                             </span>
                                         </td>
                                         <td class="py-4 px-6">
-                                            <div
-                                                class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <a href="{{ route('admin.teachers.edit', $teacher) }}"
                                                     class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center hover:bg-blue-200 transition-colors"
                                                     title="Edit Teacher">
@@ -293,18 +290,17 @@
                                 @empty
                                     <tr>
                                         <td colspan="6" class="py-8 px-6 text-center">
-                                            <div
-                                                class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                            <div class="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
                                                 <i class="fas fa-users text-gray-400 text-2xl"></i>
                                             </div>
                                             <h3 class="text-lg font-medium text-gray-900 mb-2">No teachers found</h3>
                                             <p class="text-gray-500 mb-4">
-                                                @if (request()->anyFilled(['search', 'subject', 'status']))
+                                                @if(request()->anyFilled(['search', 'subject', 'status']))
                                                     Try adjusting your search filters or
                                                 @endif
                                                 Add your first teacher to get started.
                                             </p>
-                                            @if (request()->anyFilled(['search', 'subject', 'status']))
+                                            @if(request()->anyFilled(['search', 'subject', 'status']))
                                                 <a href="{{ route('admin.teachers.index') }}"
                                                     class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors mr-2">
                                                     <i class="fas fa-refresh mr-2"></i>
@@ -324,7 +320,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    @if (isset($teachers) && $teachers->hasPages())
+                    @if(isset($teachers) && $teachers->hasPages())
                         <div class="p-6 border-t border-gray-200">
                             <div class="flex items-center justify-between">
                                 <p class="text-sm text-gray-700">

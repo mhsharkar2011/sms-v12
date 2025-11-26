@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -16,7 +17,6 @@ class DashboardController extends Controller
     public function users()
     {
         $quickStats = User::count();
-        dd($quickStats);
         return view('admin.users',$quickStats);
     }
 
@@ -27,7 +27,8 @@ class DashboardController extends Controller
 
     public function teachers()
     {
-        return view('admin.teachers');
+         $teachers = $teachers ?? null;
+        return view('admin.teachers',compact('teachers'));
     }
 
     public function classes()

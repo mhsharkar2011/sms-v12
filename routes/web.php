@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentManagementController;
+use App\Http\Controllers\TeacherController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
@@ -66,6 +67,16 @@ Route::middleware(['auth'])->group(function () {
         // Teacher Management
         Route::resource('/teachers', TeacherManagementController::class);
 
+
+        Route::get('/', [TeacherController::class, 'index'])->name('teachers.index');
+        Route::get('/teachers/create', [TeacherController::class, 'create'])->name('teachers.create');
+        Route::post('/teachers', [TeacherController::class, 'store'])->name('teachers.store');
+        Route::get('/teachers/{teacher}', [TeacherController::class, 'show'])->name('teachers.show');
+        Route::get('/teachers/{teacher}/edit', [TeacherController::class, 'edit'])->name('teachers.edit');
+        Route::put('/teachers/{teacher}', [TeacherController::class, 'update'])->name('teachers.update');
+        Route::delete('/teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teachers.destroy');
+
+
         // In your routes file
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
         // Route::put('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');
@@ -73,7 +84,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
         // Dashboard Route
         Route::get('/students', [AdminDashboard::class, 'students'])->name('students');
-        Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers');
+        Route::get('/teachers', [AdminDashboard::class, 'teachers'])->name('teachers');
         Route::get('/classes', [AdminDashboard::class, 'classes'])->name('classes');
         Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
@@ -153,3 +164,10 @@ Route::get('/notifications/unread-count', function () {
         'unread_count' => auth()->check() ? auth()->user()->unreadNotifications->count() : 0
     ]);
 })->name('notifications.unread-count')->middleware('auth');
+
+
+Route::prefix('teachers')->group(function () {
+    Route::get('/subjects/{teacher}', [TeacherController::class, 'getTeacherSubjects']);
+    Route::get('/available/{subject}', [TeacherController::class, 'getAvailableTeachers']);
+    Route::get('/check-qualification/{teacher}/{subject}', [TeacherController::class, 'checkQualification']);
+});

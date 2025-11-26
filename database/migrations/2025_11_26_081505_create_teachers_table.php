@@ -42,31 +42,7 @@ return new class extends Migration
             $table->index(['status', 'subject']);
         });
 
-        // Pivot table for teacher-class relationships
-        Schema::create('teacher_class', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teacher_id')->constrained()->onDelete('cascade');
-            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
-            $table->string('subject')->nullable()->comment('Specific subject for this class');
-            $table->enum('academic_year', ['2023-2024', '2024-2025', '2025-2026'])->default('2024-2025');
-            $table->timestamps();
 
-            // Unique constraint to prevent duplicate assignments
-            $table->unique(['teacher_id', 'class_id', 'subject', 'academic_year']);
-        });
-
-        // Pivot table for teacher-subject relationships (if teachers can teach multiple subjects)
-        Schema::create('teacher_subject', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('teacher_id')->constrained()->onDelete('cascade');
-            $table->string('subject_name');
-            $table->enum('proficiency_level', ['beginner', 'intermediate', 'advanced', 'expert'])->default('intermediate');
-            $table->integer('years_of_experience')->default(0);
-            $table->boolean('is_primary')->default(false);
-            $table->timestamps();
-
-            $table->unique(['teacher_id', 'subject_name']);
-        });
     }
 
     /**
@@ -74,8 +50,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_subject');
-        Schema::dropIfExists('teacher_class');
         Schema::dropIfExists('teachers');
     }
 };
