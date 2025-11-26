@@ -2,25 +2,216 @@
 
 namespace App\View\Components;
 
-use Closure;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Support\Facades\Route;
 
-class adminSidebar extends Component
+class AdminSidebar extends Component
 {
-    /**
-     * Create a new component instance.
-     */
-    public function __construct()
+    public $activeRoute;
+    public $user;
+    public $compact = false;
+    public $menuItems;
+    public $systemItems;
+    public $accountItems;
+    public $quickStats;
+    public $activeStates = [];
+
+    public function __construct($activeRoute = null, $compact = false)
     {
-        //
+        $this->activeRoute = $activeRoute;
+        $this->user = auth()->user();
+        $this->compact = $compact;
+        $this->menuItems = $this->getMenuItems();
+        $this->systemItems = $this->getSystemItems();
+        $this->accountItems = $this->getAccountItems();
+        $this->quickStats = $this->getQuickStats();
+        $this->activeStates = $this->calculateActiveStates();
     }
 
-    /**
-     * Get the view / contents that represent the component.
-     */
-    public function render(): View|Closure|string
+    protected function getMenuItems()
     {
-        return view('components.admin-sidebar');
+        return [
+            [
+                'route' => 'admin.dashboard',
+                'icon' => '📊',
+                'label' => 'Dashboard',
+                'description' => 'Overview & Analytics',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.users.index',
+                'icon' => '👥',
+                'label' => 'User Management',
+                'description' => 'Manage all users',
+                'badge' => '12'
+            ],
+            [
+                'route' => 'admin.students',
+                'icon' => '🎓',
+                'label' => 'Students',
+                'description' => 'Student records',
+                'badge' => '245'
+            ],
+            [
+                'route' => 'admin.teachers',
+                'icon' => '👨‍🏫',
+                'label' => 'Teachers',
+                'description' => 'Faculty management',
+                'badge' => '32'
+            ],
+            [
+                'route' => 'admin.classes',
+                'icon' => '🏫',
+                'label' => 'Classes',
+                'description' => 'Class management',
+                'badge' => '15'
+            ],
+            [
+                'route' => 'admin.subjects',
+                'icon' => '📚',
+                'label' => 'Subjects',
+                'description' => 'Course catalog',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.attendance',
+                'icon' => '📅',
+                'label' => 'Attendance',
+                'description' => 'Track presence',
+                'badge' => '3'
+            ],
+            [
+                'route' => 'admin.exams',
+                'icon' => '📝',
+                'label' => 'Exams',
+                'description' => 'Tests & results',
+                'badge' => '8'
+            ],
+            [
+                'route' => 'admin.grades',
+                'icon' => '⭐',
+                'label' => 'Grades',
+                'description' => 'Academic records',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.timetable',
+                'icon' => '🕒',
+                'label' => 'Timetable',
+                'description' => 'Schedule management',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.events',
+                'icon' => '🎉',
+                'label' => 'Events',
+                'description' => 'School activities',
+                'badge' => '5'
+            ],
+            [
+                'route' => 'admin.reports',
+                'icon' => '📈',
+                'label' => 'Reports',
+                'description' => 'Analytics & insights',
+                'badge' => null
+            ],
+        ];
+    }
+
+    protected function getSystemItems()
+    {
+        return [
+            [
+                'route' => 'admin.settings',
+                'icon' => '⚙️',
+                'label' => 'System Settings',
+                'description' => 'Platform configuration',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.backup',
+                'icon' => '💾',
+                'label' => 'Backup & Restore',
+                'description' => 'Data management',
+                'badge' => null
+            ],
+            [
+                'route' => 'admin.logs',
+                'icon' => '📋',
+                'label' => 'System Logs',
+                'description' => 'Activity tracking',
+                'badge' => '12'
+            ],
+        ];
+    }
+
+    protected function getAccountItems()
+    {
+        return [
+            [
+                'route' => 'admin.profile',
+                'icon' => '👤',
+                'label' => 'My Profile',
+                'description' => 'Account settings'
+            ],
+            [
+                'route' => 'admin.notifications',
+                'icon' => '🔔',
+                'label' => 'Notifications',
+                'description' => 'Alerts & messages',
+                'badge' => '7'
+            ],
+            [
+                'route' => 'logout',
+                'icon' => '🚪',
+                'label' => 'Logout',
+                'description' => 'Sign out securely',
+                'method' => 'POST'
+            ],
+        ];
+    }
+
+    protected function getQuickStats()
+    {
+        return [
+            'total_students' => 1245,
+            'total_teachers' => 45,
+            'attendance_today' => '94%',
+            'pending_requests' => 8,
+        ];
+    }
+
+    protected function calculateActiveStates()
+    {
+        $activeStates = [];
+
+        // Check all menu items
+        foreach ($this->menuItems as $item) {
+            $activeStates[$item['route']] = $this->isActive($item['route']);
+        }
+
+        // Check system items
+        foreach ($this->systemItems as $item) {
+            $activeStates[$item['route']] = $this->isActive($item['route']);
+        }
+
+        // Check account items
+        foreach ($this->accountItems as $item) {
+            $activeStates[$item['route']] = $this->isActive($item['route']);
+        }
+
+        return $activeStates;
+    }
+
+    protected function isActive($route)
+    {
+        return $this->activeRoute === $route || Route::is($route . '*');
+    }
+
+    public function render()
+    {
+        return view('components.admin-sidebar', [
+            'activeStates' => $this->activeStates,
+        ]);
     }
 }

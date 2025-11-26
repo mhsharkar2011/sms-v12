@@ -4,6 +4,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
 use App\Http\Controllers\Parent\DashboardController as ParentDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -54,7 +55,13 @@ Route::middleware(['auth'])->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-        Route::get('/users', [AdminDashboard::class, 'users'])->name('users');
+
+        // User Route
+        Route::resource('/users', UserManagementController::class);
+        // Route::put('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');
+        // Route::get('/users/{user}/profile', [UserController::class, 'showProfile'])->name('users.profile');
+        // Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+        // Dashboard Route
         Route::get('/students', [AdminDashboard::class, 'students'])->name('students');
         Route::get('/teachers', [AdminDashboard::class, 'teachers'])->name('teachers');
         Route::get('/classes', [AdminDashboard::class, 'classes'])->name('classes');

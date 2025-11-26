@@ -2,15 +2,18 @@
 
 namespace App\View\Components;
 
+use Illuminate\Container\Attributes\Auth;
 use Illuminate\View\Component;
 
 class StudentSidebar extends Component
 {
-    public $active;
+    public $activeRoute;
+    public $user;
 
-    public function __construct($active = null)
+    public function __construct($activeRoute = null)
     {
-        $this->active = $active;
+        $this->activeRoute = $activeRoute;
+        $this->user = Auth::user();
     }
 
     public function menuItems()
@@ -18,59 +21,109 @@ class StudentSidebar extends Component
         return [
             [
                 'route' => 'student.dashboard',
-                'icon' => 'dashboard',
+                'icon' => '🏠',
                 'label' => 'Dashboard',
-                'badge' => null
+                'badge' => null,
+                'description' => 'Overview & Analytics'
             ],
             [
-                'route' => 'student.attendance',
-                'icon' => 'calendar_today',
-                'label' => 'Attendance',
-                'badge' => null
+                'route' => 'student.courses',
+                'icon' => '📚',
+                'label' => 'My Courses',
+                'badge' => null,
+                'description' => 'Enrolled Subjects'
             ],
             [
                 'route' => 'student.timetable',
-                'icon' => 'schedule',
+                'icon' => '🕒',
                 'label' => 'Timetable',
-                'badge' => null
+                'badge' => null,
+                'description' => 'Class Schedule'
             ],
             [
-                'route' => 'student.subjects',
-                'icon' => 'menu_book',
-                'label' => 'Subjects',
-                'badge' => null
+                'route' => 'student.attendance',
+                'icon' => '📅',
+                'label' => 'Attendance',
+                'badge' => null,
+                'description' => 'Track Presence'
             ],
             [
-                'route' => 'student.homework',
-                'icon' => 'assignment',
-                'label' => 'Homework',
-                'badge' => '2'
+                'route' => 'student.assignments',
+                'icon' => '📝',
+                'label' => 'Assignments',
+                'badge' => '3',
+                'badgeColor' => 'bg-red-500',
+                'description' => 'Homework & Tasks'
             ],
             [
                 'route' => 'student.grades',
-                'icon' => 'grade',
+                'icon' => '📊',
                 'label' => 'Grades',
-                'badge' => null
+                'badge' => null,
+                'description' => 'Academic Performance'
+            ],
+            [
+                'route' => 'student.exams',
+                'icon' => '🧪',
+                'label' => 'Exams',
+                'badge' => '2',
+                'badgeColor' => 'bg-orange-500',
+                'description' => 'Tests & Results'
             ],
             [
                 'route' => 'student.events',
-                'icon' => 'event',
-                'label' => 'School Events',
-                'badge' => '5'
+                'icon' => '🎉',
+                'label' => 'Events',
+                'badge' => '5',
+                'badgeColor' => 'bg-purple-500',
+                'description' => 'School Activities'
             ],
             [
                 'route' => 'student.messages',
-                'icon' => 'message',
+                'icon' => '💬',
                 'label' => 'Messages',
-                'badge' => '3'
+                'badge' => '3',
+                'badgeColor' => 'bg-blue-500',
+                'description' => 'Communications'
+            ],
+            [
+                'route' => 'student.resources',
+                'icon' => '📁',
+                'label' => 'Resources',
+                'badge' => null,
+                'description' => 'Study Materials'
+            ],
+        ];
+    }
+
+    public function bottomMenuItems()
+    {
+        return [
+            [
+                'route' => 'student.profile',
+                'icon' => '👤',
+                'label' => 'Profile',
+                'description' => 'Account Settings'
             ],
             [
                 'route' => 'student.settings',
-                'icon' => 'settings',
+                'icon' => '⚙️',
                 'label' => 'Settings',
-                'badge' => null
+                'description' => 'Preferences'
+            ],
+            [
+                'route' => 'logout',
+                'icon' => '🚪',
+                'label' => 'Logout',
+                'description' => 'Sign out',
+                'method' => 'POST'
             ],
         ];
+    }
+
+    public function isActive($route)
+    {
+        return $this->activeRoute === $route || request()->routeIs($route);
     }
 
     public function render()
