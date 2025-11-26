@@ -30,7 +30,7 @@ class AdminSidebar extends Component
 
     protected function getMenuItems()
     {
-        return [
+        $items = [
             [
                 'route' => 'admin.dashboard',
                 'icon' => '📊',
@@ -88,27 +88,6 @@ class AdminSidebar extends Component
                 'badge' => '8'
             ],
             [
-                'route' => 'admin.grades',
-                'icon' => '⭐',
-                'label' => 'Grades',
-                'description' => 'Academic records',
-                'badge' => null
-            ],
-            [
-                'route' => 'admin.timetable',
-                'icon' => '🕒',
-                'label' => 'Timetable',
-                'description' => 'Schedule management',
-                'badge' => null
-            ],
-            [
-                'route' => 'admin.events',
-                'icon' => '🎉',
-                'label' => 'Events',
-                'description' => 'School activities',
-                'badge' => '5'
-            ],
-            [
                 'route' => 'admin.reports',
                 'icon' => '📈',
                 'label' => 'Reports',
@@ -116,11 +95,16 @@ class AdminSidebar extends Component
                 'badge' => null
             ],
         ];
+
+        // Filter out items that don't have defined routes
+        return array_filter($items, function ($item) {
+            return Route::has($item['route']);
+        });
     }
 
     protected function getSystemItems()
     {
-        return [
+        $items = [
             [
                 'route' => 'admin.settings',
                 'icon' => '⚙️',
@@ -128,47 +112,65 @@ class AdminSidebar extends Component
                 'description' => 'Platform configuration',
                 'badge' => null
             ],
-            [
+        ];
+
+        // Only include backup if route exists
+        if (Route::has('admin.backup')) {
+            $items[] = [
                 'route' => 'admin.backup',
                 'icon' => '💾',
                 'label' => 'Backup & Restore',
                 'description' => 'Data management',
                 'badge' => null
-            ],
-            [
+            ];
+        }
+
+        // Only include logs if route exists
+        if (Route::has('admin.logs')) {
+            $items[] = [
                 'route' => 'admin.logs',
                 'icon' => '📋',
                 'label' => 'System Logs',
                 'description' => 'Activity tracking',
                 'badge' => '12'
-            ],
-        ];
+            ];
+        }
+
+        return $items;
     }
 
     protected function getAccountItems()
     {
-        return [
+        $items = [
             [
                 'route' => 'admin.profile',
                 'icon' => '👤',
                 'label' => 'My Profile',
                 'description' => 'Account settings'
             ],
-            [
+        ];
+
+        // Only include notifications if route exists
+        if (Route::has('admin.notifications')) {
+            $items[] = [
                 'route' => 'admin.notifications',
                 'icon' => '🔔',
                 'label' => 'Notifications',
                 'description' => 'Alerts & messages',
                 'badge' => '7'
-            ],
-            [
-                'route' => 'logout',
-                'icon' => '🚪',
-                'label' => 'Logout',
-                'description' => 'Sign out securely',
-                'method' => 'POST'
-            ],
+            ];
+        }
+
+        // Always include logout
+        $items[] = [
+            'route' => 'logout',
+            'icon' => '🚪',
+            'label' => 'Logout',
+            'description' => 'Sign out securely',
+            'method' => 'POST'
         ];
+
+        return $items;
     }
 
     protected function getQuickStats()

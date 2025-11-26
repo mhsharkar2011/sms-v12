@@ -8,6 +8,7 @@ use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserManagementController extends Controller
 {
@@ -31,7 +32,7 @@ class UserManagementController extends Controller
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('email', 'like', "%{$search}%");
+                        ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             ->with('roles')
@@ -106,27 +107,62 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
             'role' => 'required|exists:roles,name',
-            'status' => 'required|in:active,inactive,pending'
+            'status' => 'required|in:active,inactive,pending',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', // 5MB max, added webp
+            'phone' => 'nullable|string|max:20|regex:/^[\+]?[0-9\s\-\(\)]+$/',
+            'address' => 'nullable|string|max:500'
+        ], [
+            'avatar.image' => 'The avatar must be a valid image file.',
+            'avatar.mimes' => 'The avatar must be a JPEG, PNG, JPG, GIF, or WEBP file.',
+            'avatar.max' => 'The avatar may not be greater than 5MB.',
+            'phone.regex' => 'Please enter a valid phone number.',
         ]);
 
-        DB::transaction(function () use ($validated, $user, $request) {
-            $updateData = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'status' => $validated['status'],
-            ];
+        try {
+            DB::transaction(function () use ($validated, $user, $request) {
+                $updateData = [
+                    'name' => $validated['name'],
+                    'email' => $validated['email'],
+                    'status' => $validated['status'],
+                    'phone' => $validated['phone'] ?? null,
+                    'address' => $validated['address'] ?? null,
+                ];
 
-            if ($request->filled('password')) {
-                $updateData['password'] = Hash::make($validated['password']);
-            }
+                // Handle password update
+                if ($request->filled('password')) {
+                    $updateData['password'] = Hash::make($validated['password']);
+                }
 
-            $user->update($updateData);
+                // Handle avatar upload
+                if ($request->hasFile('avatar')) {
+                    // Delete old avatar if exists
+                    if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+                        Storage::disk('public')->delete($user->avatar);
+                    }
 
-            // Sync roles using Spatie
-            $user->syncRoles([$validated['role']]);
-        });
+                    // Store new avatar with unique filename
+                    $avatarFile = $request->file('avatar');
+                    $filename = 'avatar_' . $user->id . '_' . time() . '.' . $avatarFile->getClientOriginalExtension();
+                    $avatarPath = $avatarFile->storeAs('avatars', $filename, 'public');
+                    $updateData['avatar'] = $avatarPath;
+                }
 
-        return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+                // Update user data
+                $user->update($updateData);
+
+                // Sync roles using Spatie
+                $user->syncRoles([$validated['role']]);
+            });
+
+            return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('User update failed: ' . $e->getMessage());
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to update user. Please try again.');
+        }
     }
 
     public function destroy(User $user)

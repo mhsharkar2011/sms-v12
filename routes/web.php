@@ -58,6 +58,8 @@ Route::middleware(['auth'])->group(function () {
 
         // User Route
         Route::resource('/users', UserManagementController::class);
+        // In your routes file
+        Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
         // Route::put('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.status');
         // Route::get('/users/{user}/profile', [UserController::class, 'showProfile'])->name('users.profile');
         // Route::post('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
