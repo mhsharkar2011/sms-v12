@@ -57,6 +57,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+        Route::get('/profile', [AdminDashboard::class, 'adminProfile'])->name('profile');
+        Route::get('/profile', [AdminDashboard::class, 'adminProfileEdit'])->name('profile');
+        Route::put('/profile', [AdminDashboard::class, 'adminProfileUpdate'])->name('profile.update');
+        Route::put('/profile/password', [AdminDashboard::class, 'adminProfileUpdatePassword'])->name('profile.password');
+
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
 
         // User Management Route

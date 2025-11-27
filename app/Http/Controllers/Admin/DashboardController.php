@@ -12,14 +12,32 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalStudent = User::role('student')->where('status','active')->count();
-        return view('dashboards.admin-dashboard',compact('totalStudent'));
+        $totalStudent = User::role('student')->where('status', 'active')->count();
+        return view('dashboards.admin-dashboard', compact('totalStudent'));
     }
 
     public function users()
     {
         $quickStats = User::count();
-        return view('admin.users',$quickStats);
+        return view('admin.users', $quickStats);
+    }
+
+
+    public function adminProfile()
+    {
+        return view('admin.profiles.index');
+    }
+    public function adminProfileEdit()
+    {
+        return view('admin.profiles.index');
+    }
+    public function adminProfileUpdate()
+    {
+        return view('admin.profiles.edit');
+    }
+    public function adminProfileUpdatePassword()
+    {
+        return view('admin.profiles.edit');
     }
 
     public function students()
@@ -29,8 +47,8 @@ class DashboardController extends Controller
 
     public function teachers()
     {
-         $teachers = $teachers ?? null;
-        return view('admin.teachers.index',compact('teachers'));
+        $teachers = $teachers ?? null;
+        return view('admin.teachers.index', compact('teachers'));
     }
 
     public function classes()
