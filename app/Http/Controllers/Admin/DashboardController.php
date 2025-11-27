@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -11,7 +12,8 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return view('admin.dashboard');
+        $totalStudent = User::role('student')->where('status','active')->count();
+        return view('dashboards.admin-dashboard',compact('totalStudent'));
     }
 
     public function users()
@@ -22,13 +24,13 @@ class DashboardController extends Controller
 
     public function students()
     {
-        return view('admin.students');
+        return view('admin.students.index');
     }
 
     public function teachers()
     {
          $teachers = $teachers ?? null;
-        return view('admin.teachers',compact('teachers'));
+        return view('admin.teachers.index',compact('teachers'));
     }
 
     public function classes()

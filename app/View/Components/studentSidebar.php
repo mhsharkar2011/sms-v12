@@ -2,8 +2,10 @@
 
 namespace App\View\Components;
 
+use App\Models\User;
 use Illuminate\Container\Attributes\Auth;
 use Illuminate\View\Component;
+use Symfony\Component\Routing\Route;
 
 class StudentSidebar extends Component
 {
@@ -13,87 +15,96 @@ class StudentSidebar extends Component
     public function __construct($activeRoute = null)
     {
         $this->activeRoute = $activeRoute;
-        $this->user = Auth::user();
+        $this->user = auth()->user();
     }
 
-    public function menuItems()
+    protected function getMenuItems()
     {
-        return [
+        $user = auth()->user();
+        $pendingUsersCount = User::where('status', 'active')->count();
+        $totalUserCount = User::count();
+        $adminUserCount = User::role('admin')->count();
+        $studentUserCount = User::role('student')->count();
+        $teacherUserCount = User::role('teacher')->count();
+        $parentUserCount = User::role('parent')->count();
+
+        $items = [
             [
-                'route' => 'student.dashboard',
-                'icon' => '🏠',
+                'route' => 'admin.dashboard',
+                'icon' => '📊',
                 'label' => 'Dashboard',
-                'badge' => null,
-                'description' => 'Overview & Analytics'
+                'description' => 'Overview & Analytics',
+                'badge' => $adminUserCount,
             ],
             [
-                'route' => 'student.courses',
+                'route' => 'admin.users.index',
+                'icon' => '👥',
+                'label' => 'User Management',
+                'description' => 'Manage all users',
+                'badge' => $pendingUsersCount > 0 ? $pendingUsersCount : null,
+                'badgeColor' => $pendingUsersCount > 0 ? 'bg-gray-400' : null
+            ],
+            [
+                'route' => 'admin.students.index',
+                'icon' => '🎓',
+                'label' => 'Students',
+                'description' => 'Student records',
+                'badge' => $studentUserCount,
+                'badgeColor' => 'bg-blue-500'
+            ],
+            [
+                'route' => 'admin.teachers',
+                'icon' => '👨‍🏫',
+                'label' => 'Teachers',
+                'description' => 'Faculty management',
+                'badge' => $teacherUserCount,
+                'badgeColor' => 'bg-green-500'
+            ],
+            [
+                'route' => 'admin.classes',
+                'icon' => '🏫',
+                'label' => 'Classes',
+                'description' => 'Class management',
+                'badge' => '15'
+            ],
+            [
+                'route' => 'admin.subjects',
                 'icon' => '📚',
-                'label' => 'My Courses',
-                'badge' => null,
-                'description' => 'Enrolled Subjects'
+                'label' => 'Subjects',
+                'description' => 'Course catalog',
+                'badge' => null
             ],
             [
-                'route' => 'student.timetable',
-                'icon' => '🕒',
-                'label' => 'Timetable',
-                'badge' => null,
-                'description' => 'Class Schedule'
-            ],
-            [
-                'route' => 'student.attendance',
+                'route' => 'admin.attendance',
                 'icon' => '📅',
                 'label' => 'Attendance',
-                'badge' => null,
-                'description' => 'Track Presence'
+                'description' => 'Track presence',
+                'badge' => '3'
             ],
             [
-                'route' => 'student.assignments',
+                'route' => 'admin.exams',
                 'icon' => '📝',
-                'label' => 'Assignments',
-                'badge' => '3',
-                'badgeColor' => 'bg-red-500',
-                'description' => 'Homework & Tasks'
-            ],
-            [
-                'route' => 'student.grades',
-                'icon' => '📊',
-                'label' => 'Grades',
-                'badge' => null,
-                'description' => 'Academic Performance'
-            ],
-            [
-                'route' => 'student.exams',
-                'icon' => '🧪',
                 'label' => 'Exams',
-                'badge' => '2',
-                'badgeColor' => 'bg-orange-500',
-                'description' => 'Tests & Results'
+                'description' => 'Tests & results',
+                'badge' => '8'
             ],
             [
-                'route' => 'student.events',
-                'icon' => '🎉',
-                'label' => 'Events',
-                'badge' => '5',
-                'badgeColor' => 'bg-purple-500',
-                'description' => 'School Activities'
-            ],
-            [
-                'route' => 'student.messages',
-                'icon' => '💬',
-                'label' => 'Messages',
-                'badge' => '3',
-                'badgeColor' => 'bg-blue-500',
-                'description' => 'Communications'
-            ],
-            [
-                'route' => 'student.resources',
-                'icon' => '📁',
-                'label' => 'Resources',
-                'badge' => null,
-                'description' => 'Study Materials'
+                'route' => 'admin.reports',
+                'icon' => '📈',
+                'label' => 'Reports',
+                'description' => 'Analytics & insights',
+                'badge' => null
             ],
         ];
+
+        // Filter out items that don't have defined routes
+        return array_filter($items, function ($item) {
+            try {
+                return Route::has($item['route']);
+            } catch (\Exception $e) {
+                return false;
+            }
+        });
     }
 
     public function bottomMenuItems()

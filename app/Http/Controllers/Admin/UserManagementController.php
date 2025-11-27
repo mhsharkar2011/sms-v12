@@ -9,10 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Notifications\UserRegistered;
-use App\Notifications\AccountCreated;
 use App\Notifications\UserStatusChanged;
 use App\Notifications\UserDeleted;
+use Illuminate\Support\Facades\Log;
 
 class UserManagementController extends Controller
 {
@@ -85,23 +84,50 @@ class UserManagementController extends Controller
             'password' => 'required|min:8|confirmed',
             'role' => 'required|exists:roles,name',
             'status' => 'required|in:active,inactive,pending',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'phone' => 'nullable|string|max:20',
+            'address' => 'nullable|string|max:500'
         ]);
 
         try {
-            $user = User::create([
+            DB::beginTransaction();
+
+            // Create user with hashed password
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'status' => $validated['status'],
-            ]);
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+            ];
 
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                $userData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+            }
+
+            $user = User::create($userData);
+
+            // Assign role
             $user->assignRole($validated['role']);
+
+            DB::commit();
 
             return redirect()->route('admin.users.index')
                 ->with('success', 'User created successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Delete uploaded avatar if user creation failed
+            if (isset($userData['avatar']) && Storage::disk('public')->exists($userData['avatar'])) {
+                Storage::disk('public')->delete($userData['avatar']);
+            }
+
+            Log::error('User creation failed: ' . $e->getMessage());
+
             return redirect()->back()
-                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->with('error', 'Failed to create user. Please try again.')
                 ->withInput();
         }
     }

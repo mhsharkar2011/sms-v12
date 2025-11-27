@@ -13,8 +13,7 @@ class AdminSidebar extends Component
     public $user;
     public $compact = false;
     public $menuItems;
-    public $systemItems;
-    public $accountItems;
+    public $bottomMenuItems;
     public $quickStats;
     public $activeStates = [];
 
@@ -24,8 +23,7 @@ class AdminSidebar extends Component
         $this->user = auth()->user();
         $this->compact = $compact;
         $this->menuItems = $this->getMenuItems();
-        $this->systemItems = $this->getSystemItems();
-        $this->accountItems = $this->getAccountItems();
+        $this->bottomMenuItems = $this->getBottomMenuItems();
         $this->quickStats = $this->getQuickStats();
         $this->activeStates = $this->calculateActiveStates();
     }
@@ -47,7 +45,6 @@ class AdminSidebar extends Component
                 'label' => 'Dashboard',
                 'description' => 'Overview & Analytics',
                 'badge' => $adminUserCount,
-
             ],
             [
                 'route' => 'admin.users.index',
@@ -58,7 +55,7 @@ class AdminSidebar extends Component
                 'badgeColor' => $pendingUsersCount > 0 ? 'bg-gray-400' : null
             ],
             [
-                'route' => 'admin.students',
+                'route' => 'admin.students.index',
                 'icon' => '🎓',
                 'label' => 'Students',
                 'description' => 'Student records',
@@ -112,48 +109,15 @@ class AdminSidebar extends Component
 
         // Filter out items that don't have defined routes
         return array_filter($items, function ($item) {
-            return Route::has($item['route']);
+            try {
+                return Route::has($item['route']);
+            } catch (\Exception $e) {
+                return false;
+            }
         });
     }
 
-    protected function getSystemItems()
-    {
-        $items = [
-            [
-                'route' => 'admin.settings',
-                'icon' => '⚙️',
-                'label' => 'System Settings',
-                'description' => 'Platform configuration',
-                'badge' => null
-            ],
-        ];
-
-        // Only include backup if route exists
-        if (Route::has('admin.backup')) {
-            $items[] = [
-                'route' => 'admin.backup',
-                'icon' => '💾',
-                'label' => 'Backup & Restore',
-                'description' => 'Data management',
-                'badge' => null
-            ];
-        }
-
-        // Only include logs if route exists
-        if (Route::has('admin.logs')) {
-            $items[] = [
-                'route' => 'admin.logs',
-                'icon' => '📋',
-                'label' => 'System Logs',
-                'description' => 'Activity tracking',
-                'badge' => '12'
-            ];
-        }
-
-        return $items;
-    }
-
-    protected function getAccountItems()
+    protected function getBottomMenuItems()
     {
         $unreadCount = 0;
         try {
@@ -180,6 +144,12 @@ class AdminSidebar extends Component
                 'badgeColor' => 'bg-red-500'
             ],
             [
+                'route' => 'admin.settings',
+                'icon' => '⚙️',
+                'label' => 'Settings',
+                'description' => 'System configuration'
+            ],
+            [
                 'route' => 'logout',
                 'icon' => '🚪',
                 'label' => 'Logout',
@@ -192,7 +162,7 @@ class AdminSidebar extends Component
     protected function getQuickStats()
     {
         $totalStudent = User::role('student')->count();
-        $totalTeacher = User::role('student')->count();
+        $totalTeacher = User::role('teacher')->count();
         $totalUserPending = User::where('status', 'pending')->count();
         return [
             'total_students' => $totalStudent,
@@ -208,17 +178,20 @@ class AdminSidebar extends Component
 
         // Check all menu items
         foreach ($this->menuItems as $item) {
-            $activeStates[$item['route']] = $this->isActive($item['route']);
+            try {
+                $activeStates[$item['route']] = $this->isActive($item['route']);
+            } catch (\Exception $e) {
+                $activeStates[$item['route']] = false;
+            }
         }
 
-        // Check system items
-        foreach ($this->systemItems as $item) {
-            $activeStates[$item['route']] = $this->isActive($item['route']);
-        }
-
-        // Check account items
-        foreach ($this->accountItems as $item) {
-            $activeStates[$item['route']] = $this->isActive($item['route']);
+        // Check bottom menu items
+        foreach ($this->bottomMenuItems as $item) {
+            try {
+                $activeStates[$item['route']] = $this->isActive($item['route']);
+            } catch (\Exception $e) {
+                $activeStates[$item['route']] = false;
+            }
         }
 
         return $activeStates;

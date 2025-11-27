@@ -40,8 +40,9 @@
                 <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                         <div>
+
                             <p class="text-sm font-medium text-gray-600">Total Students</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">1,247</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $totalStudent }}</p>
                             <div class="flex items-center mt-2">
                                 <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                     <i class="fas fa-arrow-up text-xs mr-1"></i>
