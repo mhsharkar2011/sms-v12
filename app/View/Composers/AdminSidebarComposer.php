@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\SchoolClass;
 use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
@@ -84,7 +85,7 @@ class AdminSidebarComposer
                     'icon' => '🏫',
                     'label' => 'Classes',
                     'description' => 'Class management',
-                    'badge' => '15'
+                    'badge' => SchoolClass::count(),
                 ],
                 // ... more items
             ];
@@ -109,6 +110,8 @@ class AdminSidebarComposer
             return [
                 'total_students' => User::role('student')->count(),
                 'total_teachers' => User::role('teacher')->count(),
+                'total_classes' => SchoolClass::count(),
+                'total_classes' => SchoolClass::count(),
                 'total_admins' => User::role('admin')->count(),
                 'pending_requests' => User::where('status', 'pending')->count(),
                 'attendance_today' => '94%',

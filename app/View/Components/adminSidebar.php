@@ -2,6 +2,7 @@
 
 namespace App\View\Components;
 
+use App\Models\SchoolClass;
 use App\Models\User;
 use Illuminate\View\Component;
 use Illuminate\Support\Facades\Route;
@@ -63,7 +64,7 @@ class AdminSidebar extends Component
                 'badgeColor' => 'bg-blue-500'
             ],
             [
-                'route' => 'admin.teachers',
+                'route' => 'admin.teachers.index',
                 'icon' => '👨‍🏫',
                 'label' => 'Teachers',
                 'description' => 'Faculty management',
@@ -82,7 +83,7 @@ class AdminSidebar extends Component
                 'icon' => '🏫',
                 'label' => 'Classes',
                 'description' => 'Class management',
-                'badge' => '15'
+                'badge' => SchoolClass::count(),
             ],
             [
                 'route' => 'admin.subjects',
