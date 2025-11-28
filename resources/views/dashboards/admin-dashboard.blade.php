@@ -1,12 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Admin Dashboard')
 
 @section('content')
 <div class="min-h-screen bg-gray-50 flex">
-    <!-- Sidebar -->
-    <x-admin-sidebar active-route="admin.dashboard" />
-
     <!-- Main Content -->
     <div class="flex-1 overflow-auto">
         <!-- Header -->

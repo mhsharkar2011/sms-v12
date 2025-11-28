@@ -28,7 +28,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600">Total Teachers</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_teachers']  }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ $stats['total_teachers']  ?? 2 }}</p>
                         </div>
                         <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                             <span class="material-icons-sharp text-blue-600">groups</span>

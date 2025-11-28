@@ -2,6 +2,13 @@
 
 namespace App\Providers;
 
+use App\View\Composers\AdminSidebarComposer;
+use App\View\Composers\ParentSidebarComposer;
+use App\View\Composers\StudentSidebarComposer;
+use App\View\Composers\SystemInfoComposer;
+use App\View\Composers\TeacherSidebarComposer;
+use App\View\Composers\TeacherStatsComposer;
+use App\View\Composers\UserStatsComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 
@@ -9,14 +16,12 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        View::composer('components.admin-sidebar', \App\View\Composers\AdminSidebarComposer::class);
-        // Teacher sidebar composer
-        View::composer('components.teacher-sidebar', \App\View\Composers\TeacherSidebarComposer::class);
-        // Student sidebar composer
-        View::composer('components.student-sidebar', \App\View\Composers\StudentSidebarComposer::class);
-        // Parent sidebar composer
-        View::composer('components.parent-sidebar', \App\View\Composers\ParentSidebarComposer::class);
-        View::composer('admin.dashboard', \App\View\Composers\UserStatsComposer::class);
-        View::composer('admin.*', \App\View\Composers\SystemInfoComposer::class);
+        View::composer('components.admin-sidebar', AdminSidebarComposer::class);
+        View::composer('admin.*', TeacherStatsComposer::class);
+        View::composer('components.teacher-sidebar', TeacherSidebarComposer::class);
+        View::composer('components.student-sidebar', StudentSidebarComposer::class);
+        View::composer('components.parent-sidebar', ParentSidebarComposer::class);
+        View::composer('admin.dashboard', UserStatsComposer::class);
+        View::composer('admin.*', SystemInfoComposer::class);
     }
 }
