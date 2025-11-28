@@ -253,7 +253,7 @@
                 <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between mb-6">
                         <h2 class="text-lg font-bold text-gray-900">Recent Students</h2>
-                        <a href="{{ route('admin.students') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                        <a href="{{ route('admin.students.dashboard') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center">
                             View All
                             <i class="fas fa-chevron-right ml-1 text-xs"></i>
                         </a>

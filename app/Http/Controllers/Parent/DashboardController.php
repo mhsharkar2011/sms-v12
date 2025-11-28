@@ -9,7 +9,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return view('parent.dashboard');
+        return view('dashboards.parent-dashboard');
     }
 
     public function children()

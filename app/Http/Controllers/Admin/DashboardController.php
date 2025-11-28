@@ -25,7 +25,22 @@ class DashboardController extends Controller
 
     public function adminProfile()
     {
-        return view('admin.profiles.index');
+        $totalAdmins = User::role('admin')->count();
+        $activeAdmins = User::role('admin')->where('status', 'active')->count();
+        $superAdmins = User::role('admin')->whereHas('permissions', function ($q) {
+            $q->where('name', 'super-admin');
+        })->count();
+        $pendingAdmins = User::role('admin')->where('status', 'pending')->count();
+
+        $admins = User::role('admin')->paginate(10);
+
+        return view('admin.admins.index', compact(
+            'admins',
+            'totalAdmins',
+            'activeAdmins',
+            'superAdmins',
+            'pendingAdmins'
+        ));
     }
     public function adminProfileEdit()
     {
@@ -42,13 +57,19 @@ class DashboardController extends Controller
 
     public function students()
     {
-        return view('admin.students.index');
+        return view('dashboards.student-dashboard');
     }
 
     public function teachers()
     {
         $teachers = $teachers ?? null;
-        return view('admin.teachers.index', compact('teachers'));
+        return view('dashboards.teacher-dashboard', compact('teachers'));
+    }
+
+    public function parents()
+    {
+        $parents = $parents ?? null;
+        return view('dashboards.parent-dashboard', compact('parents'));
     }
 
     public function classes()

@@ -50,4 +50,30 @@ class User extends Authenticatable
     {
         return $this->roles->count() > 0;
     }
+
+    public function guardianProfile()
+    {
+        return $this->hasOne(Guardian::class);
+    }
+    public function isGuardian()
+    {
+        return $this->guardianProfile()->exists();
+    }
+
+    public function children()
+    {
+        return $this->hasManyThrough(
+            Student::class,
+            Guardian::class,
+            'user_id', // Foreign key on guardians table
+            'id', // Foreign key on students table
+            'id', // Local key on users table
+            'id' // Local key on guardians table
+        )->via('guardianProfile');
+    }
+
+    public function guardianWithStudents()
+    {
+        return $this->guardianProfile()->with('students');
+    }
 }

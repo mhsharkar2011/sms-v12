@@ -57,8 +57,8 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
-        Route::get('/profile', [AdminDashboard::class, 'adminProfile'])->name('profile');
-        Route::get('/profile', [AdminDashboard::class, 'adminProfileEdit'])->name('profile');
+        Route::get('/profiles', [AdminDashboard::class, 'adminProfile'])->name('profile');
+        Route::get('/profile', [AdminDashboard::class, 'adminProfileEdit'])->name('profile.edit');
         Route::put('/profile', [AdminDashboard::class, 'adminProfileUpdate'])->name('profile.update');
         Route::put('/profile/password', [AdminDashboard::class, 'adminProfileUpdatePassword'])->name('profile.password');
 
@@ -73,12 +73,22 @@ Route::middleware(['auth'])->group(function () {
         // Teacher Management
         Route::resource('/teachers', TeacherManagementController::class);
 
+        // // Student routes
+        // Route::get('/students', [\App\Http\Controllers\Admin\StudentManagementController::class, 'index'])->name('students.index');
+        // Route::get('/students', [StudentManagementController::class, 'create'])->name('students.create');
+        // Route::post('/students', [StudentManagementController::class, 'store'])->name('students.store');
+        // Route::get('/students/{student}', [StudentManagementController::class, 'show'])->name('students.show');
+        // Route::get('/students/{student}/edit', [StudentManagementController::class, 'edit'])->name('students.edit');
+        // Route::put('/students/{student}', [StudentManagementController::class, 'update'])->name('students.update');
+        // Route::delete('/students/{student}', [StudentManagementController::class, 'destroy'])->name('students.destroy');
+
 
 
         // In your routes file
         // Dashboard Route
-        Route::get('/students', [AdminDashboard::class, 'students'])->name('students');
-        Route::get('/teachers', [AdminDashboard::class, 'teachers'])->name('teachers');
+        Route::get('/students/dashboard', [AdminDashboard::class, 'students'])->name('students.dashboard');
+        Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
+        Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
         Route::get('/classes', [AdminDashboard::class, 'classes'])->name('classes');
         Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
@@ -93,24 +103,24 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    // Admin Report Routes
-    Route::middleware(['auth', 'role:admin'])->prefix('admin/reports')->name('admin.reports.')->group(function () {
-        Route::get('/academic', function () {
-            return view('admin.reports.academic');
-        })->name('academic');
+    // // Admin Report Routes
+    // Route::middleware(['auth', 'role:admin'])->prefix('admin/reports')->name('admin.reports.')->group(function () {
+    //     Route::get('/academic', function () {
+    //         return view('admin.reports.academic');
+    //     })->name('academic');
 
-        Route::get('/financial', function () {
-            return view('admin.reports.financial');
-        })->name('financial');
+    //     Route::get('/financial', function () {
+    //         return view('admin.reports.financial');
+    //     })->name('financial');
 
-        Route::get('/attendance', function () {
-            return view('admin.reports.attendance');
-        })->name('attendance');
+    //     Route::get('/attendance', function () {
+    //         return view('admin.reports.attendance');
+    //     })->name('attendance');
 
-        Route::get('/examination', function () {
-            return view('admin.reports.examination');
-        })->name('examination');
-    });
+    //     Route::get('/examination', function () {
+    //         return view('admin.reports.examination');
+    //     })->name('examination');
+    // });
 
     // Redirect based on role
     Route::get('/dashboard', function () {

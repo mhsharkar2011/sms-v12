@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller; // FIXED: Changed 'app' to 'App'
-use App\Models\Student;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Models\User;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 
 class StudentManagementController extends Controller
 {
@@ -23,20 +19,15 @@ class StudentManagementController extends Controller
         $status = $request->get('status');
         $search = $request->get('search');
 
-        // Build query with filters
-        $students = Student::query()
-            ->when($roleFilter, function ($query, $roleFilter) {
-                return $query->whereHas('roles', function ($q) use ($roleFilter) {
-                    $q->where('name', $roleFilter);
-                });
-            })
+        // Build query with filters - only get students
+        $students = User::role('student')
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                      ->orWhere('email', 'like', "%{$search}%");
                 });
             })
             ->with('roles')
@@ -46,10 +37,10 @@ class StudentManagementController extends Controller
 
         // Calculate statistics
         $stats = [
-            'totalStudents' => Student::count(),
-            'activeStudents' => Student::where('status', 'active')->count(),
-            'pendingStudents' => Student::where('status', 'pending')->count(),
-            'inactiveStudents' => Student::where('status', 'inactive')->count(),
+            'totalStudents' => User::role('student')->count(),
+            'activeStudents' => User::role('student')->where('status', 'active')->count(),
+            'pendingStudents' => User::role('student')->where('status', 'pending')->count(),
+            'inactiveStudents' => User::role('student')->where('status', 'inactive')->count(),
         ];
 
         // Get available roles for filter
@@ -63,7 +54,8 @@ class StudentManagementController extends Controller
      */
     public function create()
     {
-        //
+        $roles = Role::all();
+        return view('admin.students.create', compact('roles'));
     }
 
     /**
@@ -71,7 +63,7 @@ class StudentManagementController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Add your store logic here
     }
 
     /**
@@ -79,7 +71,8 @@ class StudentManagementController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $student = User::role('student')->findOrFail($id);
+        return view('admin.students.show', compact('student'));
     }
 
     /**
@@ -87,7 +80,9 @@ class StudentManagementController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $student = User::role('student')->findOrFail($id);
+        $roles = Role::all();
+        return view('admin.students.edit', compact('student', 'roles'));
     }
 
     /**
@@ -95,7 +90,7 @@ class StudentManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        // Add your update logic here
     }
 
     /**
@@ -103,6 +98,6 @@ class StudentManagementController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        // Add your delete logic here
     }
 }
