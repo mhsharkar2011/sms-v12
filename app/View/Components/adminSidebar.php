@@ -70,8 +70,15 @@ class AdminSidebar extends Component
                 'badge' => $teacherUserCount,
                 'badgeColor' => 'bg-green-500'
             ],
-            [
-                'route' => 'admin.classes',
+            // [
+            //     'route' => 'admin.classes',
+            //     'icon' => '🏫',
+            //     'label' => 'Classes',
+            //     'description' => 'Class management',
+            //     'badge' => '15'
+            // ],
+             [
+                'route' => 'admin.classes.index',
                 'icon' => '🏫',
                 'label' => 'Classes',
                 'description' => 'Class management',

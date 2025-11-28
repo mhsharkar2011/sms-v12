@@ -97,7 +97,7 @@
                 {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate">{{ Auth::user()->name }}</p>
+                <p class="text-sm font-medium text-gray-900 truncate">{{ auth()->user()->name }}</p>
                 <p class="text-xs text-gray-500 truncate">Parent Account</p>
             </div>
             <a href="{{ route('logout') }}"

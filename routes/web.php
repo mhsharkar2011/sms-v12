@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
@@ -72,6 +73,13 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/students', StudentManagementController::class);
         // Teacher Management
         Route::resource('/teachers', TeacherManagementController::class);
+        // Class Management
+        Route::resource('/classes', ClassManagementController::class);
+
+        // Student assignment routes
+        Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
+        Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
+
 
         // // Student routes
         // Route::get('/students', [\App\Http\Controllers\Admin\StudentManagementController::class, 'index'])->name('students.index');
@@ -89,7 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/dashboard', [AdminDashboard::class, 'students'])->name('students.dashboard');
         Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
         Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
-        Route::get('/classes', [AdminDashboard::class, 'classes'])->name('classes');
+        Route::get('/classes/dashboard', [AdminDashboard::class, 'classes'])->name('classes.dashboard');
         Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');

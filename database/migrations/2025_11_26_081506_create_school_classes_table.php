@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('school_classes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('code');
             $table->string('grade_level');
             $table->string('section');
             $table->foreignId('class_teacher_id')->nullable()->constrained('teachers');

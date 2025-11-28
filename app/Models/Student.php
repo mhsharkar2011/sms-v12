@@ -4,70 +4,140 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'student_id',
         'admission_number',
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'date_of_birth',
         'gender',
+        'blood_group',
+        'nationality',
+        'religion',
+        'caste',
         'address',
-        'father_name',
-        'father_phone',
-        'mother_name',
-        'mother_phone',
+        'city',
+        'state',
+        'pincode',
+        'country',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
         'admission_date',
         'class_id',
+        'grade_level',
         'roll_number',
+        'section',
+        'academic_year',
         'avatar',
-        'status'
+        'medical_info',
+        'medical_notes',
+        'allergies',
+        'medications',
+        'transport_route',
+        'hostel_info',
+        'special_instructions',
+        'status',
+        'last_attendance_date',
+        'last_login_at',
+        'is_boarder',
+        'uses_transport',
     ];
 
     protected $casts = [
         'date_of_birth' => 'date',
         'admission_date' => 'date',
+        'last_attendance_date' => 'date',
+        'last_login_at' => 'datetime',
+        'medical_info' => 'array',
+        'allergies' => 'array',
+        'medications' => 'array',
+        'hostel_info' => 'array',
+        'is_boarder' => 'boolean',
+        'uses_transport' => 'boolean',
     ];
 
-    protected $attributes = [
-        'status' => 'active',
-        'gender' => 'male'
-    ];
-
-    // Relationship with class
-    public function class(): BelongsTo
+    /**
+     * Get the school class that the student belongs to.
+     */
+    public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
-    // Accessor for age
-    public function getAgeAttribute(): ?int
+    /**
+     * Get the addresses for the student.
+     */
+    public function addresses(): HasMany
     {
-        return $this->date_of_birth?->age;
+        return $this->hasMany(StudentAddress::class);
     }
 
-    // Accessor for avatar URL
-    public function getAvatarUrlAttribute(): string
+    /**
+     * Get the primary address for the student.
+     */
+    public function primaryAddress(): HasOne
     {
-        if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
+        return $this->hasOne(StudentAddress::class)->where('is_primary', true);
+    }
+
+    /**
+     * Get full name of the student.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return $this->first_name . ' ' . $this->last_name;
+    }
+
+    /**
+     * Get age of the student.
+     */
+    public function getAgeAttribute(): int
+    {
+        return $this->date_of_birth->age;
+    }
+
+    /**
+     * Generate next student ID.
+     */
+    public static function generateStudentId(): string
+    {
+        $lastStudent = static::withTrashed()->orderBy('id', 'desc')->first();
+        $number = $lastStudent ? (int) substr($lastStudent->student_id, 1) + 1 : 1;
+        return 'S' . str_pad($number, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Generate next admission number.
+     */
+    public static function generateAdmissionNumber(): string
+    {
+        $year = date('Y');
+        $lastStudent = static::withTrashed()->where('admission_number', 'like', 'ADM' . $year . '%')->orderBy('id', 'desc')->first();
+
+        if ($lastStudent) {
+            $number = (int) substr($lastStudent->admission_number, -4) + 1;
+        } else {
+            $number = 1;
         }
-        return asset('images/default-student-avatar.png');
+
+        return 'ADM' . $year . str_pad($number, 4, '0', STR_PAD_LEFT);
     }
 
-    // Accessor for class name
-    public function getClassNameAttribute(): ?string
-    {
-        return $this->class?->display_name;
-    }
-
-    // Scope active students
+    /**
+     * Scope active students.
+     */
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
