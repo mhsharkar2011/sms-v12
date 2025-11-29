@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Teacher;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
@@ -14,8 +15,26 @@ class TeacherManagementController extends Controller
      */
     public function index()
     {
-        $teachers = User::role('teacher')->paginate(10);
-        return view('admin.teachers.index', compact('teachers'));
+        $teachers = Teacher::with('department')->paginate(10);
+
+        $totalTeachers = Teacher::count();
+        $activeTeachers = Teacher::where('status', 'active')->count();
+        $pendingTeachers = Teacher::where('status', 'pending')->count();
+        $inactiveTeachers = Teacher::where('status', 'inactive')->count();
+
+        $stats = [
+            'total_teachers' => $totalTeachers,
+            'activeTeachers' => $activeTeachers,
+            'pendingTeachers' => $pendingTeachers,
+            'inactiveTeachers' => $inactiveTeachers,
+            'activePercentage' => $totalTeachers > 0 ? round(($activeTeachers / $totalTeachers) * 100, 1) : 0,
+            'pendingPercentage' => $totalTeachers > 0 ? round(($pendingTeachers / $totalTeachers) * 100, 1) : 0,
+            'inactivePercentage' => $totalTeachers > 0 ? round(($inactiveTeachers / $totalTeachers) * 100, 1) : 0,
+        ];
+
+        $departments = [];
+
+        return view('admin.teachers.index', compact('teachers', 'stats', 'departments'));
     }
 
     /**

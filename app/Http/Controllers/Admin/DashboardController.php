@@ -12,8 +12,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $totalStudent = User::role('student')->where('status', 'active')->count();
-        return view('dashboards.admin-dashboard', compact('totalStudent'));
+        return view('dashboards.admin-dashboard');
     }
 
     public function users()

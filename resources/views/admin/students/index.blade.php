@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar active-route="admin.students" />
+        <x-admin-sidebar active-route="admin.students.index" />
 
         <div class="flex-1 overflow-auto">
             <!-- Header -->
@@ -48,7 +48,7 @@
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Total Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    {{ $stats['totalStudents'] }}
+                                    {{ $stats['total_students'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span

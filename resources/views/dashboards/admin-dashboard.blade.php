@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50 flex">
+    <x-admin-sidebar />
     <!-- Main Content -->
     <div class="flex-1 overflow-auto">
         <!-- Header -->
@@ -39,7 +40,7 @@
                         <div>
 
                             <p class="text-sm font-medium text-gray-600">Total Students</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $totalStudent }}</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total_students'] }}</p>
                             <div class="flex items-center mt-2">
                                 <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                     <i class="fas fa-arrow-up text-xs mr-1"></i>
@@ -58,7 +59,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm font-medium text-gray-600">Total Teachers</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1">68</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1">{{ $stats['total_teachers'] }}</p>
                             <div class="flex items-center mt-2">
                                 <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                     <i class="fas fa-arrow-up text-xs mr-1"></i>

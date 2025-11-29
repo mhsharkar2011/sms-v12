@@ -75,20 +75,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/teachers', TeacherManagementController::class);
         // Class Management
         Route::resource('/classes', ClassManagementController::class);
+        Route::resource('/subjects', SubjectManagementController::class);
 
         // Student assignment routes
         Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
         Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
-
-
-        // // Student routes
-        // Route::get('/students', [\App\Http\Controllers\Admin\StudentManagementController::class, 'index'])->name('students.index');
-        // Route::get('/students', [StudentManagementController::class, 'create'])->name('students.create');
-        // Route::post('/students', [StudentManagementController::class, 'store'])->name('students.store');
-        // Route::get('/students/{student}', [StudentManagementController::class, 'show'])->name('students.show');
-        // Route::get('/students/{student}/edit', [StudentManagementController::class, 'edit'])->name('students.edit');
-        // Route::put('/students/{student}', [StudentManagementController::class, 'update'])->name('students.update');
-        // Route::delete('/students/{student}', [StudentManagementController::class, 'destroy'])->name('students.destroy');
 
 
 
@@ -98,7 +89,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
         Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
         Route::get('/classes/dashboard', [AdminDashboard::class, 'classes'])->name('classes.dashboard');
-        Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
+        Route::get('/subjects/dashboard', [AdminDashboard::class, 'subjects'])->name('subjects.dashboard');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');

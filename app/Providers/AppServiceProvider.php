@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\View\Composers\AdminSidebarComposer;
 use App\View\Composers\ParentSidebarComposer;
+use App\View\Composers\AdminStatsComposer;
+use App\View\Composers\QuickStatsComposer;
 use App\View\Composers\StudentSidebarComposer;
 use App\View\Composers\StudentStatsComposer;
 use App\View\Composers\SystemInfoComposer;
@@ -21,7 +23,9 @@ class AppServiceProvider extends ServiceProvider
         View::composer('components.teacher-sidebar', TeacherSidebarComposer::class);
         View::composer('components.student-sidebar', StudentSidebarComposer::class);
         View::composer('components.parent-sidebar', ParentSidebarComposer::class);
-        View::composer('admin.dashboard', UserStatsComposer::class);
+        View::composer('dashboards.admin-dashboard', QuickStatsComposer::class);
+        View::composer('admin.teachers.*', QuickStatsComposer::class);
+        // View::composer('admin.dashboard', UserStatsComposer::class);
         View::composer('admin.*', TeacherStatsComposer::class);
         View::composer('admin.students.*', StudentStatsComposer::class);
         View::composer('admin.*', SystemInfoComposer::class);
