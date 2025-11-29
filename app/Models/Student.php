@@ -8,13 +8,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Spatie\Permission\Models\Role;
 
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'user_id', // Add this
         'student_id',
+        'class_id',
         'admission_number',
         'first_name',
         'last_name',
@@ -35,7 +38,6 @@ class Student extends Model
         'emergency_contact_phone',
         'emergency_contact_relation',
         'admission_date',
-        'class_id',
         'grade_level',
         'roll_number',
         'section',
@@ -67,6 +69,15 @@ class Student extends Model
         'is_boarder' => 'boolean',
         'uses_transport' => 'boolean',
     ];
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function roles(){
+        return $this->belongsTo(Role::class);
+    }
 
     /**
      * Get the school class that the student belongs to.

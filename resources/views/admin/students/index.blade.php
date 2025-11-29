@@ -41,23 +41,20 @@
             <div class="container mx-auto p-6">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Total Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['totalStudents']))
-                                        {{ $stats['totalStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['totalStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span
                                         class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                         <i class="fas fa-arrow-up text-xs mr-1"></i>
-                                        12% growth
+                                        {{ $stats['activePercentage'] }}%
                                     </span>
                                 </div>
                             </div>
@@ -67,26 +64,18 @@
                         </div>
                     </div>
 
+                    <!-- Active Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Active Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['activeStudents']))
-                                        {{ $stats['activeStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['activeStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['activeStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            active
-                                        @else
-                                            0% active
-                                        @endif
+                                        {{ number_format($stats['activePercentage'], 1) }}% active
                                     </span>
                                 </div>
                             </div>
@@ -96,26 +85,18 @@
                         </div>
                     </div>
 
+                    <!-- Pending Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Pending Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['pendingStudents']))
-                                        {{ $stats['pendingStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['pendingStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span class="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['pendingStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            pending
-                                        @else
-                                            0% pending
-                                        @endif
+                                        {{ number_format($stats['pendingPercentage'], 1) }}% pending
                                     </span>
                                 </div>
                             </div>
@@ -125,28 +106,20 @@
                         </div>
                     </div>
 
+                    <!-- Inactive Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Inactive Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['inactiveStudents']))
-                                        {{ $stats['inactiveStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['inactiveStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span
                                         class="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full flex items-center">
                                         <i class="fas fa-info-circle text-xs mr-1"></i>
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['inactiveStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            inactive
-                                        @else
-                                            0% inactive
-                                        @endif
+                                        {{ number_format($stats['inactivePercentage'], 1) }}% inactive
                                     </span>
                                 </div>
                             </div>
@@ -189,14 +162,12 @@
                             <select name="role"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">All Roles</option>
-                                @if (isset($roles))
-                                    @foreach ($roles as $role)
-                                        <option value="{{ $role->name }}"
-                                            {{ request('role') == $role->name ? 'selected' : '' }}>
-                                            {{ ucfirst($role->name) }}
-                                        </option>
-                                    @endforeach
-                                @endif
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->name }}"
+                                        {{ request('role') == $role->name ? 'selected' : '' }}>
+                                        {{ ucfirst($role->name) }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 

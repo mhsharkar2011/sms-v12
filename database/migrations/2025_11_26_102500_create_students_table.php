@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id')->unique()->nullable();
             $table->string('student_id')->unique();
             $table->string('admission_number')->unique()->nullable()->comment('Custom admission number: ADM001, ADM002, etc.');
             $table->string('first_name');
