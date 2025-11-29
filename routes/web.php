@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SubjectManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page

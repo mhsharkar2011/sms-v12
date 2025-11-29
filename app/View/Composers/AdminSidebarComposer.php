@@ -71,7 +71,7 @@ class AdminSidebarComposer
                 'badge' => SchoolClass::count(),
             ],
             [
-                'route' => 'admin.subjects',
+                'route' => 'admin.subjects.index',
                 'icon' => '📚',
                 'label' => 'Subjects',
                 'description' => 'Course catalog',

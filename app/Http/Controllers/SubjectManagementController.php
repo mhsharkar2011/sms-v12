@@ -31,7 +31,7 @@ class SubjectManagementController extends Controller
 
         $subjects = $query->latest()->paginate(10);
 
-        return view('subjects.index', compact('subjects'));
+        return view('admin.subjects.index', compact('subjects'));
     }
 
     /**
@@ -39,7 +39,7 @@ class SubjectManagementController extends Controller
      */
     public function create()
     {
-        return view('subjects.create');
+        return view('admin.subjects.create');
     }
 
     /**
@@ -47,6 +47,9 @@ class SubjectManagementController extends Controller
      */
     public function store(Request $request)
     {
+        // Debug: Check if request data is coming through
+        // dd($request->all());
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'code' => 'required|string|max:50|unique:subjects',
@@ -54,13 +57,31 @@ class SubjectManagementController extends Controller
             'category' => 'required|in:core,elective,extracurricular,vocational',
             'credit_hours' => 'required|integer|min:1|max:10',
             'difficulty_level' => 'required|integer|min:1|max:5',
-            'is_active' => 'boolean'
+            'is_active' => 'sometimes|boolean'
         ]);
 
-        Subject::create($validated);
+        // Debug: Check validated data
+        // dd($validated);
 
-        return redirect()->route('subjects.index')
-            ->with('success', 'Subject created successfully.');
+        try {
+            // Handle checkbox boolean value
+            $validated['is_active'] = $request->has('is_active');
+
+            $subject = Subject::create($validated);
+
+            // Debug: Check if subject was created
+            // dd($subject);
+
+            return redirect()->route('admin.subjects.index')
+                ->with('success', 'Subject created successfully.');
+        } catch (\Exception $e) {
+            // Debug: Check for any exceptions
+            // dd($e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Error creating subject: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -68,7 +89,7 @@ class SubjectManagementController extends Controller
      */
     public function show(Subject $subject)
     {
-        return view('subjects.show', compact('subject'));
+        return view('admin.subjects.show', compact('subject'));
     }
 
     /**
@@ -76,7 +97,7 @@ class SubjectManagementController extends Controller
      */
     public function edit(Subject $subject)
     {
-        return view('subjects.edit', compact('subject'));
+        return view('admin.subjects.edit', compact('subject'));
     }
 
     /**
@@ -96,7 +117,7 @@ class SubjectManagementController extends Controller
 
         $subject->update($validated);
 
-        return redirect()->route('subjects.index')
+        return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject updated successfully.');
     }
 
@@ -108,7 +129,7 @@ class SubjectManagementController extends Controller
     {
         $subject->delete();
 
-        return redirect()->route('subjects.index')
+        return redirect()->route('admin.subjects.index')
             ->with('success', 'Subject deleted successfully.');
     }
 }
