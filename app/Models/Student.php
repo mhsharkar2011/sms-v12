@@ -75,7 +75,7 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function roles(){
+    public function role(){
         return $this->belongsTo(Role::class);
     }
 

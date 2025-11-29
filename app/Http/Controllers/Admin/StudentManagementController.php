@@ -215,13 +215,30 @@ class StudentManagementController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(User $student)
     {
-        $student = Student::with(['user.roles'])->findOrFail($id);
+
+        $student = Student::where('user_id', $student->id)->firstOrFail();
+       
+        // Find student by ID and load relationships
+        $student->load(['user.roles', 'schoolClass']);
+        $user = $student->user;
+
+        if (!$user) {
+            abort(404, 'User not found for this student');
+        }
+
+
+        // Prepare roles for the edit form and currently assigned roles
+        $roles = Role::all();
+
+        // FIX: Get roles from the USER, not the student
+        $assignedRoles = $user->roles->pluck('name')->toArray();
 
         $classes = SchoolClass::active()->get();
 
-        return view('admin.students.edit', compact('student', 'classes'));
+        // Pass both student and user to the view
+        return view('admin.students.edit', compact('student', 'user', 'classes', 'roles', 'assignedRoles'));
     }
 
     /**
