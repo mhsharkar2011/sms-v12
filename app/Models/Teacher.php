@@ -12,6 +12,7 @@ class Teacher extends Model
 
     protected $fillable = [
         'teacher_id',
+        'department_id',
         'name',
         'email',
         'phone',
@@ -23,7 +24,9 @@ class Teacher extends Model
         'date_of_joining',
         'qualification',
         'bio',
-        'last_login_at'
+        'last_login_at',
+        'subjects_taught',
+
     ];
 
     protected $casts = [
@@ -48,6 +51,16 @@ class Teacher extends Model
     public function subjects()
     {
         return $this->hasMany(TeacherSubject::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+    // Accessor for department name with fallback
+    public function getDepartmentNameAttribute()
+    {
+        return $this->department ? $this->department->name : 'No Department';
     }
 
     // Accessor for avatar URL
@@ -88,6 +101,12 @@ class Teacher extends Model
     public function primarySubject()
     {
         return $this->hasOne(TeacherSubject::class)->where('is_primary', true);
+    }
+
+    // Check if teacher is active
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 
     /**

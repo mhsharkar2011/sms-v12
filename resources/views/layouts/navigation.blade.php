@@ -48,7 +48,7 @@
                     <x-slot name="content">
                         <!-- Check if profile route exists before displaying -->
                         @if(Route::has('profile.edit'))
-                            <x-dropdown-link :href="route('profile.edit')">
+                            <x-dropdown-link :href="route('profile.edit', Auth::user())">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
                         @else
@@ -115,7 +115,7 @@
             <div class="mt-3 space-y-1">
                 <!-- Check if profile route exists before displaying -->
                 @if(Route::has('profile.edit'))
-                    <x-responsive-nav-link :href="route('profile.edit')">
+                    <x-responsive-nav-link :href="route('profile.edit', Auth::user())">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
                 @else

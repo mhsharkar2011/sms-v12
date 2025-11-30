@@ -3,6 +3,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\Guardian;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
@@ -22,7 +23,7 @@ class QuickStatsComposer
     {
         $totalStudents = Student::count();
         $totalTeachers = Teacher::count();
-        // $totalParents = Parent::count();
+        $totalParents = Guardian::count();
         $activeStudents = User::role('student')->where('status', 'active')->count();
         $pendingStudents = User::role('student')->where('status', 'pending')->count();
         $inactiveStudents = User::role('student')->where('status', 'inactive')->count();
@@ -30,7 +31,7 @@ class QuickStatsComposer
         return [
             'total_students' => $totalStudents,
             'total_teachers' => $totalTeachers,
-            // 'total_parents' => $totalParents,
+            'total_guardians' => $totalParents,
             'activeStudents' => $activeStudents,
             'pendingStudents' => $pendingStudents,
             'inactiveStudents' => $inactiveStudents,

@@ -215,11 +215,11 @@ class StudentManagementController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $student)
+    public function edit(Student $student)
     {
 
-        $student = Student::where('user_id', $student->id)->firstOrFail();
-       
+        $student = Student::where('user_id', $student->User_id)->firstOrFail();
+
         // Find student by ID and load relationships
         $student->load(['user.roles', 'schoolClass']);
         $user = $student->user;

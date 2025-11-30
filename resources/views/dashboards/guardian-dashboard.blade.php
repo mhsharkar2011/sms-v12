@@ -5,7 +5,7 @@
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
         <!-- Parent Sidebar -->
-        <x-parent-sidebar />
+        <x-guardian-sidebar />
 
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">

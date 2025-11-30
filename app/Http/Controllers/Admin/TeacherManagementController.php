@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Department;
 use App\Models\Teacher;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class TeacherManagementController extends Controller
 {
@@ -43,7 +45,8 @@ class TeacherManagementController extends Controller
     public function create()
     {
         $roles = Role::all();
-        return view('admin.teachers.create', compact('roles'));
+        $departments = Department::where('is_active', true)->get();
+        return view('admin.teachers.create', compact('roles', 'departments'));
     }
 
     /**
@@ -51,9 +54,46 @@ class TeacherManagementController extends Controller
      */
     public function store(Request $request)
     {
-        // Add validation and store logic here
-        return redirect()->route('admin.teachers.index');
+        // Validate the request data
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:teachers,email',
+            'phone' => 'nullable|string|max:20',
+            'date_of_birth' => 'nullable|date',
+            'teacher_id' => 'required|string|unique:teachers,teacher_id',
+            'department_id' => 'required|exists:departments,id',
+            'subject' => 'required|string|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'date_of_joining' => 'nullable|date',
+            'status' => 'required|in:active,on_leave,inactive',
+            'address' => 'nullable|string',
+            'bio' => 'nullable|string',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        try {
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                $avatar = $request->file('avatar');
+                $avatarName = 'teacher_' . time() . '_' . Str::random(10) . '.' . $avatar->getClientOriginalExtension();
+
+                // Store avatar in storage/app/public/avatars
+                $avatarPath = $avatar->storeAs('avatars/teachers', $avatarName, 'public');
+                $validated['avatar'] = $avatarPath;
+            }
+
+            // Create the teacher
+            $teacher = Teacher::create($validated);
+
+            return redirect()->route('admin.teachers.index')
+                ->with('success', 'Teacher added successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error creating teacher: ' . $e->getMessage())
+                ->withInput();
+        }
     }
+
 
     /**
      * Display the specified resource.

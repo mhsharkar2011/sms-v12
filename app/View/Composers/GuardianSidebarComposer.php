@@ -2,19 +2,19 @@
 
 namespace App\View\Composers;
 
-use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 
-class ParentSidebarComposer
+class GuardianSidebarComposer
 {
     /**
      * Bind data to the view.
      */
     public function compose(View $view)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $currentRoute = Route::currentRouteName();
 
         $view->with([
@@ -94,7 +94,7 @@ class ParentSidebarComposer
      */
     protected function getParentQuickStats()
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         return Cache::remember('parent_quick_stats_' . $user->id, 300, function () use ($user) {
             return [

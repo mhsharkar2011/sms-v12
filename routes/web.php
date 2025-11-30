@@ -1,16 +1,16 @@
 <?php
 
-use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
-use App\Http\Controllers\Parent\DashboardController as ParentDashboard;
+use App\Http\Controllers\Parent\DashboardController as GuardianDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
+use App\Http\Controllers\Admin\ClassManagementController;
+use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\SubjectManagementController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
@@ -23,9 +23,11 @@ require __DIR__ . '/auth.php';
 
 // Add profile routes if they don't exist
 Route::middleware('auth')->group(function () {
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/{user}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/{user}/posts', [ProfileController::class, 'posts'])->name('users.posts');
 });
 
 // Protected Routes
@@ -52,33 +54,21 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Parent Routes
-    Route::prefix('parent')->name('parent.')->middleware('role:parent')->group(function () {
-        Route::get('/dashboard', [ParentDashboard::class, 'index'])->name('dashboard');
-        Route::get('/children', [ParentDashboard::class, 'children'])->name('children')->middleware('permission:view child grades');
+    Route::prefix('guardian')->name('guardian.')->middleware('role:guardian')->group(function () {
+        Route::get('/dashboard', [GuardianDashboard::class, 'index'])->name('dashboard');
+        Route::get('/children', [GuardianDashboard::class, 'children'])->name('children')->middleware('permission:view child grades');
     });
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
-        Route::get('/profiles', [AdminDashboard::class, 'adminProfile'])->name('profile');
-        Route::get('/profile', [AdminDashboard::class, 'adminProfileEdit'])->name('profile.edit');
-        Route::put('/profile', [AdminDashboard::class, 'adminProfileUpdate'])->name('profile.update');
-        Route::put('/profile/password', [AdminDashboard::class, 'adminProfileUpdatePassword'])->name('profile.password');
-
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-
-        // User Management Route
         Route::resource('/users', UserManagementController::class);
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
-
-        // Student Management Route
         Route::resource('/students', StudentManagementController::class);
-        // Teacher Management
+        Route::resource('/guardians', TeacherManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
-        // Class Management
         Route::resource('/classes', ClassManagementController::class);
         Route::resource('/subjects', SubjectManagementController::class);
-
-        // Student assignment routes
         Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
         Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
 
