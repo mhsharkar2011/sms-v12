@@ -1,10 +1,12 @@
 <?php
+// app/Models/Comment.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Comment extends Model
 {
@@ -14,6 +16,7 @@ class Comment extends Model
         'content',
         'user_id',
         'post_id',
+        'parent_id',
         'is_approved',
     ];
 
@@ -21,35 +24,41 @@ class Comment extends Model
         'is_approved' => 'boolean',
     ];
 
-    /**
-     * Get the user that owns the comment.
-     */
+    // Relationships
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Get the post that owns the comment.
-     */
     public function post(): BelongsTo
     {
         return $this->belongsTo(Post::class);
     }
 
-    /**
-     * Scope approved comments.
-     */
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Comment::class, 'parent_id');
+    }
+
+    public function replies(): HasMany
+    {
+        return $this->hasMany(Comment::class, 'parent_id');
+    }
+
+    // Scopes
     public function scopeApproved($query)
     {
         return $query->where('is_approved', true);
     }
 
-    /**
-     * Scope pending comments.
-     */
     public function scopePending($query)
     {
         return $query->where('is_approved', false);
+    }
+
+    // Helpers
+    public function hasReplies(): bool
+    {
+        return $this->replies->isNotEmpty();
     }
 }

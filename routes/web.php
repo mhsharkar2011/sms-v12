@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\Admin\SubjectManagementController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +19,18 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('landing');
 })->name('home');
+
+
+// routes/web.php
+
+// Posts
+Route::resource('posts', PostController::class);
+
+// Comments
+Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
 
 // Authentication Routes
 require __DIR__ . '/auth.php';
