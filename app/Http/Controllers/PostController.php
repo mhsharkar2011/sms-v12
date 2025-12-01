@@ -15,15 +15,23 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): View
+    public function index()
     {
-        $posts = Post::published()
-            ->with(['comments.user'])
-            ->withCount(['comments', 'likes'])
+        $posts = Post::with(['user', 'comments.user'])
+            ->withCount(['likes', 'comments'])
             ->latest()
-            ->paginate(10);
+            ->paginate(9);
 
-        return view('landing', compact('posts'));
+        // For each post, check if current user liked it
+        if (auth()->check()) {
+            $posts->each(function ($post) {
+                $post->is_liked_by_user = $post->likes()
+                    ->where('user_id', auth()->id())
+                    ->exists();
+            });
+        }
+
+        return view('posts.index', compact('posts'));
     }
 
     /**

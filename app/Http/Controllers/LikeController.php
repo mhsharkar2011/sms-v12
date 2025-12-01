@@ -2,85 +2,54 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Like;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
 class LikeController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-
     public function like(Post $post)
     {
-        auth()->user()->likes()->attach($post->id);
+        // Check if already liked
+        if ($post->likes()->where('user_id', auth()->id())->exists()) {
+            return response()->json([
+                'message' => 'Already liked',
+                'likes_count' => $post->likes()->count()
+            ], 200);
+        }
+
+        // Create the like
+        $post->likes()->attach(auth()->id());
+
+        // Reload the relationship to get updated count
+        $post->loadCount('likes');
 
         return response()->json([
-            'likes_count' => $post->likes()->count(),
-            'message' => 'Post liked successfully'
-        ]);
+            'message' => 'Post liked successfully',
+            'likes_count' => $post->likes_count,
+            'liked' => true
+        ], 200);
     }
 
     public function unlike(Post $post)
     {
-        auth()->user()->likes()->detach($post->id);
+        // Check if not already liked
+        if (!$post->likes()->where('user_id', auth()->id())->exists()) {
+            return response()->json([
+                'message' => 'Not liked yet',
+                'likes_count' => $post->likes()->count()
+            ], 200);
+        }
+
+        // Remove the like
+        $post->likes()->detach(auth()->id());
+
+        // Reload the relationship to get updated count
+        $post->loadCount('likes');
 
         return response()->json([
-            'likes_count' => $post->likes()->count(),
-            'message' => 'Post unliked successfully'
-        ]);
-    }
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Like $like)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Like $like)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Like $like)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Like $like)
-    {
-        //
+            'message' => 'Post unliked successfully',
+            'likes_count' => $post->likes_count,
+            'liked' => false
+        ], 200);
     }
 }

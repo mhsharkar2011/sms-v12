@@ -112,18 +112,91 @@
             contentTextarea.addEventListener('blur', function() {
                 if (!excerptTextarea.value && contentTextarea.value) {
                     const content = contentTextarea.value.replace(/[#*`~]/g, '').substring(0, 150);
-                    excerptTextarea.value = content + (content.length === 150 ? '...' : '');
-                }
+                excerptTextarea.value = content + (content.length === 150 ? '...' : '');
+            }
+        });
+
+        // Auto-generate meta title if empty and title changes
+        titleInput.addEventListener('blur', function() {
+            const metaTitle = document.getElementById('meta_title');
+            if (!metaTitle.value && titleInput.value) {
+                metaTitle.value = titleInput.value;
+            }
+        });
+    });
+
+
+
+    async function toggleLike(postId) {
+        const likeButton = document.getElementById(`like-button-${postId}`);
+        const likeIcon = document.getElementById(`like-icon-${postId}`);
+        const likeText = document.getElementById(`like-text-${postId}`);
+        const likeCount = document.getElementById(`like-count-${postId}`);
+
+        // Store current state locally
+        const isCurrentlyLiked = likeIcon.textContent.trim() === '❤️';
+
+        if (!likeButton || !likeIcon || !likeText || !likeCount) {
+            console.error('Like elements not found');
+            return;
+        }
+
+        try {
+            likeButton.disabled = true;
+
+            // Create form data
+            const formData = new FormData();
+            formData.append('_token', csrfToken);
+
+            const url = isCurrentlyLiked ?
+                `/posts/${postId}/unlike` :
+                `/posts/${postId}/like`;
+            const method = isCurrentlyLiked ? 'DELETE' : 'POST';
+
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+                body: formData,
             });
 
-            // Auto-generate meta title if empty and title changes
-            titleInput.addEventListener('blur', function() {
-                const metaTitle = document.getElementById('meta_title');
-                if (!metaTitle.value && titleInput.value) {
-                    metaTitle.value = titleInput.value;
+            const data = await response.json();
+
+            if (response.ok) {
+                // Update UI based on response
+                const liked = data.liked !== undefined ? data.liked : !isCurrentlyLiked;
+
+                likeIcon.textContent = liked ? '❤️' : '🤍';
+                likeText.textContent = liked ? 'Liked' : 'Like';
+
+                // Update classes
+                likeButton.classList.toggle('text-pink-600', liked);
+                likeButton.classList.toggle('text-blue-600', !liked);
+                likeButton.classList.toggle('hover:text-pink-800', liked);
+                likeButton.classList.toggle('hover:text-blue-800', !liked);
+
+                // Update count
+                if (data.likes_count !== undefined) {
+                    likeCount.textContent = `${data.likes_count} Likes`;
+                    }
+
+                    // Animation
+                    likeIcon.style.transform = 'scale(1.3)';
+                    setTimeout(() => {
+                        likeIcon.style.transform = 'scale(1)';
+                    }, 200);
+                } else {
+                    throw new Error(data.message || 'Request failed');
                 }
-            });
-        });
+            } catch (error) {
+                console.error('Like error:', error);
+                alert(error.message || 'Something went wrong. Please try again.');
+            } finally {
+                likeButton.disabled = false;
+            }
+        }
     </script>
 
     <style>

@@ -20,20 +20,16 @@ use Illuminate\Support\Facades\Route;
 // Landing Page
 Route::get('/', function () {
     $query = Post::published()
-                    ->with('comments.user')
-                    ->withCount(['comments','likes'])->latest();
-     $posts = $query->paginate(10);
-    return view('landing',compact('posts'));
+        ->with('comments.user')
+        ->withCount(['comments', 'likes'])->latest();
+    $posts = $query->paginate(10);
+    return view('landing', compact('posts'));
 })->name('home');
 
 
 // routes/web.php
 
-// Posts
-Route::resource('posts', PostController::class);
-Route::resource('likes', LikeController::class);
-Route::post('/posts/{post}/like', [LikeController::class, 'store'])->middleware('auth')->name('posts.like');
-Route::delete('/posts/{post}/unlike', [LikeController::class, 'destroy'])->middleware('auth')->name('posts.unlike');
+
 
 // Comments
 Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
@@ -55,6 +51,13 @@ Route::middleware('auth')->group(function () {
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
+
+    // Posts
+    Route::resource('posts', PostController::class);
+    Route::resource('likes', LikeController::class);
+    Route::post('/posts/{post}/like', [LikeController::class, 'store'])->middleware('auth')->name('posts.like');
+    Route::delete('/posts/{post}/unlike', [LikeController::class, 'destroy'])->middleware('auth')->name('posts.unlike');
+
     // Student Routes
     Route::prefix('student')->name('student.')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');

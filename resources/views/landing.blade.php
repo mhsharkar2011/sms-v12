@@ -102,11 +102,9 @@
 
                             {{-- Likes & Share Action Bar --}}
                             <div class="flex items-center justify-between text-sm mb-4">
-
                                 {{-- Like/Unlike Button Logic --}}
                                 <div class="flex items-center space-x-2">
                                     @auth
-                                        {{-- Check if the current user has liked this specific post --}}
                                         <button onclick="toggleLike({{ $post->id }})" id="like-button-{{ $post->id }}"
                                             class="{{ $post->is_liked_by_user ? 'text-pink-600 hover:text-pink-800' : 'text-blue-600 hover:text-blue-800' }} flex items-center font-medium transition-colors duration-200"
                                             aria-label="{{ $post->is_liked_by_user ? 'Unlike this post' : 'Like this post' }}">
@@ -118,7 +116,6 @@
                                             </span>
                                         </button>
                                     @else
-                                        {{-- Not authenticated --}}
                                         <a href="{{ route('login') }}"
                                             class="text-gray-400 hover:text-gray-600 flex items-center">
                                             🤍 Login to Like
@@ -132,14 +129,13 @@
                                 {{-- Share Link --}}
                                 <div>
                                     <button
-                                        onclick="sharePost('{{ addslashes($post->title) }}', '{{ route('posts.show', $post) }}')"
+                                        onclick="sharePost(event, '{{ addslashes($post->title) }}', '{{ route('posts.show', $post) }}')"
                                         class="text-green-600 hover:text-green-800 flex items-center"
                                         aria-label="Share this post">
                                         📤 Share Post
                                     </button>
                                 </div>
                             </div>
-                            {{-- End Action Bar --}}
 
                             {{-- Comments Section --}}
                             <div class="text-sm text-gray-700">
@@ -154,24 +150,34 @@
                                     </p>
                                 @endif
                             </div>
-                            {{-- End Comments Section --}}
                         </div>
                     </div>
                 @endforeach
             </div>
 
-            {{-- Add JavaScript for AJAX likes and share functionality --}}
+            {{-- JavaScript at the bottom of the page or in a separate file --}}
             <script>
-                // CSRF token for AJAX requests
-                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                // Wait for DOM to be fully loaded
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Initialize any event listeners if needed
+                });
+
+                // CSRF token setup
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
                 async function toggleLike(postId) {
-                    try {
-                        const likeButton = document.getElementById(`like-button-${postId}`);
-                        const likeIcon = document.getElementById(`like-icon-${postId}`);
-                        const likeText = document.getElementById(`like-text-${postId}`);
-                        const likeCount = document.getElementById(`like-count-${postId}`);
+                    const likeButton = document.getElementById(`like-button-${postId}`);
+                    const likeIcon = document.getElementById(`like-icon-${postId}`);
+                    const likeText = document.getElementById(`like-text-${postId}`);
+                    const likeCount = document.getElementById(`like-count-${postId}`);
 
+                    // Check if elements exist
+                    if (!likeButton || !likeIcon || !likeText || !likeCount) {
+                        console.error('Like elements not found for post:', postId);
+                        return;
+                    }
+
+                    try {
                         // Disable button during request
                         likeButton.disabled = true;
 
@@ -188,71 +194,114 @@
                                 'X-CSRF-TOKEN': csrfToken,
                                 'Accept': 'application/json',
                                 'Content-Type': 'application/json'
-                            }
+                            },
+                            credentials: 'same-origin' // Include cookies for session
                         });
 
-                        if (response.ok) {
-                            const data = await response.json();
+                        // Check if response is JSON
+                        const contentType = response.headers.get("content-type");
+                        if (!contentType || !contentType.includes("application/json")) {
+                            // Handle non-JSON response (likely an error page)
+                            const text = await response.text();
+                            console.error('Non-JSON response:', text.substring(0, 200));
 
-                            // Update UI
-                            if (isCurrentlyLiked) {
-                                // Just unliked
-                                likeIcon.textContent = '🤍';
-                                likeText.textContent = 'Like';
-                                likeButton.classList.remove('text-pink-600', 'hover:text-pink-800');
-                                likeButton.classList.add('text-blue-600', 'hover:text-blue-800');
-                            } else {
-                                // Just liked
-                                likeIcon.textContent = '❤️';
-                                likeText.textContent = 'Liked';
-                                likeButton.classList.remove('text-blue-600', 'hover:text-blue-800');
-                                likeButton.classList.add('text-pink-600', 'hover:text-pink-800');
+                            // If not authenticated, redirect to login
+                            if (response.status === 401 || response.status === 419) {
+                                window.location.href = '/login';
+                                return;
                             }
 
-                            // Update like count
-                            likeCount.textContent = `${data.likes_count} Likes`;
-
-                            // Add animation feedback
-                            likeIcon.style.transform = 'scale(1.3)';
-                            setTimeout(() => {
-                                likeIcon.style.transform = 'scale(1)';
-                            }, 200);
-
-                        } else {
-                            throw new Error('Failed to update like');
+                            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
                         }
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(data.message || 'Failed to update like');
+                        }
+
+                        // Update UI
+                        if (isCurrentlyLiked) {
+                            // Just unliked
+                            likeIcon.textContent = '🤍';
+                            likeText.textContent = 'Like';
+                            likeButton.classList.remove('text-pink-600', 'hover:text-pink-800');
+                            likeButton.classList.add('text-blue-600', 'hover:text-blue-800');
+                            likeButton.setAttribute('aria-label', 'Like this post');
+                        } else {
+                            // Just liked
+                            likeIcon.textContent = '❤️';
+                            likeText.textContent = 'Liked';
+                            likeButton.classList.remove('text-blue-600', 'hover:text-blue-800');
+                            likeButton.classList.add('text-pink-600', 'hover:text-pink-800');
+                            likeButton.setAttribute('aria-label', 'Unlike this post');
+                        }
+
+                        // Update like count
+                        likeCount.textContent = `${data.likes_count} Likes`;
+
+                        // Add animation feedback
+                        likeIcon.style.transform = 'scale(1.3)';
+                        setTimeout(() => {
+                            likeIcon.style.transform = 'scale(1)';
+                        }, 200);
+
                     } catch (error) {
                         console.error('Error toggling like:', error);
-                        alert('Failed to update like. Please try again.');
+
+                        // Show user-friendly error message
+                        const errorMessage = error.message.includes('401') || error.message.includes('419') ?
+                            'Please login to like posts' :
+                            'Failed to update like. Please try again.';
+
+                        // Temporary error display
+                        const originalText = likeText.textContent;
+                        likeText.textContent = 'Error';
+                        likeIcon.textContent = '⚠️';
+                        likeButton.classList.add('text-red-500');
+
+                        setTimeout(() => {
+                            likeText.textContent = originalText;
+                            likeIcon.textContent = isCurrentlyLiked ? '❤️' : '🤍';
+                            likeButton.classList.remove('text-red-500');
+                        }, 2000);
+
+                        // If session expired, reload page to get fresh CSRF token
+                        if (error.message.includes('419')) {
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
                     } finally {
                         // Re-enable button
-                        likeButton.disabled = false;
+                        if (likeButton) {
+                            likeButton.disabled = false;
+                        }
                     }
                 }
 
-                async function sharePost(title, url) {
+                async function sharePost(event, title, url) {
                     try {
                         if (navigator.share) {
-                            // Use Web Share API if available
                             await navigator.share({
                                 title: title,
                                 text: 'Check out this post!',
                                 url: url,
                             });
                         } else if (navigator.clipboard) {
-                            // Fallback: Copy link to clipboard
                             await navigator.clipboard.writeText(url);
 
                             // Show success feedback
-                            const originalText = event.target.textContent;
-                            event.target.textContent = '✅ Copied!';
-                            event.target.classList.remove('text-green-600', 'hover:text-green-800');
-                            event.target.classList.add('text-green-700');
+                            const button = event.target.closest('button') || event.target;
+                            const originalText = button.textContent;
+                            button.textContent = '✅ Copied!';
+                            button.classList.remove('text-green-600', 'hover:text-green-800');
+                            button.classList.add('text-green-700');
 
                             setTimeout(() => {
-                                event.target.textContent = originalText;
-                                event.target.classList.remove('text-green-700');
-                                event.target.classList.add('text-green-600', 'hover:text-green-800');
+                                button.textContent = originalText;
+                                button.classList.remove('text-green-700');
+                                button.classList.add('text-green-600', 'hover:text-green-800');
                             }, 2000);
                         } else {
                             // Fallback for older browsers
@@ -266,7 +315,6 @@
                         }
                     } catch (error) {
                         if (error.name !== 'AbortError') {
-                            // User cancelled share, don't show error
                             console.error('Error sharing:', error);
 
                             // Show manual share options
@@ -276,37 +324,43 @@
                 }
 
                 function showShareOptions(title, url) {
-                    // Create a modal or dropdown with share options
+                    // Remove existing modal if any
+                    const existingModal = document.querySelector('.share-modal-overlay');
+                    if (existingModal) {
+                        existingModal.remove();
+                    }
+
+                    // Create modal
                     const shareModal = document.createElement('div');
-                    shareModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    shareModal.className =
+                        'share-modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
                     shareModal.innerHTML = `
         <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4">
             <h3 class="text-lg font-semibold mb-4">Share Post</h3>
             <p class="text-gray-600 mb-4">Copy the link or share via:</p>
             <div class="space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-gray-700">Link:</span>
+                <div class="flex items-center">
                     <input type="text" value="${url}" readonly
-                           class="border rounded px-2 py-1 text-sm flex-1 mx-2">
-                    <button onclick="copyToClipboard('${url}')"
-                            class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">
+                           class="border rounded-l px-3 py-2 text-sm flex-1" id="share-url-input">
+                    <button onclick="copyShareUrl()"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-r text-sm hover:bg-blue-600">
                         Copy
                     </button>
                 </div>
                 <div class="pt-4 border-t">
                     <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}"
                        target="_blank"
-                       class="text-blue-400 hover:text-blue-600 block mb-2">
-                        🐦 Share on Twitter
+                       class="text-blue-400 hover:text-blue-600 flex items-center mb-3">
+                        <span class="mr-2">🐦</span> Share on Twitter
                     </a>
                     <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}"
                        target="_blank"
-                       class="text-blue-600 hover:text-blue-800 block">
-                        📘 Share on Facebook
+                       class="text-blue-600 hover:text-blue-800 flex items-center">
+                        <span class="mr-2">📘</span> Share on Facebook
                     </a>
                 </div>
             </div>
-            <button onclick="this.closest('.fixed').remove()"
+            <button onclick="closeShareModal()"
                     class="mt-6 w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 rounded">
                 Close
             </button>
@@ -315,19 +369,41 @@
                     document.body.appendChild(shareModal);
                 }
 
-                function copyToClipboard(text) {
-                    navigator.clipboard.writeText(text).then(() => {
-                        alert('Link copied to clipboard!');
-                    });
+                function copyShareUrl() {
+                    const input = document.getElementById('share-url-input');
+                    if (input) {
+                        input.select();
+                        navigator.clipboard.writeText(input.value).then(() => {
+                            const copyBtn = input.nextElementSibling;
+                            const originalText = copyBtn.textContent;
+                            copyBtn.textContent = 'Copied!';
+                            copyBtn.classList.add('bg-green-500');
+                            setTimeout(() => {
+                                copyBtn.textContent = originalText;
+                                copyBtn.classList.remove('bg-green-500');
+                            }, 2000);
+                        });
+                    }
                 }
+
+                function closeShareModal() {
+                    const modal = document.querySelector('.share-modal-overlay');
+                    if (modal) {
+                        modal.remove();
+                    }
+                }
+
+                // Make functions available globally
+                window.toggleLike = toggleLike;
+                window.sharePost = sharePost;
+                window.copyShareUrl = copyShareUrl;
+                window.closeShareModal = closeShareModal;
             </script>
 
-            {{-- Make sure CSRF token meta tag exists in your layout --}}
-            @if (!View::hasSection('csrf-meta'))
-                @section('csrf-meta')
-                    <meta name="csrf-token" content="{{ csrf_token() }}">
-                @endsection
-            @endif
+            {{-- Ensure CSRF token is available --}}
+            @push('scripts')
+                <meta name="csrf-token" content="{{ csrf_token() }}">
+            @endpush
 
             <div class="mt-6">
                 {{ $posts->links() }}
