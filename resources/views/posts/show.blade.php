@@ -39,7 +39,34 @@
                 @endcan
             </div>
         </article>
+        {{-- Likes & Share Action Bar (New Addition) --}}
+        <div class="flex items-center justify-between text-sm mb-4">
+            {{-- Like Button (Requires Backend Logic to function fully) --}}
+            <div class="flex items-center space-x-2">
+                {{-- This is a placeholder link, you'd link this to a controller route --}}
+                <a href="#" class="text-blue-600 hover:text-blue-800 flex items-center">
+                    {{-- Placeholder for a Heart Icon (using simple text) --}}
+                    ❤️ Like
+                </a>
+                <span class="text-gray-500">
+                    {{ $post->likes_count ?? $post->likes->count() }} Likes
+                </span>
+            </div>
 
+            {{-- Share Link --}}
+            <div>
+                {{-- This opens the native share dialogue if supported by the browser --}}
+                <a href="#"
+                    onclick="navigator.share({
+                               title: '{{ $post->title }}',
+                               url: '{{ route('posts.show', $post) }}'
+                           })"
+                    class="text-green-600 hover:text-green-800">
+                    📤 Share Post
+                </a>
+            </div>
+        </div>
+        {{-- End Action Bar --}}
         <!-- Comments Section -->
         <div class="mt-8 bg-white shadow-lg rounded-lg p-8">
             <h2 class="text-2xl font-bold mb-6">Comments ({{ $post->comments->count() }})</h2>

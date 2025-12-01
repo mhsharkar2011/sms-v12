@@ -29,6 +29,15 @@ class DatabaseSeeder extends Seeder
             SchoolClassSeeder::class,
             StudentSeeder::class,
             GuardianSeeder::class,
+            DepartmentSeeder::class,
+            // TeacherSeeder::class,
+            // SubjectSeeder::class,
+            // AcademicYearSeeder::class,
+            // ClassScheduleSeeder::class,
+            // AttendanceSeeder::class,
+            // GradeSeeder::class,
+            // ExamSeeder::class,
+            // ExamResultSeeder::class,
             // StudentAddressSeeder::class,
         ]);
     }

@@ -11,13 +11,19 @@ use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
 Route::get('/', function () {
-    return view('landing');
+    $query = Post::published()
+                    ->with('comments.user')
+                    ->withCount(['comments','likes'])->latest();
+     $posts = $query->paginate(10);
+    return view('landing',compact('posts'));
 })->name('home');
 
 
@@ -25,6 +31,9 @@ Route::get('/', function () {
 
 // Posts
 Route::resource('posts', PostController::class);
+Route::resource('likes', LikeController::class);
+Route::post('/posts/{post}/like', [LikeController::class, 'store'])->middleware('auth')->name('posts.like');
+Route::delete('/posts/{post}/unlike', [LikeController::class, 'destroy'])->middleware('auth')->name('posts.unlike');
 
 // Comments
 Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');

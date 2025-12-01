@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 // Make sure it extends Controller
 class PostController extends Controller
@@ -17,10 +18,12 @@ class PostController extends Controller
     public function index(): View
     {
         $posts = Post::published()
+            ->with(['comments.user'])
+            ->withCount(['comments', 'likes'])
             ->latest()
             ->paginate(10);
 
-        return view('posts.index', compact('posts'));
+        return view('landing', compact('posts'));
     }
 
     /**

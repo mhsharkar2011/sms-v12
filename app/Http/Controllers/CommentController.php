@@ -22,11 +22,19 @@ class CommentController extends Controller
         ]);
 
         $comment = Comment::create([
-            ...$validated,
-            'user_id' => Auth::user(),
-            'post_id' => $post->id,
-            'is_approved' => true, // Auto-approve for now
+            'content' => $validated['content'],
+            'user_id' => auth()->user()->id,
+            'post_id' => $post->id, // <-- Use the bound $post object's ID
+            'is_approved' => true,
+            // Optional: you can use $validated['parent_id'] here if using nested comments
         ]);
+
+        // Alternative approach using the relationship method (more Laravel idiomatic)
+        // $comment = $post->comments()->create([
+        //     'content' => $validated['content'],
+        //     'user_id' => auth()->id(),
+        //     'is_approved' => true,
+        // ]);
 
         return redirect()->route('posts.show', $post)
             ->with('success', 'Comment added successfully.');
