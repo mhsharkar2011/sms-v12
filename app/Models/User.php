@@ -137,6 +137,9 @@ class User extends Authenticatable
     {
         return $this->logins()->latest()->take($limit)->get();
     }
+
+
+    // Post Section
     public function posts()
     {
         return $this->hasMany(Post::class);
@@ -144,7 +147,7 @@ class User extends Authenticatable
     /**
      * Get the user's latest post.
      */
-    public function latestPost():HasOne
+    public function latestPost(): HasOne
     {
         return $this->hasOne(Post::class)->latest();
     }
@@ -165,7 +168,7 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
-     /**
+    /**
      * Get the user's approved comments.
      */
     public function approvedComments(): HasMany
@@ -177,5 +180,20 @@ class User extends Authenticatable
     public function getCommentsCountAttribute(): int
     {
         return $this->comments()->count();
+    }
+
+    // Likes Section
+    /**
+     * Get the likes for the user.
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function likedPosts()
+    {
+        return $this->belongsToMany(Post::class, 'likes')
+            ->withTimestamps();
     }
 }

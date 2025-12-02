@@ -72,10 +72,35 @@ class Post extends Model
     {
         return $this->hasMany(Comment::class);
     }
+    // Likes Relationship
     public function likes()
     {
         return $this->hasMany(Like::class);
     }
+
+    public function likedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'likes')
+            ->withTimestamps();
+    }
+    // Add this accessor to check if current user liked the post
+    public function getIsLikedByUserAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        return $this->likes()
+            ->where('user_id', auth()->id())
+            ->exists();
+    }
+
+    // Add this accessor to get likes count
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
+    }
+    
     // Scopes
     public function scopePublished($query)
     {

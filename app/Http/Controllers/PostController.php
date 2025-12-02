@@ -6,6 +6,7 @@ use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
@@ -17,21 +18,21 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with(['user', 'comments.user'])
-            ->withCount(['likes', 'comments'])
+        $posts = Post::with(['user', 'comments.user', 'likes'])
+            ->withCount(['comments', 'likes'])
             ->latest()
-            ->paginate(9);
+            ->paginate(6);
 
-        // For each post, check if current user liked it
-        if (auth()->check()) {
+        // Check if each post is liked by the authenticated user
+        if (Auth::check()) {
             $posts->each(function ($post) {
                 $post->is_liked_by_user = $post->likes()
-                    ->where('user_id', auth()->id())
+                    ->where('user_id', Auth::id())
                     ->exists();
             });
         }
 
-        return view('posts.index', compact('posts'));
+        return view('home', compact('posts'));
     }
 
     /**

@@ -17,25 +17,12 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
 
-// Landing Page
-Route::get('/', function () {
-    $query = Post::published()
-        ->with('comments.user')
-        ->withCount(['comments', 'likes'])->latest();
-    $posts = $query->paginate(10);
-    return view('landing', compact('posts'));
-})->name('home');
 
-
-// routes/web.php
-
-
-
-// Comments
-Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
-Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
-Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-
+// Debug route
+Route::get('/', [PostController::class, 'index'])->name('home');
+Route::post('/posts/{post}/like', [LikeController::class, 'like'])->name('posts.like');
+Route::delete('/posts/{post}/unlike', [LikeController::class, 'unlike'])->name('posts.unlike');
+Route::post('/posts/{post}/toggle-like', [LikeController::class, 'toggle'])->name('posts.toggle-like');
 
 // Authentication Routes
 require __DIR__ . '/auth.php';
@@ -46,7 +33,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile/{user}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::get('/profile/{user}/posts', [ProfileController::class, 'posts'])->name('users.posts');
 });
 
 // Protected Routes
@@ -54,9 +40,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Posts
     Route::resource('posts', PostController::class);
-    Route::resource('likes', LikeController::class);
-    Route::post('/posts/{post}/like', [LikeController::class, 'store'])->middleware('auth')->name('posts.like');
-    Route::delete('/posts/{post}/unlike', [LikeController::class, 'destroy'])->middleware('auth')->name('posts.unlike');
+
+    // Comments
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+    // Route::resource('likes', LikeController::class);
+    // Route::post('/posts/{post}/like', [LikeController::class, 'store'])->middleware('auth')->name('posts.like');
+    // Route::delete('/posts/{post}/unlike', [LikeController::class, 'destroy'])->middleware('auth')->name('posts.unlike');
 
     // Student Routes
     Route::prefix('student')->name('student.')->middleware('role:student')->group(function () {
