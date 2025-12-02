@@ -32,7 +32,7 @@ class PostController extends Controller
             });
         }
 
-        return view('home', compact('posts'));
+        return view('posts.index', compact('posts'));
     }
 
     /**

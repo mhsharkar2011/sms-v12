@@ -20,9 +20,6 @@ use Illuminate\Support\Facades\Route;
 
 // Debug route
 Route::get('/', [PostController::class, 'index'])->name('home');
-Route::post('/posts/{post}/like', [LikeController::class, 'like'])->name('posts.like');
-Route::delete('/posts/{post}/unlike', [LikeController::class, 'unlike'])->name('posts.unlike');
-Route::post('/posts/{post}/toggle-like', [LikeController::class, 'toggle'])->name('posts.toggle-like');
 
 // Authentication Routes
 require __DIR__ . '/auth.php';
@@ -40,7 +37,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Posts
     Route::resource('posts', PostController::class);
-
+    Route::post('/posts/{post}/like', [LikeController::class, 'like'])->name('posts.like');
+    Route::delete('/posts/{post}/unlike', [LikeController::class, 'unlike'])->name('posts.unlike');
+    Route::post('/posts/{post}/toggle-like', [LikeController::class, 'toggle'])->name('posts.toggle-like');
     // Comments
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
