@@ -54,7 +54,7 @@
                                     <span
                                         class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                         <i class="fas fa-arrow-up text-xs mr-1"></i>
-                                        {{ $stats['activePercentage'] }}%
+                                        {{ $stats['active_percentage'] }}%
                                     </span>
                                 </div>
                             </div>
@@ -75,7 +75,7 @@
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                        {{ number_format($stats['activePercentage'], 1) }}% active
+                                        {{ number_format($stats['active_percentage'], 1) }}% active
                                     </span>
                                 </div>
                             </div>

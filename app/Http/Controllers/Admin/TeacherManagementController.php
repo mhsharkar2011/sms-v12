@@ -9,6 +9,7 @@ use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use phpDocumentor\Reflection\Types\Nullable;
 
 class TeacherManagementController extends Controller
 {
@@ -54,21 +55,23 @@ class TeacherManagementController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the request data
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:teachers,email',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
             'date_of_birth' => 'nullable|date',
-            'teacher_id' => 'required|string|unique:teachers,teacher_id',
-            'department_id' => 'required|exists:departments,id',
+            'teacher_id' => 'required|string|unique:users,teacher_id',
+            'department_id' => 'required|exists:departments,id', // Add this
             'subject' => 'required|string|max:255',
             'qualification' => 'nullable|string|max:255',
             'date_of_joining' => 'nullable|date',
             'status' => 'required|in:active,on_leave,inactive',
+            'gender' => 'nullable|in:male,female,other',
+            'salary' => 'nullable|numeric|min:0',
             'address' => 'nullable|string',
             'bio' => 'nullable|string',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {

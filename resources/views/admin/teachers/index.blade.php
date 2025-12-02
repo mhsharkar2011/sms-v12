@@ -80,7 +80,8 @@
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-medium text-gray-500">Active Teachers</p>
-                                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['active_teachers'] ?? 0 }}</p>
+                                    <p class="text-3xl font-bold text-gray-900 mt-2">{{ $stats['active_teachers'] ?? 0 }}
+                                    </p>
                                     <div class="flex items-center mt-3">
                                         <span class="text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
                                             {{ number_format($stats['active_percentage'] ?? 0) }}% of total
