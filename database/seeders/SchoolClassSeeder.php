@@ -12,8 +12,6 @@ class SchoolClassSeeder extends Seeder
         // Clear existing classes to avoid conflicts
         SchoolClass::query()->delete();
 
-        $academicYear = '2024-2025';
-
         // Define classes with unique grade_level + section combinations
         $classes = [
             // Nursery to UKG - Single section
@@ -70,7 +68,6 @@ class SchoolClassSeeder extends Seeder
             // Check if this combination already exists to avoid duplicates
             $exists = SchoolClass::where('grade_level', $classData['grade_level'])
                 ->where('section', $classData['section'])
-                ->where('academic_year', $academicYear)
                 ->exists();
 
             if ($exists) {
@@ -83,13 +80,11 @@ class SchoolClassSeeder extends Seeder
                 'code' => $classData['code'],
                 'grade_level' => $classData['grade_level'],
                 'section' => $classData['section'],
-                'class_teacher_id' => null,
                 'capacity' => $this->getCapacity($classData['grade_level']),
                 'current_strength' => 0,
                 'room_number' => $this->generateRoomNumber($classData['grade_level'], $classData['section']),
-                'description' => $classData['name'] . ' - Academic Year ' . $academicYear,
+                'description' => $classData['name'],
                 'status' => 'active',
-                'academic_year' => $academicYear,
             ]);
 
             $createdCount++;

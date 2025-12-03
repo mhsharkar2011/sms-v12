@@ -11,8 +11,8 @@ return new class extends Migration
     {
         Schema::create('student_class_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('class_id')->constrained('student_classes')->onDelete('cascade');
+            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->string('roll_number')->nullable();
             $table->enum('status', ['active', 'inactive', 'transferred', 'graduated'])->default('active');
             $table->date('enrollment_date')->default(now());
@@ -22,13 +22,13 @@ return new class extends Migration
             $table->softDeletes();
 
             // Unique constraint to prevent duplicate assignments
-            $table->unique(['student_id', 'class_id', 'deleted_at']);
+            $table->unique(['student_id', 'class_id']);
 
             // Indexes for performance
             $table->index('student_id');
             $table->index('class_id');
             $table->index('status');
-            $table->index(['student_id', 'status']);
+            $table->index(['student_id', 'status'], 'idx_student_status' );
         });
     }
 

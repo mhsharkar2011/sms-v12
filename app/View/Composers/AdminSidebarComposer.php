@@ -184,12 +184,14 @@ class AdminSidebarComposer
 
     protected function getQuickStats()
     {
+        $totalUserCount = User::count();
         $totalStudent = User::role('student')->count();
         $totalTeacher = User::role('teacher')->count();
         $totalClass = SchoolClass::count();
         $totalUserPending = User::where('status', 'pending')->count();
 
         return [
+            'total_users' => $totalUserCount,
             'total_students' => $totalStudent,
             'total_teachers' => $totalTeacher,
             'total_classes' => $totalClass,

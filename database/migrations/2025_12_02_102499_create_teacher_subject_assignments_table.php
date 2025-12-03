@@ -11,9 +11,9 @@ return new class extends Migration
     {
         Schema::create('teacher_subject_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained('class_subjects')->onDelete('cascade');
-            $table->foreignId('class_id')->constrained('student_classes')->onDelete('cascade');
+            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->integer('teaching_hours_per_week')->default(5);
             $table->json('schedule')->nullable();
             $table->date('start_date')->default(now());
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->index(['teacher_id', 'subject_id']);
             $table->index(['class_id', 'subject_id']);
             $table->index('is_active');
-            $table->unique(['teacher_id', 'subject_id', 'class_id', 'deleted_at']);
+            $table->unique(['teacher_id', 'subject_id', 'class_id'], 'idx_teacher_subject_class' );
         });
     }
 

@@ -13,8 +13,7 @@ class StudentSeeder extends Seeder
     {
         // Get available classes for current academic year
         $academicYear = '2024-2025';
-        $classes = SchoolClass::where('academic_year', $academicYear)
-            ->where('status', 'active')
+        $classes = SchoolClass::where('status', 'active')
             ->get();
 
         if ($classes->isEmpty()) {

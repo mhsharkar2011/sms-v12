@@ -8,6 +8,9 @@ use App\Models\Teacher;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use phpDocumentor\Reflection\Types\Nullable;
 
@@ -56,6 +59,15 @@ class TeacherManagementController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            // User fields
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'nullable|string|max:20',
+            'password' => 'required|string|min:8|confirmed',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|in:active,inactive,pending',
+            // Teacher fields
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
@@ -75,18 +87,51 @@ class TeacherManagementController extends Controller
         ]);
 
         try {
-            // Handle avatar upload
-            if ($request->hasFile('avatar')) {
-                $avatar = $request->file('avatar');
-                $avatarName = 'teacher_' . time() . '_' . Str::random(10) . '.' . $avatar->getClientOriginalExtension();
+            DB::beginTransaction();
 
-                // Store avatar in storage/app/public/avatars
-                $avatarPath = $avatar->storeAs('avatars/teachers', $avatarName, 'public');
-                $validated['avatar'] = $avatarPath;
+            // Handle avatar upload
+            $avatarPath = null;
+            if ($request->hasFile('avatar')) {
+                $avatarPath = $request->file('avatar')->store('avatars', 'public');
             }
+            // Create User account
+            $user = User::create([
+                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'phone' => $validated['phone'] ?? null,
+                'avatar' => $avatarPath,
+                'status' => $validated['status'],
+                'address' => $validated['address'] ?? null,
+            ]);
+
+            // Assign student role
+            $user->assignRole('teacher');
+
+            // try {
+            //     // Handle avatar upload
+            //     if ($request->hasFile('avatar')) {
+            //         $avatar = $request->file('avatar');
+            //         $avatarName = 'teacher_' . time() . '_' . Str::random(10) . '.' . $avatar->getClientOriginalExtension();
+
+            //         // Store avatar in storage/app/public/avatars
+            //         $avatarPath = $avatar->storeAs('avatars/teachers', $avatarName, 'public');
+            //         $validated['avatar'] = $avatarPath;
+            //     }
+            $teacherData = ['user_id' => $user->id,] + $validated;
 
             // Create the teacher
-            $teacher = Teacher::create($validated);
+            $teacher = Teacher::create($teacherData);
+
+              DB::commit();
+
+            // Log success
+            Log::info('Student created successfully', [
+                'student_id' => $teacher->teacher_id,
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
+
 
             return redirect()->route('admin.teachers.index')
                 ->with('success', 'Teacher added successfully!');

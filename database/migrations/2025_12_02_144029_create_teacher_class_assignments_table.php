@@ -11,8 +11,8 @@ return new class extends Migration
     {
         Schema::create('teacher_class_assignments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('class_id')->constrained('student_classes')->onDelete('cascade');
+            $table->foreignId('teacher_id')->constrained('teachers')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->enum('role', ['class_teacher', 'subject_teacher', 'assistant'])->default('subject_teacher');
             $table->json('subjects')->nullable(); // Subjects taught by this teacher in this class
             $table->date('start_date')->default(now());
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->index(['teacher_id', 'class_id']);
             $table->index('role');
             $table->index('is_active');
-            $table->unique(['teacher_id', 'class_id', 'role', 'deleted_at']);
+            $table->unique(['teacher_id', 'class_id', 'role'], 'idx_teacher_class_role' );
         });
     }
 
