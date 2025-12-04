@@ -1,4 +1,5 @@
 <?php
+// database/seeders/RolePermissionSeeder.php
 
 namespace Database\Seeders;
 
@@ -35,7 +36,7 @@ class RolePermissionSeeder extends Seeder
         // Step 3: Assign Permissions to Roles
         $this->assignPermissionsToRoles($permissions, $roles);
 
-        $this->command->info('✅ Permissions and Roles seeded successfully!');
+        $this->command->info('✅ Roles and Permissions seeded successfully!');
         $this->command->info("Created " . count($permissions) . " permissions");
         $this->command->info("Created " . count($roles) . " roles");
     }
@@ -149,7 +150,7 @@ class RolePermissionSeeder extends Seeder
     }
 
     /**
-     * Create roles for the school system (using default Spatie schema)
+     * Create roles for the school system
      */
     private function createRoles(): array
     {

@@ -36,6 +36,20 @@ class User extends Authenticatable
         'date_of_birth' => 'date',
     ];
 
+    public function teachers()
+    {
+        return $this->hasMany(Teacher::class);
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    public function guardians()
+    {
+        return $this->hasMany(Guardian::class);
+    }
     /**
      * Safely get the primary role name
      */

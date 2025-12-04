@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Department;
+use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
+use Illuminate\Container\Attributes\Storage;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -151,10 +153,11 @@ class TeacherManagementController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Teacher $teacher)
     {
-        $teacher = User::role('teacher')->findOrFail($id);
-        return view('admin.teachers.show', compact('teacher'));
+        $departments = Department::all();
+        $subjects = Subject::all();
+        return view('admin.teachers.show', compact('teacher', 'departments', 'subjects'));
     }
 
     /**
@@ -162,9 +165,10 @@ class TeacherManagementController extends Controller
      */
     public function edit(string $id)
     {
-        $teacher = User::role('teacher')->findOrFail($id);
-        $roles = Role::all();
-        return view('admin.teachers.edit', compact('teacher', 'roles'));
+        $departments = Department::all();
+        $subjects = Subject::all();
+        $teacher = Teacher::with('user')->findOrFail($id);
+        return view('admin.teachers.edit', compact('teacher', 'departments', 'subjects'));
     }
 
     /**
@@ -172,18 +176,20 @@ class TeacherManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $teacher = User::role('teacher')->findOrFail($id);
+        $teacher = Teacher::findOrFail($id); // Teacher extends User
+
         $validated = $request->validate([
             // User fields
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $teacher->id,
             'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,on_leave,inactive',
+            'password' => 'nullable|string|min:8|confirmed',
 
-            // Teacher fields
+            // Teacher-specific fields
             'department_id' => 'required|exists:departments,id',
+            'teacher_id' => 'required|string|max:50|unique:teachers,teacher_id,' . $teacher->id,
             'date_of_birth' => 'nullable|date',
             'subject' => 'required|string|max:255',
             'qualification' => 'nullable|string|max:255',
@@ -192,33 +198,60 @@ class TeacherManagementController extends Controller
             'salary' => 'nullable|numeric|min:0',
             'address' => 'nullable|string',
             'bio' => 'nullable|string',
+            'remove_avatar' => 'nullable|boolean',
         ]);
-        // Handle avatar upload
-        if ($request->hasFile('avatar')) {
-            $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
-            $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
-            $teacher->avatar = $avatarPath;
-        }
-        // Update User account
-        $teacher->name = $validated['first_name'] . ' ' . $validated['last_name'];
-        $teacher->email = $validated['email'];
-        $teacher->phone = $validated['phone'] ?? null;
-        $teacher->status = $validated['status'];
-        $teacher->save();
-        // Update Teacher details
-        $teacher->teacher->department_id = $validated['department_id'];
-        $teacher->teacher->subject = $validated['subject'];
-        $teacher->teacher->qualification = $validated['qualification'] ?? null;
-        $teacher->teacher->date_of_birth = $validated['date_of_birth'] ?? null;
-        $teacher->teacher->date_of_joining = $validated['date_of_joining'] ?? null;
-        $teacher->teacher->gender = $validated['gender'] ?? null;
-        $teacher->teacher->salary = $validated['salary'] ?? null;
-        $teacher->teacher->bio = $validated['bio'] ?? null;
-        $teacher->teacher->address = $validated['address'] ?? null;
-        $teacher->teacher->status = $validated['status'];
-        $teacher->teacher->save();
 
-        return redirect()->route('admin.teachers.index');
+        try {
+            // Handle avatar removal
+            if ($request->has('remove_avatar') && $teacher->avatar) {
+                Storage::disk('public')->delete($teacher->avatar);
+                $teacher->avatar = null;
+            }
+
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                if ($teacher->avatar) {
+                    Storage::disk('public')->delete($teacher->avatar);
+                }
+
+                $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
+                $teacher->avatar = $avatarPath;
+            }
+
+            // Prepare update data
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'] ?? null,
+                'department_id' => $validated['department_id'],
+                'teacher_id' => $validated['teacher_id'],
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
+                'subject' => $validated['subject'],
+                'qualification' => $validated['qualification'] ?? null,
+                'date_of_joining' => $validated['date_of_joining'] ?? null,
+                'gender' => $validated['gender'] ?? null,
+                'salary' => $validated['salary'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'bio' => $validated['bio'] ?? null,
+                'status' => $validated['status'],
+                'type' => 'teacher',
+            ];
+
+            // Update password if provided
+            if ($request->filled('password')) {
+                $updateData['password'] = bcrypt($validated['password']);
+            }
+
+            $teacher->update($updateData);
+
+            return redirect()->route('admin.teachers.index')
+                ->with('success', 'Teacher updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Failed to update teacher: ' . $e->getMessage());
+        }
     }
 
     /**

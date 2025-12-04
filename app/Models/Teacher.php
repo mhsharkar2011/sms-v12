@@ -42,6 +42,10 @@ class Teacher extends Model
         'status' => 'active'
     ];
 
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
     // Relationship with classes
     public function classes()
     {
