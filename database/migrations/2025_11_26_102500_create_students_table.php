@@ -13,9 +13,6 @@ return new class extends Migration
             $table->string('user_id')->unique()->nullable();
             $table->string('student_id')->unique();
             $table->string('admission_number')->unique()->nullable()->comment('Custom admission number: ADM001, ADM002, etc.');
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->date('date_of_birth');
             $table->enum('gender', ['male', 'female', 'other']);

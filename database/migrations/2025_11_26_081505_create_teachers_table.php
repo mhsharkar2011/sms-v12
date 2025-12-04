@@ -15,15 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('user_id')->unique()->comment('Reference to users table');
             $table->string('teacher_id')->unique()->comment('Custom teacher ID like T001');
-            $table->string('name');
-            $table->string('email')->unique();
+            $table->string('department_id')->unique()->comment('Reference to departments table');
             $table->string('phone')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->date('date_of_joining')->nullable();
+            $table->enum('gender', ['male', 'female', 'other']);
             $table->string('subject');
             $table->enum('status', ['active', 'on_leave', 'inactive'])->default('active');
             $table->string('avatar')->nullable()->comment('Profile picture path');
             $table->text('address')->nullable();
-            $table->date('date_of_birth')->nullable();
-            $table->date('date_of_joining')->nullable();
             $table->string('qualification')->nullable();
             $table->text('bio')->nullable()->comment('Teacher biography');
             $table->json('subjects_taught')->nullable()->comment('Array of subjects teacher can teach');
@@ -37,7 +37,6 @@ return new class extends Migration
 
             // Indexes for better performance
             $table->index('teacher_id');
-            $table->index('email');
             $table->index('status');
             $table->index('subject');
             $table->index(['status', 'subject']);

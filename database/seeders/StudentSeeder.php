@@ -24,8 +24,7 @@ class StudentSeeder extends Seeder
         // Create only 3 students
         $students = [
             [
-                'first_name' => 'Aarav',
-                'last_name' => 'Sharma',
+                'name' => ['first_name' => 'Aarav', 'last_name' => 'Sharma'],
                 'email' => 'aarav.sharma@school.com',
                 'date_of_birth' => '2014-03-15',
                 'gender' => 'male',
@@ -41,8 +40,7 @@ class StudentSeeder extends Seeder
                 'emergency_contact_relation' => 'Father',
             ],
             [
-                'first_name' => 'Ananya',
-                'last_name' => 'Verma',
+                'name' => ['first_name' => 'Aarav', 'last_name' => 'Sharma'],
                 'email' => 'ananya.verma@school.com',
                 'date_of_birth' => '2016-07-22',
                 'gender' => 'female',
@@ -58,8 +56,7 @@ class StudentSeeder extends Seeder
                 'emergency_contact_relation' => 'Mother',
             ],
             [
-                'first_name' => 'Vihaan',
-                'last_name' => 'Gupta',
+                'name' => ['first_name' => 'Aarav', 'last_name' => 'Sharma'],
                 'email' => 'vihaan.gupta@school.com',
                 'date_of_birth' => '2015-11-08',
                 'gender' => 'male',
@@ -95,9 +92,6 @@ class StudentSeeder extends Seeder
             $student = Student::create([
                 'student_id' => $this->generateStudentId(),
                 'admission_number' => $this->generateAdmissionNumber(),
-                'first_name' => $studentData['first_name'],
-                'last_name' => $studentData['last_name'],
-                'email' => $studentData['email'],
                 'phone' => '+91-' . rand(70000, 99999) . rand(10000, 99999),
                 'date_of_birth' => $studentData['date_of_birth'],
                 'gender' => $studentData['gender'],

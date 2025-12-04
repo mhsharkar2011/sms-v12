@@ -49,7 +49,7 @@ class TeacherManagementController extends Controller
     public function create()
     {
         $roles = Role::all();
-        $departments = Department::where('is_active', true)->get();
+        $departments = Department::all();
         return view('admin.teachers.create', compact('roles', 'departments'));
     }
 
@@ -63,27 +63,22 @@ class TeacherManagementController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'required|in:active,inactive,pending',
+            'status' => 'required|in:active,on_leave,inactive',
+
             // Teacher fields
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'phone' => 'nullable|string|max:20',
+            'teacher_id' => 'required|string|unique:teachers,teacher_id',
+            'department_id' => 'required|exists:departments,id',
             'date_of_birth' => 'nullable|date',
-            'teacher_id' => 'required|string|unique:users,teacher_id',
-            'department_id' => 'required|exists:departments,id', // Add this
             'subject' => 'required|string|max:255',
             'qualification' => 'nullable|string|max:255',
             'date_of_joining' => 'nullable|date',
-            'status' => 'required|in:active,on_leave,inactive',
             'gender' => 'nullable|in:male,female,other',
             'salary' => 'nullable|numeric|min:0',
             'address' => 'nullable|string',
             'bio' => 'nullable|string',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         try {
@@ -92,8 +87,10 @@ class TeacherManagementController extends Controller
             // Handle avatar upload
             $avatarPath = null;
             if ($request->hasFile('avatar')) {
-                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+                $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
             }
+
             // Create User account
             $user = User::create([
                 'name' => $validated['first_name'] . ' ' . $validated['last_name'],
@@ -101,47 +98,55 @@ class TeacherManagementController extends Controller
                 'password' => Hash::make($validated['password']),
                 'phone' => $validated['phone'] ?? null,
                 'avatar' => $avatarPath,
-                'status' => $validated['status'],
+                'status' => $validated['status'], // or use a default like 'active'
                 'address' => $validated['address'] ?? null,
             ]);
 
-            // Assign student role
+            // Assign teacher role
             $user->assignRole('teacher');
 
-            // try {
-            //     // Handle avatar upload
-            //     if ($request->hasFile('avatar')) {
-            //         $avatar = $request->file('avatar');
-            //         $avatarName = 'teacher_' . time() . '_' . Str::random(10) . '.' . $avatar->getClientOriginalExtension();
-
-            //         // Store avatar in storage/app/public/avatars
-            //         $avatarPath = $avatar->storeAs('avatars/teachers', $avatarName, 'public');
-            //         $validated['avatar'] = $avatarPath;
-            //     }
-            $teacherData = ['user_id' => $user->id,] + $validated;
+            // Prepare teacher data (exclude user-specific fields)
+            $teacherData = [
+                'user_id' => $user->id,
+                'teacher_id' => $validated['teacher_id'],
+                'department_id' => $validated['department_id'],
+                'subject' => $validated['subject'],
+                'qualification' => $validated['qualification'] ?? null,
+                'date_of_birth' => $validated['date_of_birth'] ?? null,
+                'date_of_joining' => $validated['date_of_joining'] ?? null,
+                'gender' => $validated['gender'] ?? null,
+                'salary' => $validated['salary'] ?? null,
+                'bio' => $validated['bio'] ?? null,
+                'status' => $validated['status'],
+            ];
 
             // Create the teacher
             $teacher = Teacher::create($teacherData);
 
-              DB::commit();
+            DB::commit();
 
             // Log success
-            Log::info('Student created successfully', [
-                'student_id' => $teacher->teacher_id,
+            Log::info('Teacher created successfully', [
+                'teacher_id' => $teacher->teacher_id,
                 'user_id' => $user->id,
                 'email' => $user->email
             ]);
 
-
             return redirect()->route('admin.teachers.index')
                 ->with('success', 'Teacher added successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error creating teacher: ' . $e->getMessage(), [
+                'request' => $request->except(['password', 'password_confirmation']),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return redirect()->back()
                 ->with('error', 'Error creating teacher: ' . $e->getMessage())
                 ->withInput();
         }
     }
-
 
     /**
      * Display the specified resource.
@@ -167,7 +172,52 @@ class TeacherManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        // Add validation and update logic here
+        $teacher = User::role('teacher')->findOrFail($id);
+        $validated = $request->validate([
+            // User fields
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $teacher->id,
+            'phone' => 'nullable|string|max:20',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'status' => 'required|in:active,on_leave,inactive',
+
+            // Teacher fields
+            'department_id' => 'required|exists:departments,id',
+            'date_of_birth' => 'nullable|date',
+            'subject' => 'required|string|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'date_of_joining' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
+            'salary' => 'nullable|numeric|min:0',
+            'address' => 'nullable|string',
+            'bio' => 'nullable|string',
+        ]);
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
+            $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
+            $teacher->avatar = $avatarPath;
+        }
+        // Update User account
+        $teacher->name = $validated['first_name'] . ' ' . $validated['last_name'];
+        $teacher->email = $validated['email'];
+        $teacher->phone = $validated['phone'] ?? null;
+        $teacher->status = $validated['status'];
+        $teacher->save();
+        // Update Teacher details
+        $teacher->teacher->department_id = $validated['department_id'];
+        $teacher->teacher->subject = $validated['subject'];
+        $teacher->teacher->qualification = $validated['qualification'] ?? null;
+        $teacher->teacher->date_of_birth = $validated['date_of_birth'] ?? null;
+        $teacher->teacher->date_of_joining = $validated['date_of_joining'] ?? null;
+        $teacher->teacher->gender = $validated['gender'] ?? null;
+        $teacher->teacher->salary = $validated['salary'] ?? null;
+        $teacher->teacher->bio = $validated['bio'] ?? null;
+        $teacher->teacher->address = $validated['address'] ?? null;
+        $teacher->teacher->status = $validated['status'];
+        $teacher->teacher->save();
+
         return redirect()->route('admin.teachers.index');
     }
 

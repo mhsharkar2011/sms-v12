@@ -49,11 +49,21 @@
                                     <h3 class="text-lg font-semibold text-gray-900">Personal Information</h3>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                                        <input type="text" name="name" value="{{ old('name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                        <input type="text" name="first_name" value="{{ old('first_name') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('first_name') border-red-500 @enderror"
                                             required>
-                                        @error('name')
+                                        @error('first_name')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
+                                     <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                        <input type="text" name="last_name" value="{{ old('last_name') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('last_name') border-red-500 @enderror"
+                                            required>
+                                        @error('last_name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>

@@ -49,7 +49,7 @@ class GuardianSeeder extends Seeder
                     'country' => 'US',
                     'is_primary' => true,
                 ],
-                'students' => ['Aarav Sharma', 'Ananya Verma'] // Match the student names from StudentSeeder
+                'students' => ['Aarav Sharma'.'Ananya Verma'] // Match the student names from StudentSeeder
             ],
             [
                 'user' => [
@@ -81,7 +81,7 @@ class GuardianSeeder extends Seeder
                     'country' => 'US',
                     'is_primary' => true,
                 ],
-                'students' => ['Aarav Sharma', 'Ananya Verma']
+                'students' => ['Aarav Sharma'.'Ananya Verma']
             ],
             [
                 'user' => [
@@ -140,13 +140,11 @@ class GuardianSeeder extends Seeder
             // Attach students
             if (!empty($guardianData['students'])) {
                 foreach ($guardianData['students'] as $studentName) {
-                    $nameParts = explode(' ', $studentName);
-                    $firstName = $nameParts[0];
-                    $lastName = $nameParts[1] ?? '';
+                    // $nameParts = explode(' ', $studentName);
+                    // $firstName = $nameParts[0];
+                    // $lastName = $nameParts[1] ?? '';
 
-                    $student = Student::where('first_name', $firstName)
-                        ->where('last_name', $lastName)
-                        ->first();
+                    $student = Student::first();
 
                     if ($student) {
                         $isPrimary = in_array($guardianData['guardian']['relationship'], ['Father', 'Mother']);

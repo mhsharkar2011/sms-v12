@@ -14,7 +14,8 @@ class Teacher extends Model
         'user_id',
         'teacher_id',
         'department_id',
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'subject',
@@ -25,8 +26,8 @@ class Teacher extends Model
         'date_of_joining',
         'qualification',
         'bio',
-        'last_login_at',
-        'subjects_taught',
+        // 'last_login_at',
+        // 'subjects_taught',
 
     ];
 

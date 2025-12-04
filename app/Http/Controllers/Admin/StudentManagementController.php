@@ -254,9 +254,9 @@ class StudentManagementController extends Controller
             // User fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'email' => 'required|email|unique:users,email',
             'password' => 'nullable|string|min:8|confirmed',
+            'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,inactive,pending',
             'remove_avatar' => 'sometimes|boolean',
