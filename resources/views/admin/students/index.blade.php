@@ -291,8 +291,8 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    @if ($student->roles->count() > 0)
-                                                        {{ ucfirst($student->roles->first()->name) }}
+                                                    @if ($student->user->roles->count() > 0)
+                                                        {{ ucfirst($student->user->roles->first()->name) }}
                                                     @else
                                                         <span class="text-gray-400">No role</span>
                                                     @endif

@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Add New Student')
@@ -7,35 +11,52 @@
         <x-admin-sidebar active-route="admin.students.index" />
 
         <div class="flex-1 overflow-auto">
-            <!-- Header -->
-            <div class="bg-white shadow-sm border-b border-gray-200">
-                <div class="px-6 py-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">Add New Student</h1>
-                            <p class="text-gray-600 mt-1">Create a new student account with user credentials</p>
-                        </div>
-                        <div class="flex items-center space-x-4">
+            <div class="container mx-auto p-6">
+                <div class="max-w-6xl mx-auto">
+                    <!-- Breadcrumb -->
+                    <nav class="mb-6" aria-label="Breadcrumb">
+                        <ol class="flex items-center space-x-2 text-sm">
+                            <li>
+                                <a href="{{ route('admin.dashboard') }}" class="text-blue-600 hover:text-blue-800">
+                                    <i class="fas fa-home mr-1"></i> Dashboard
+                                </a>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                <a href="{{ route('admin.students.index') }}"
+                                    class="ml-2 text-blue-600 hover:text-blue-800">
+                                    Students
+                                </a>
+                            </li>
+                            <li class="flex items-center">
+                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                                <span class="ml-2 text-gray-500">Add New Student</span>
+                            </li>
+                        </ol>
+                    </nav>
+
+                    <!-- Header -->
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">Add New Student</h1>
+                                <p class="mt-1 text-sm text-gray-600">Create a new student account with user credentials</p>
+                            </div>
                             <a href="{{ route('admin.students.index') }}"
-                                class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                                <i class="fas fa-arrow-left"></i>
-                                Back to Students
+                                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                <i class="fas fa-arrow-left mr-2"></i> Back to Students
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="container mx-auto p-6">
-                <div class="max-w-6xl mx-auto">
                     <!-- Flash Messages -->
                     @if ($errors->any())
-                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span class="font-medium">Please fix the following errors:</span>
+                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 text-xl mr-3"></i>
+                                <h3 class="text-red-800 font-semibold">Please fix the following errors:</h3>
                             </div>
-                            <ul class="mt-2 list-disc list-inside text-sm">
+                            <ul class="mt-2 list-disc list-inside text-red-700">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -44,10 +65,19 @@
                     @endif
 
                     @if (session('success'))
-                        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
-                            <div class="flex items-center space-x-2">
-                                <i class="fas fa-check-circle"></i>
-                                <span>{{ session('success') }}</span>
+                        <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                                <p class="text-green-800 font-semibold">{{ session('success') }}</p>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-times-circle text-red-500 text-xl mr-3"></i>
+                                <p class="text-red-800 font-semibold">{{ session('error') }}</p>
                             </div>
                         </div>
                     @endif
@@ -57,12 +87,12 @@
                         <form action="{{ route('admin.students.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
 
-                            <!-- Student Basic Information Section -->
+                            <!-- Student Basic Information -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-user-graduate text-blue-600"></i>
                                     Student Basic Information
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- First Name -->
@@ -72,8 +102,8 @@
                                         </label>
                                         <input type="text" name="first_name" id="first_name"
                                             value="{{ old('first_name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('first_name') border-red-500 @enderror"
-                                            placeholder="Enter first name" required>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('first_name') border-red-500 @enderror"
+                                            required>
                                         @error('first_name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -84,9 +114,10 @@
                                         <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
                                             Last Name *
                                         </label>
-                                        <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('last_name') border-red-500 @enderror"
-                                            placeholder="Enter last name" required>
+                                        <input type="text" name="last_name" id="last_name"
+                                            value="{{ old('last_name') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('last_name') border-red-500 @enderror"
+                                            required>
                                         @error('last_name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -98,8 +129,8 @@
                                             Email Address *
                                         </label>
                                         <input type="email" name="email" id="email" value="{{ old('email') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror"
-                                            placeholder="student@example.com" required>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror"
+                                            required>
                                         @error('email')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -111,8 +142,7 @@
                                             Phone Number
                                         </label>
                                         <input type="tel" name="phone" id="phone" value="{{ old('phone') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('phone') border-red-500 @enderror"
-                                            placeholder="+1 (555) 123-4567">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('phone') border-red-500 @enderror">
                                         @error('phone')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -125,7 +155,7 @@
                                         </label>
                                         <input type="date" name="date_of_birth" id="date_of_birth"
                                             value="{{ old('date_of_birth') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('date_of_birth') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('date_of_birth') border-red-500 @enderror"
                                             required>
                                         @error('date_of_birth')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -138,13 +168,13 @@
                                             Gender *
                                         </label>
                                         <select name="gender" id="gender"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('gender') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('gender') border-red-500 @enderror"
                                             required>
                                             <option value="">Select Gender</option>
                                             <option value="male" {{ old('gender') == 'male' ? 'selected' : '' }}>Male
                                             </option>
-                                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>Female
-                                            </option>
+                                            <option value="female" {{ old('gender') == 'female' ? 'selected' : '' }}>
+                                                Female</option>
                                             <option value="other" {{ old('gender') == 'other' ? 'selected' : '' }}>Other
                                             </option>
                                         </select>
@@ -155,12 +185,12 @@
                                 </div>
                             </div>
 
-                            <!-- Account Information Section -->
+                            <!-- Account Information -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-lock text-green-600"></i>
                                     Account Information
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Password -->
@@ -169,8 +199,8 @@
                                             Password *
                                         </label>
                                         <input type="password" name="password" id="password"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('password') border-red-500 @enderror"
-                                            placeholder="Enter password" required>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-500 @enderror"
+                                            required>
                                         @error('password')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -184,18 +214,21 @@
                                             Confirm Password *
                                         </label>
                                         <input type="password" name="password_confirmation" id="password_confirmation"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Confirm password" required>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-500 @enderror"
+                                            required>
+                                        @error('password')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Academic Information Section -->
+                            <!-- Academic Information -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-graduation-cap text-purple-600"></i>
                                     Academic Information
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- Admission Number -->
@@ -206,7 +239,7 @@
                                         </label>
                                         <input type="text" name="admission_number" id="admission_number"
                                             value="{{ old('admission_number', \App\Models\Student::generateAdmissionNumber()) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('admission_number') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 @error('admission_number') border-red-500 @enderror"
                                             readonly>
                                         @error('admission_number')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -220,7 +253,7 @@
                                         </label>
                                         <input type="text" name="student_id" id="student_id"
                                             value="{{ old('student_id', \App\Models\Student::generateStudentId()) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('student_id') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50 @error('student_id') border-red-500 @enderror"
                                             readonly>
                                         @error('student_id')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -233,9 +266,9 @@
                                             Class
                                         </label>
                                         <select name="class_id" id="class_id"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('class_id') border-red-500 @enderror">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('class_id') border-red-500 @enderror">
                                             <option value="">Select Class</option>
-                                            @foreach ($classes ?? [] as $class)
+                                            @foreach ($classes as $class)
                                                 <option value="{{ $class->id }}"
                                                     {{ old('class_id') == $class->id ? 'selected' : '' }}>
                                                     {{ $class->name }} - {{ $class->grade_level }}
@@ -253,7 +286,7 @@
                                             Grade Level *
                                         </label>
                                         <select name="grade_level" id="grade_level"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('grade_level') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('grade_level') border-red-500 @enderror"
                                             required>
                                             <option value="">Select Grade Level</option>
                                             @foreach (['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] as $level)
@@ -275,8 +308,7 @@
                                         </label>
                                         <input type="text" name="roll_number" id="roll_number"
                                             value="{{ old('roll_number') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('roll_number') border-red-500 @enderror"
-                                            placeholder="Roll number">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('roll_number') border-red-500 @enderror">
                                         @error('roll_number')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -289,8 +321,8 @@
                                         </label>
                                         <input type="text" name="section" id="section"
                                             value="{{ old('section') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('section') border-red-500 @enderror"
-                                            placeholder="Section (e.g., A, B, C)">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('section') border-red-500 @enderror"
+                                            placeholder="A, B, C, etc.">
                                         @error('section')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -303,8 +335,8 @@
                                         </label>
                                         <input type="text" name="academic_year" id="academic_year"
                                             value="{{ old('academic_year', date('Y') . '-' . (date('Y') + 1)) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('academic_year') border-red-500 @enderror"
-                                            placeholder="e.g., 2024-2025" required>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('academic_year') border-red-500 @enderror"
+                                            required>
                                         @error('academic_year')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -317,7 +349,7 @@
                                         </label>
                                         <input type="date" name="admission_date" id="admission_date"
                                             value="{{ old('admission_date', date('Y-m-d')) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('admission_date') border-red-500 @enderror"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('admission_date') border-red-500 @enderror"
                                             required>
                                         @error('admission_date')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -326,12 +358,12 @@
                                 </div>
                             </div>
 
-                            <!-- Personal Details Section -->
+                            <!-- Personal Details -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-id-card text-orange-600"></i>
                                     Personal Details
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- Blood Group -->
@@ -340,7 +372,7 @@
                                             Blood Group
                                         </label>
                                         <select name="blood_group" id="blood_group"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('blood_group') border-red-500 @enderror">
                                             <option value="">Select Blood Group</option>
                                             <option value="A+" {{ old('blood_group') == 'A+' ? 'selected' : '' }}>A+
                                             </option>
@@ -359,6 +391,9 @@
                                             <option value="O-" {{ old('blood_group') == 'O-' ? 'selected' : '' }}>O-
                                             </option>
                                         </select>
+                                        @error('blood_group')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Nationality -->
@@ -368,8 +403,10 @@
                                         </label>
                                         <input type="text" name="nationality" id="nationality"
                                             value="{{ old('nationality', 'Indian') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Nationality">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('nationality') border-red-500 @enderror">
+                                        @error('nationality')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Religion -->
@@ -379,8 +416,10 @@
                                         </label>
                                         <input type="text" name="religion" id="religion"
                                             value="{{ old('religion') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Religion">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('religion') border-red-500 @enderror">
+                                        @error('religion')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Caste -->
@@ -388,132 +427,157 @@
                                         <label for="caste" class="block text-sm font-medium text-gray-700 mb-2">
                                             Caste
                                         </label>
-                                        <input type="text" name="caste" id="caste" value="{{ old('caste') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Caste">
+                                        <input type="text" name="caste" id="caste"
+                                            value="{{ old('caste') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('caste') border-red-500 @enderror">
+                                        @error('caste')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Address Information Section -->
+                            <!-- Address Information -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-home text-indigo-600"></i>
                                     Address Information
-                                </h2>
+                                </h3>
 
-                                <div class="grid grid-cols-1 gap-6">
-                                    <!-- Address -->
-                                    <div>
-                                        <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Address
-                                        </label>
-                                        <textarea name="address" id="address" rows="3"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Enter full address">{{ old('address') }}</textarea>
-                                    </div>
+                                <!-- Student Address -->
+                                <div>
+                                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Address *
+                                    </label>
+                                    <textarea name="address" id="address" rows="3"
+                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('address') border-red-500 @enderror"
+                                        required>{{ old('address') }}</textarea>
+                                    @error('address')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
 
-                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-4">
                                         <!-- City -->
                                         <div>
                                             <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                                                City
+                                                City *
                                             </label>
                                             <input type="text" name="city" id="city"
                                                 value="{{ old('city') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="City">
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('city') border-red-500 @enderror"
+                                                required>
+                                            @error('city')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
 
                                         <!-- State -->
                                         <div>
                                             <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
-                                                State
+                                                State *
                                             </label>
                                             <input type="text" name="state" id="state"
                                                 value="{{ old('state') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="State">
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('state') border-red-500 @enderror"
+                                                required>
+                                            @error('state')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
 
-                                        <!-- Pincode -->
+                                        <!-- Postal Code -->
                                         <div>
-                                            <label for="pincode" class="block text-sm font-medium text-gray-700 mb-2">
-                                                Pincode
+                                            <label for="postal_code" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Postal Code *
                                             </label>
-                                            <input type="text" name="pincode" id="pincode"
-                                                value="{{ old('pincode') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Pincode">
+                                            <input type="text" name="postal_code" id="postal_code"
+                                                value="{{ old('postal_code') }}"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('postal_code') border-red-500 @enderror"
+                                                required>
+                                            @error('postal_code')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
 
                                         <!-- Country -->
                                         <div>
                                             <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
-                                                Country
+                                                Country *
                                             </label>
                                             <input type="text" name="country" id="country"
                                                 value="{{ old('country', 'India') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                                placeholder="Country">
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('country') border-red-500 @enderror"
+                                                required>
+                                            @error('country')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Emergency Contact Section -->
+                            <!-- Emergency Contact -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-phone-alt text-red-600"></i>
                                     Emergency Contact
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- Emergency Contact Name -->
                                     <div>
                                         <label for="emergency_contact_name"
                                             class="block text-sm font-medium text-gray-700 mb-2">
-                                            Contact Name
+                                            Contact Name *
                                         </label>
                                         <input type="text" name="emergency_contact_name" id="emergency_contact_name"
                                             value="{{ old('emergency_contact_name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Emergency contact name">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('emergency_contact_name') border-red-500 @enderror"
+                                            required>
+                                        @error('emergency_contact_name')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Emergency Contact Phone -->
                                     <div>
                                         <label for="emergency_contact_phone"
                                             class="block text-sm font-medium text-gray-700 mb-2">
-                                            Contact Phone
+                                            Contact Phone *
                                         </label>
                                         <input type="tel" name="emergency_contact_phone" id="emergency_contact_phone"
                                             value="{{ old('emergency_contact_phone') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Emergency phone number">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('emergency_contact_phone') border-red-500 @enderror"
+                                            required>
+                                        @error('emergency_contact_phone')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Emergency Contact Relation -->
                                     <div>
                                         <label for="emergency_contact_relation"
                                             class="block text-sm font-medium text-gray-700 mb-2">
-                                            Relation
+                                            Relation *
                                         </label>
                                         <input type="text" name="emergency_contact_relation"
                                             id="emergency_contact_relation"
                                             value="{{ old('emergency_contact_relation') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Relation (e.g., Father, Mother)">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('emergency_contact_relation') border-red-500 @enderror"
+                                            required>
+                                        @error('emergency_contact_relation')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Medical Information Section -->
+                            <!-- Medical Information -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-heartbeat text-pink-600"></i>
                                     Medical Information
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 gap-6">
                                     <!-- Medical Notes -->
@@ -522,8 +586,10 @@
                                             Medical Notes
                                         </label>
                                         <textarea name="medical_notes" id="medical_notes" rows="3"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Any medical conditions or notes">{{ old('medical_notes') }}</textarea>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('medical_notes') border-red-500 @enderror">{{ old('medical_notes') }}</textarea>
+                                        @error('medical_notes')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Allergies -->
@@ -533,8 +599,11 @@
                                         </label>
                                         <input type="text" name="allergies" id="allergies"
                                             value="{{ old('allergies') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="e.g., Peanuts, Dust, Pollen">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('allergies') border-red-500 @enderror"
+                                            placeholder="Peanuts, Dust, Pollen, etc.">
+                                        @error('allergies')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Medications -->
@@ -544,8 +613,11 @@
                                         </label>
                                         <input type="text" name="medications" id="medications"
                                             value="{{ old('medications') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="e.g., Inhaler, Insulin">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('medications') border-red-500 @enderror"
+                                            placeholder="Inhaler, Insulin, etc.">
+                                        @error('medications')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Special Instructions -->
@@ -555,18 +627,20 @@
                                             Special Instructions
                                         </label>
                                         <textarea name="special_instructions" id="special_instructions" rows="2"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Any special instructions">{{ old('special_instructions') }}</textarea>
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('special_instructions') border-red-500 @enderror">{{ old('special_instructions') }}</textarea>
+                                        @error('special_instructions')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Additional Options Section -->
+                            <!-- Additional Options -->
                             <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-cog text-gray-600"></i>
                                     Additional Options
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- Transport Route -->
@@ -576,8 +650,10 @@
                                         </label>
                                         <input type="text" name="transport_route" id="transport_route"
                                             value="{{ old('transport_route') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            placeholder="Transport route">
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('transport_route') border-red-500 @enderror">
+                                        @error('transport_route')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
                                     </div>
 
                                     <!-- Boarding Status -->
@@ -602,12 +678,12 @@
                                 </div>
                             </div>
 
-                            <!-- Profile & Status Section -->
+                            <!-- Profile & Status -->
                             <div class="p-6">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                                     <i class="fas fa-user-circle text-teal-600"></i>
                                     Profile & Status
-                                </h2>
+                                </h3>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <!-- Profile Photo -->
@@ -624,28 +700,74 @@
                                             </div>
                                             <div class="flex-1">
                                                 <input type="file" name="avatar" id="avatar" accept="image/*"
-                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('avatar') border-red-500 @enderror"
                                                     onchange="previewImage(this)">
                                                 <p class="mt-1 text-xs text-gray-500">JPG, PNG or GIF (Max: 2MB)</p>
+                                                @error('avatar')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Status -->
-                                    <div>
-                                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Account Status *
-                                        </label>
-                                        <select name="status" id="status"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            required>
-                                            <option value="active"
-                                                {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>
-                                                Inactive</option>
-                                            <option value="pending" {{ old('status') == 'pending' ? 'selected' : '' }}>
-                                                Pending</option>
-                                        </select>
+                                    <!-- Status Section -->
+                                    <div class="space-y-4">
+                                        <!-- User Status -->
+                                        <div>
+                                            <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                                                User Account Status *
+                                            </label>
+                                            <select name="status" id="status"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('status') border-red-500 @enderror"
+                                                required>
+                                                <option value="">Select Status</option>
+                                                <option value="active"
+                                                    {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active
+                                                </option>
+                                                <option value="inactive"
+                                                    {{ old('status') == 'inactive' ? 'selected' : '' }}>
+                                                    Inactive</option>
+                                                <option value="pending"
+                                                    {{ old('status') == 'pending' ? 'selected' : '' }}>
+                                                    Pending</option>
+                                                <option value="on_leave"
+                                                    {{ old('status') == 'on_leave' ? 'selected' : '' }}>
+                                                    On Leave</option>
+                                            </select>
+                                            @error('status')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+
+                                        <!-- Student Status -->
+                                        <div>
+                                            <label for="student_status" class="block text-sm font-medium text-gray-700 mb-2">
+                                                Student Status *
+                                            </label>
+                                            <select name="student_status" id="student_status"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('student_status') border-red-500 @enderror"
+                                                required>
+                                                <option value="">Select Status</option>
+                                                <option value="active"
+                                                    {{ old('student_status', 'active') == 'active' ? 'selected' : '' }}>
+                                                    Active</option>
+                                                <option value="inactive"
+                                                    {{ old('student_status') == 'inactive' ? 'selected' : '' }}>
+                                                    Inactive</option>
+                                                <option value="graduated"
+                                                    {{ old('student_status') == 'graduated' ? 'selected' : '' }}>
+                                                    Graduated</option>
+                                                <option value="transferred"
+                                                    {{ old('student_status') == 'transferred' ? 'selected' : '' }}>
+                                                    Transferred</option>
+                                                <option value="suspended"
+                                                    {{ old('student_status') == 'suspended' ? 'selected' : '' }}>
+                                                    Suspended</option>
+                                            </select>
+                                            @error('student_status')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -687,6 +809,8 @@
                                     <li>Student will be created with a user account for system access</li>
                                     <li>Medical information is important for emergency situations</li>
                                     <li>Emergency contact details are crucial for safety</li>
+                                    <li>User Account Status controls login access</li>
+                                    <li>Student Status tracks academic status</li>
                                 </ul>
                             </div>
                         </div>
@@ -696,10 +820,6 @@
         </div>
     </div>
 @endsection
-
-@push('styles')
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-@endpush
 
 @push('scripts')
     <script>
@@ -739,6 +859,9 @@
                 document.getElementById('academic_year').value = '{{ date('Y') . '-' . (date('Y') + 1) }}';
                 document.getElementById('admission_date').value = '{{ date('Y-m-d') }}';
                 document.getElementById('status').value = 'active';
+                document.getElementById('student_status').value = 'active';
+                document.getElementById('nationality').value = 'Indian';
+                document.getElementById('country').value = 'India';
             }
         }
 
@@ -763,18 +886,6 @@
             strengthIndicator.innerHTML = `<span class="${color}">${strength} password</span>`;
         });
 
-        // Form validation
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('password_confirmation').value;
-
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match. Please check your entries.');
-                document.getElementById('password_confirmation').focus();
-            }
-        });
-
         // Set max date for date of birth (at least 5 years old)
         window.addEventListener('load', function() {
             const today = new Date();
@@ -786,14 +897,15 @@
             document.getElementById('date_of_birth').min = minDate.toISOString().split('T')[0];
         });
 
-        // Auto-fill name for user account
-        document.getElementById('first_name').addEventListener('blur', function() {
-            const firstName = this.value.trim();
-            const lastName = document.getElementById('last_name').value.trim();
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('password_confirmation').value;
 
-            if (firstName && lastName) {
-                // This will be used to create the user account name
-                console.log('Full name:', firstName + ' ' + lastName);
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match. Please check your entries.');
+                document.getElementById('password_confirmation').focus();
             }
         });
     </script>

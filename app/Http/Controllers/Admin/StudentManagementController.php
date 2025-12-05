@@ -21,27 +21,40 @@ class StudentManagementController extends Controller
     public function index(Request $request)
     {
         // Get filter parameters
-        $roleFilter = $request->get('role');
         $status = $request->get('status');
         $search = $request->get('search');
+        $classFilter = $request->get('class_id');
 
-        // Build query with filters - only get students
-        $students = Student::with('user')
+        // Build query with filters
+        $students = Student::with(['user', 'user.roles', 'schoolClass'])
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })
+            ->when($classFilter, function ($query, $classId) {
+                return $query->where('class_id', $classId);
+            })
             ->when($search, function ($query, $search) {
                 return $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                    // Search in student-specific fields
+                    $q->where('student_id', 'like', "%{$search}%")
+                        ->orWhere('admission_number', 'like', "%{$search}%")
+                        ->orWhere('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        // Search in user email through relationship
+                        ->orWhereHas('user', function ($userQuery) use ($search) {
+                            $userQuery->where('email', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%");
+                        });
                 });
             })
-            ->with('roles')
             ->orderBy('created_at', 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.students.index', compact('students'));
+        // Get classes for filter dropdown
+        $classes = SchoolClass::all();
+
+        return view('admin.students.index', compact('students', 'classes'));
     }
 
     /**
@@ -59,14 +72,14 @@ class StudentManagementController extends Controller
      */
     public function store(Request $request)
     {
-          // Handle avatar upload
-            if ($request->hasFile('avatar')) {
-                Log::info('Avatar file details:', [
-                    'name' => $request->file('avatar')->getClientOriginalName(),
-                    'size' => $request->file('avatar')->getSize(),
-                    'mime' => $request->file('avatar')->getMimeType(),
-                ]);
-            }
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            Log::info('Avatar file details:', [
+                'name' => $request->file('avatar')->getClientOriginalName(),
+                'size' => $request->file('avatar')->getSize(),
+                'mime' => $request->file('avatar')->getMimeType(),
+            ]);
+        }
 
         // Validate the request
         $userValidation = $request->validate([
@@ -76,6 +89,8 @@ class StudentManagementController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
+            'address' => 'nullable|string|max:500',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,on_leave,inactive,pending',
         ]);
         $studentValidation = $request->validate([
@@ -83,6 +98,7 @@ class StudentManagementController extends Controller
             'student_id' => 'nullable|string|unique:students,student_id',
             'class_id' => 'nullable|exists:school_classes,id',
             'admission_number' => 'nullable|string|unique:students,admission_number',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female,other',
             'blood_group' => 'nullable|string|max:10',
@@ -109,7 +125,7 @@ class StudentManagementController extends Controller
             'special_instructions' => 'nullable|string',
             'is_boarder' => 'sometimes|boolean',
             'uses_transport' => 'sometimes|boolean',
-            'status' => 'required|in:active,on_leave,inactive,pending',
+            'status' => 'required|in:active,inactive,graduated,transferred,suspended',
         ]);
 
         try {
@@ -117,7 +133,7 @@ class StudentManagementController extends Controller
 
             Log::info('Step 3: Transaction started');
 
-             // Handle avatar upload
+            // Handle avatar upload
             $userAvatarPath = null;
             $studentAvatarPath = null;
 
@@ -146,8 +162,8 @@ class StudentManagementController extends Controller
                 'password' => Hash::make($userValidation['password']),
                 'phone' => $userValidation['phone'] ?? null,
                 'avatar' => $userAvatarPath,
-                'status' => $userValidation['status'],
                 'address' => $userValidation['address'] ?? null,
+                'status' => $userValidation['status'],
             ]);
 
             // Assign student role
