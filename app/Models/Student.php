@@ -75,10 +75,23 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function role(){
+    /**
+     * Get full name of the student.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return $this->user->name ?? '';
+    }
+
+    public function role()
+    {
         return $this->belongsTo(Role::class);
     }
 
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->user ? $this->user->avatar : null;
+    }
     /**
      * Get the school class that the student belongs to.
      */
@@ -102,15 +115,6 @@ class Student extends Model
     {
         return $this->hasOne(StudentAddress::class)->where('is_primary', true);
     }
-
-    /**
-     * Get full name of the student.
-     */
-    public function getFullNameAttribute(): string
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
-
     /**
      * Get age of the student.
      */

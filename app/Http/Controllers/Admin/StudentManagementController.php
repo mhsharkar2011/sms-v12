@@ -38,12 +38,11 @@ class StudentManagementController extends Controller
                     // Search in student-specific fields
                     $q->where('student_id', 'like', "%{$search}%")
                         ->orWhere('admission_number', 'like', "%{$search}%")
-                        ->orWhere('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        // Search in user email through relationship
+                        // Search in user fields
                         ->orWhereHas('user', function ($userQuery) use ($search) {
                             $userQuery->where('email', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%");
+                                ->orWhere('phone', 'like', "%{$search}%")
+                                ->orWhere('name', 'like', "%{$search}%");
                         });
                 });
             })
@@ -248,18 +247,16 @@ class StudentManagementController extends Controller
      */
     public function show(Student $student)
     {
-        $student = User::role('student')->findOrFail($student->user_id);
+        $student->load(['user', 'schoolClass', 'user.roles']);
         return view('admin.students.show', compact('student'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Student $student)
     {
-
-        $student = Student::with('user')->findOrFail($id);
-
+        $student = Student::findOrFail($student->id);
         // Find student by ID and load relationships
         $student->load(['user.roles', 'schoolClass']);
         $user = $student->user;
@@ -268,17 +265,13 @@ class StudentManagementController extends Controller
             abort(404, 'User not found for this student');
         }
 
-
-        // Prepare roles for the edit form and currently assigned roles
-        $roles = Role::all();
-
         // FIX: Get roles from the USER, not the student
         $assignedRoles = $user->roles->pluck('name')->toArray();
 
         $classes = SchoolClass::active()->get();
 
         // Pass both student and user to the view
-        return view('admin.students.edit', compact('student', 'user', 'classes', 'roles', 'assignedRoles'));
+        return view('admin.students.edit', compact('student', 'user', 'classes', 'assignedRoles'));
     }
 
     /**

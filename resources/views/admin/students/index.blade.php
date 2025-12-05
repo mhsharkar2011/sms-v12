@@ -259,8 +259,8 @@
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
                                                         <img class="h-12 w-12 rounded-xl object-cover border-2 border-white shadow-sm"
-                                                            src="{{ $student->avatar ? asset('storage/' . $student->avatar) : asset('images/default-avatar.png') }}"
-                                                            alt="{{ $student->name }}">
+                                                            src="{{ $student->avatar_url ? asset('storage/' . $student->avatar_url) : asset('images/default-avatar.png') }}"
+                                                            alt="{{ $student->full_name }}">
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-3 h-3
                                                             {{ $student->status == 'active'
@@ -274,7 +274,7 @@
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center space-x-2">
                                                             <p class="text-sm font-semibold text-gray-900 truncate">
-                                                                {{ $student->name }}</p>
+                                                                {{ $student->full_name }}</p>
                                                             @if ($student->status == 'active')
                                                                 <span
                                                                     class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
@@ -283,9 +283,9 @@
                                                                 </span>
                                                             @endif
                                                         </div>
-                                                        <p class="text-sm text-gray-500 truncate">{{ $student->email }}
+                                                        <p class="text-sm text-gray-500 truncate">{{ $student->user->email }}
                                                         </p>
-                                                        <p class="text-xs text-gray-400 mt-1">ID: {{ $student->id }}</p>
+                                                        <p class="text-xs text-gray-400 mt-1">ID: {{ $student->student_id }}</p>
                                                     </div>
                                                 </div>
                                             </td>

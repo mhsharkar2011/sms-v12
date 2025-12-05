@@ -45,6 +45,12 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+     public function getFullNameAttribute()
+    {
+        return $this->user->name ?? '';
+    }
+    
     // Relationship with classes
     public function classes()
     {

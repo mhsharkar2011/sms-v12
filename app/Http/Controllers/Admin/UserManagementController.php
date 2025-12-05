@@ -163,7 +163,7 @@ class UserManagementController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|min:8|confirmed',
             'role' => 'required|exists:roles,name',
-            'status' => 'required|in:active,inactive,pending',
+            'status' => 'required|in:active,inactive,on_leave,pending',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500'

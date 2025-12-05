@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Student - ' . $student->first_name . ' ' . $student->last_name)
+@section('title', 'Edit Student - ' . $student->full_name)
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
@@ -11,26 +11,49 @@
             <div class="bg-white shadow-sm border-b border-gray-200">
                 <div class="px-6 py-4">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-2xl font-bold text-gray-900">Edit Student</h1>
-                            <p class="text-gray-600 mt-1">Update student information for {{ $student->first_name }}
-                                {{ $student->last_name }}</p>
-                            <div class="flex items-center space-x-4 mt-2">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    <i class="fas fa-id-card mr-1"></i>
-                                    {{ $student->student_id ?? 'N/A' }}
-                                </span>
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                    <i class="fas fa-calendar mr-1"></i>
-                                    {{ $student->admission_number ?? 'N/A' }}
-                                </span>
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                    <i class="fas fa-user-tag mr-1"></i>
-                                    {{ $user->roles->first()->name ?? 'No Role' }}
-                                </span>
+                        <div class="flex items-center space-x-4">
+                            <!-- Student Avatar -->
+                            <div class="relative">
+                                <div class="w-16 h-16 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                                    @if ($student->avatar_url)
+                                        <img src="{{ $student->avatar_url }}" alt="{{ $student->full_name }}"
+                                            class="w-full h-full object-cover">
+                                    @else
+                                        <div
+                                            class="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+                                            {{ substr($student->full_name, 0, 1) }}
+                                        </div>
+                                    @endif
+                                </div>
+                                @if ($student->avatar_url)
+                                    <button type="button" onclick="removeAvatar()"
+                                        class="absolute -bottom-1 -right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                                        title="Remove avatar">
+                                        <i class="fas fa-times text-xs"></i>
+                                    </button>
+                                @endif
+                            </div>
+                            <div>
+                                <h1 class="text-2xl font-bold text-gray-900">Edit Student</h1>
+                                <p class="text-gray-600 mt-1">Update student information for <span
+                                        class="text-2xl font-bold text-gray-600"> {{ $student->full_name }}</span></p>
+                                <div class="flex items-center space-x-4 mt-2">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        <i class="fas fa-id-card mr-1"></i>
+                                        {{ $student->student_id ?? 'N/A' }}
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-calendar mr-1"></i>
+                                        {{ $student->admission_number ?? 'N/A' }}
+                                    </span>
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                        <i class="fas fa-user-tag mr-1"></i>
+                                        {{ $user->roles->first()->name ?? 'No Role' }}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
@@ -78,9 +101,11 @@
                     <!-- Form Card -->
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                         <form action="{{ route('admin.students.update', $student->id) }}" method="POST"
-                            enctype="multipart/form-data">
+                            enctype="multipart/form-data" id="studentForm">
                             @csrf
                             @method('PUT')
+                            <!-- Hidden input for avatar removal -->
+                            <input type="hidden" name="remove_avatar" id="remove_avatar" value="0">
 
                             <!-- Student Basic Information Section -->
                             <div class="p-6 border-b border-gray-200">
@@ -89,42 +114,73 @@
                                     Student Basic Information
                                 </h2>
 
+                                <!-- Avatar Upload -->
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-3">
+                                        Profile Picture
+                                    </label>
+                                    <div class="flex items-center space-x-6">
+                                        <div class="relative">
+                                            <div
+                                                class="w-24 h-24 rounded-full overflow-hidden border-4 border-white shadow-lg">
+                                                <img id="avatarPreview"
+                                                    src="{{ $student->avatar_url ?: 'https://ui-avatars.com/api/?name=' . urlencode($student->full_name) . '&color=FFFFFF&background=4F46E5&size=96' }}"
+                                                    alt="Avatar Preview" class="w-full h-full object-cover">
+                                            </div>
+                                            <div id="avatarLoading"
+                                                class="hidden absolute inset-0 bg-gray-800 bg-opacity-50 rounded-full flex items-center justify-center">
+                                                <i class="fas fa-spinner fa-spin text-white text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="mb-3">
+                                                <input type="file" name="avatar" id="avatar" accept="image/*"
+                                                    class="hidden" onchange="previewAvatar(event)">
+                                                <label for="avatar"
+                                                    class="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2.5 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2 inline-flex">
+                                                    <i class="fas fa-upload"></i>
+                                                    Upload New Photo
+                                                </label>
+                                                @if ($student->avatar_url)
+                                                    <button type="button" onclick="removeAvatar()"
+                                                        class="ml-3 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg transition-colors flex items-center gap-2">
+                                                        <i class="fas fa-trash"></i>
+                                                        Remove Photo
+                                                    </button>
+                                                @endif
+                                            </div>
+                                            <p class="text-xs text-gray-500">
+                                                Maximum file size: 2MB. Allowed formats: JPG, PNG, GIF.
+                                            </p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                For a better result, use a square image (e.g., 400x400 pixels).
+                                            </p>
+                                            @error('avatar')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <!-- First Name -->
                                     <div>
-                                        <label for="first_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                            First Name *
-                                        </label>
-                                        <input type="text" name="first_name" id="first_name"
-                                            value="{{ old('first_name', $student->first_name) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('first_name') border-red-500 @enderror"
-                                            placeholder="Enter first name" required>
-                                        @error('first_name')
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                                        <input type="text" name="name"
+                                            value="{{ old('name', $student->user->name ?? 'Student') }}"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+                                            required>
+                                        @error('name')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
-
-                                    <!-- Last Name -->
-                                    <div>
-                                        <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Last Name *
-                                        </label>
-                                        <input type="text" name="last_name" id="last_name"
-                                            value="{{ old('last_name', $student->last_name) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('last_name') border-red-500 @enderror"
-                                            placeholder="Enter last name" required>
-                                        @error('last_name')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
                                     <!-- Email -->
                                     <div>
                                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
                                             Email Address *
                                         </label>
                                         <input type="email" name="email" id="email"
-                                            value="{{ old('email', $student->email) }}"
+                                            value="{{ old('email', $student->user->email) }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('email') border-red-500 @enderror"
                                             placeholder="student@example.com" required>
                                         @error('email')
@@ -138,7 +194,7 @@
                                             Phone Number
                                         </label>
                                         <input type="tel" name="phone" id="phone"
-                                            value="{{ old('phone', $student->phone) }}"
+                                            value="{{ old('phone', $student->user->phone) }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('phone') border-red-500 @enderror"
                                             placeholder="+1 (555) 123-4567">
                                         @error('phone')
@@ -516,9 +572,6 @@
                                 </div>
                             </div>
 
-                            <!-- Rest of your form sections (Personal Details, Address, Emergency Contact, Medical, etc.) -->
-                            <!-- ... include all the other sections from your previous edit form ... -->
-
                             <!-- Form Actions -->
                             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
                                 <div class="flex items-center justify-between">
@@ -556,50 +609,171 @@
 @endpush
 
 @push('scripts')
-<script>
-    // Role selection enhancement
-    document.addEventListener('DOMContentLoaded', function() {
-        const roleCheckboxes = document.querySelectorAll('input[name="roles[]"]');
+    <script>
+        // Role selection enhancement
+        document.addEventListener('DOMContentLoaded', function() {
+            const roleCheckboxes = document.querySelectorAll('input[name="roles[]"]');
 
-        roleCheckboxes.forEach(checkbox => {
-            // Add click effect to the entire label
-            checkbox.closest('label').addEventListener('click', function(e) {
-                if (e.target.type !== 'checkbox') {
-                    checkbox.checked = !checkbox.checked;
-                    checkbox.dispatchEvent(new Event('change'));
-                }
-            });
+            roleCheckboxes.forEach(checkbox => {
+                // Add click effect to the entire label
+                checkbox.closest('label').addEventListener('click', function(e) {
+                    if (e.target.type !== 'checkbox') {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
 
-            // Update visual state on change
-            checkbox.addEventListener('change', function() {
-                const label = this.closest('label');
-                if (this.checked) {
+                // Update visual state on change
+                checkbox.addEventListener('change', function() {
+                    const label = this.closest('label');
+                    if (this.checked) {
+                        label.classList.add('border-blue-300', 'bg-blue-50');
+                        label.classList.remove('border-gray-200', 'hover:bg-gray-50');
+                    } else {
+                        label.classList.remove('border-blue-300', 'bg-blue-50');
+                        label.classList.add('border-gray-200', 'hover:bg-gray-50');
+                    }
+                });
+
+                // Initialize visual state
+                if (checkbox.checked) {
+                    const label = checkbox.closest('label');
                     label.classList.add('border-blue-300', 'bg-blue-50');
                     label.classList.remove('border-gray-200', 'hover:bg-gray-50');
-                } else {
-                    label.classList.remove('border-blue-300', 'bg-blue-50');
-                    label.classList.add('border-gray-200', 'hover:bg-gray-50');
                 }
             });
 
-            // Initialize visual state
-            if (checkbox.checked) {
-                const label = checkbox.closest('label');
-                label.classList.add('border-blue-300', 'bg-blue-50');
-                label.classList.remove('border-gray-200', 'hover:bg-gray-50');
-            }
+            // Auto-check student role if no roles selected on form submit
+            const form = document.querySelector('form');
+            form.addEventListener('submit', function(e) {
+                const checkedRoles = document.querySelectorAll('input[name="roles[]"]:checked');
+                if (checkedRoles.length === 0) {
+                    e.preventDefault();
+                    alert('Please assign at least one role to the user. Student role is recommended.');
+                    document.querySelector('input[value="student"]').focus();
+                }
+            });
         });
 
-        // Auto-check student role if no roles selected on form submit
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(e) {
-            const checkedRoles = document.querySelectorAll('input[name="roles[]"]:checked');
-            if (checkedRoles.length === 0) {
-                e.preventDefault();
-                alert('Please assign at least one role to the user. Student role is recommended.');
-                document.querySelector('input[value="student"]').focus();
+        // Avatar preview functionality
+        function previewAvatar(event) {
+            const input = event.target;
+            const preview = document.getElementById('avatarPreview');
+            const loading = document.getElementById('avatarLoading');
+
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+
+                // Check file size
+                if (file.size > maxSize) {
+                    alert('File size exceeds 2MB limit. Please choose a smaller file.');
+                    input.value = '';
+                    return;
+                }
+
+                // Check file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Only JPG, PNG, and GIF files are allowed.');
+                    input.value = '';
+                    return;
+                }
+
+                // Show loading
+                loading.classList.remove('hidden');
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    loading.classList.add('hidden');
+
+                    // Remove avatar removal flag if a new image is uploaded
+                    document.getElementById('remove_avatar').value = '0';
+                };
+                reader.readAsDataURL(file);
             }
+        }
+
+        // Remove avatar functionality
+        function removeAvatar() {
+            if (confirm('Are you sure you want to remove the profile picture?')) {
+                // Reset file input
+                document.getElementById('avatar').value = '';
+
+                // Set default avatar (initials)
+                const initials = '{{ substr($student->full_name, 0, 1) }}';
+                const defaultAvatar =
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent('{{ $student->full_name }}')}&color=FFFFFF&background=4F46E5&size=96`;
+
+                document.getElementById('avatarPreview').src = defaultAvatar;
+
+                // Set remove avatar flag
+                document.getElementById('remove_avatar').value = '1';
+
+                // Hide remove button if it exists
+                const removeBtn = document.querySelector('button[onclick="removeAvatar()"]');
+                if (removeBtn) {
+                    removeBtn.style.display = 'none';
+                }
+            }
+        }
+
+        // Form reset functionality
+        function resetForm() {
+            if (confirm('Are you sure you want to reset all changes? This will restore the original values.')) {
+                document.getElementById('studentForm').reset();
+
+                // Reset avatar to original
+                const originalAvatar =
+                    '{{ $student->avatar_url ?: 'https://ui-avatars.com/api/?name=' . urlencode($student->full_name) . '&color=FFFFFF&background=4F46E5&size=96' }}';
+                document.getElementById('avatarPreview').src = originalAvatar;
+
+                // Reset remove avatar flag
+                document.getElementById('remove_avatar').value = '0';
+
+                // Reset role checkboxes to original state
+                const originalRoles = @json($assignedRoles);
+                document.querySelectorAll('input[name="roles[]"]').forEach(checkbox => {
+                    checkbox.checked = originalRoles.includes(checkbox.value);
+                });
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthDiv = document.getElementById('passwordStrength');
+
+            if (!password) {
+                strengthDiv.innerHTML = '';
+                return;
+            }
+
+            let strength = 0;
+            let color = 'red';
+            let text = 'Weak';
+
+            // Check password criteria
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9]/.test(password)) strength++;
+            if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+            // Determine strength level
+            if (strength <= 2) {
+                color = 'red';
+                text = 'Weak';
+            } else if (strength <= 4) {
+                color = 'orange';
+                text = 'Medium';
+            } else {
+                color = 'green';
+                text = 'Strong';
+            }
+
+            strengthDiv.innerHTML = `<span style="color: ${color}; font-weight: bold;">${text}</span>`;
         });
-    });
-</script>
+    </script>
 @endpush

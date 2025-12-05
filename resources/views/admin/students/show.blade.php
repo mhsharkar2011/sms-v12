@@ -58,8 +58,8 @@
                                             <div
                                                 class="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 p-1.5 shadow-lg">
                                                 <img class="w-full h-full rounded-2xl object-cover border-4 border-white"
-                                                    src="{{ $student->avatar ? asset('storage/' . $student->avatar) : asset('images/default-avatar.png') }}"
-                                                    alt="{{ $student->first_name }} {{ $student->last_name }}">
+                                                    src="{{ $student->avatar_url ? asset('storage/' . $student->avatar_url) : asset('images/default-avatar.png') }}"
+                                                    alt="{{ $student->full_name }}">
                                             </div>
                                             <div
                                                 class="absolute -bottom-2 -right-2 w-7 h-7 rounded-full border-3 border-white shadow-lg
@@ -165,7 +165,7 @@
                                                 </div>
                                                 <div>
                                                     <label class="text-sm font-medium text-gray-500">Full Name</label>
-                                                    <p class="text-gray-900 font-semibold">{{ $student->user->full_name }}
+                                                    <p class="text-gray-900 font-semibold">{{ $student->full_name }}
                                                        </p>
                                                 </div>
                                             </div>
