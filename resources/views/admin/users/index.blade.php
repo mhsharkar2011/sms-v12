@@ -155,8 +155,9 @@
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">
                                                         <img class="h-10 w-10 rounded-full object-cover"
-                                                            src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
-                                                            alt="{{ $user->name }}">
+                                                            src="{{ $user->avatar_url }}"
+                                                            alt="{{ $user->name ?? 'User' }}"
+                                                            onerror="this.src='{{ asset('storage/default-avatar.png') }}'">
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900">{{ $user->name }}
@@ -202,8 +203,8 @@
                                                         <i class="fas fa-edit mr-1 text-xs"></i>
                                                         Edit
                                                     </a>
-                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                                        class="inline">
+                                                    <form action="{{ route('admin.users.destroy', $user) }}"
+                                                        method="POST" class="inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"

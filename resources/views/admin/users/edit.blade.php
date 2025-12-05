@@ -42,7 +42,7 @@
                                         <div
                                             class="w-24 h-24 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gray-100">
                                             <img id="avatarPreview"
-                                                src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
+                                                src="{{ $user->avatar ? asset('storage/users/' . $user->avatar) : asset('images/default-avatar.png') }}"
                                                 alt="{{ $user->name }}" class="w-full h-full object-cover">
                                         </div>
                                         <label for="avatar"

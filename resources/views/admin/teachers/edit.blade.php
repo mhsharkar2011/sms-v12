@@ -1,3 +1,7 @@
+@php
+use Illuminate\Support\Facades\Storage;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Edit Teacher')
@@ -55,9 +59,22 @@
                         <!-- Teacher Info Summary -->
                         <div class="p-6 border-b border-gray-200 bg-gray-50">
                             <div class="flex items-center space-x-4">
-                                @if ($teacher->avatar)
-                                    <img src="{{ asset('storage/' . $teacher->avatar) }}" alt="{{ $teacher->name }}"
-                                        class="w-16 h-16 rounded-full border-2 border-white shadow-sm">
+                                @php
+                                    $avatarUrl = null;
+
+                                    // Check teacher avatar first
+                                    if ($teacher->avatar && Storage::disk('public')->exists($teacher->avatar)) {
+                                        $avatarUrl = asset('storage/' . $teacher->avatar);
+                                    }
+                                    // Then check user avatar
+                                    elseif ($teacher->user && $teacher->user->avatar && $teacher->user->avatar !== 'default-avatar.png' && Storage::disk('public')->exists($teacher->user->avatar)) {
+                                        $avatarUrl = asset('storage/' . $teacher->user->avatar);
+                                    }
+                                @endphp
+
+                                @if ($avatarUrl)
+                                    <img src="{{ $avatarUrl }}" alt="{{ $teacher->user->name ?? 'Teacher' }}"
+                                        class="w-16 h-16 rounded-full border-2 border-white shadow-sm object-cover">
                                 @else
                                     <div
                                         class="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center border-2 border-white shadow-sm">
@@ -65,7 +82,7 @@
                                     </div>
                                 @endif
                                 <div>
-                                    <h2 class="text-xl font-bold text-gray-900">{{ $teacher->user->name }}</h2>
+                                    <h2 class="text-xl font-bold text-gray-900">{{ $teacher->user->name ?? $teacher->name }}</h2>
                                     <div class="flex items-center space-x-4 mt-1">
                                         <span class="flex items-center text-gray-600">
                                             <i class="fas fa-id-badge text-blue-500 mr-2"></i>
@@ -127,7 +144,7 @@
 
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
-                                            <input type="text" name="name" value="{{ old('name', $teacher->name) }}"
+                                            <input type="text" name="name" value="{{ old('name', $teacher->user->name ?? $teacher->name) }}"
                                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
                                                 required>
                                             @error('name')
@@ -138,7 +155,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
                                             <input type="email" name="email"
-                                                value="{{ old('email', $teacher->email) }}"
+                                                value="{{ old('email', $teacher->user->email ?? $teacher->email) }}"
                                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('email') border-red-500 @enderror"
                                                 required>
                                             @error('email')
@@ -149,7 +166,7 @@
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
                                             <input type="text" name="phone"
-                                                value="{{ old('phone', $teacher->phone) }}"
+                                                value="{{ old('phone', $teacher->user->phone ?? $teacher->phone) }}"
                                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('phone') border-red-500 @enderror">
                                             @error('phone')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -294,14 +311,25 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-2">Change Password</label>
-                                        <input type="password" name="password"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-500 @enderror"
-                                            placeholder="Leave blank to keep current">
-                                        @error('password')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                        <small class="text-gray-500">Leave blank to keep current password</small>
+                                        <div class="space-y-2">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Change Password</label>
+                                                <input type="password" name="password"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('password') border-red-500 @enderror"
+                                                    placeholder="New password">
+                                                @error('password')
+                                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                                @enderror
+                                            </div>
+
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+                                                <input type="password" name="password_confirmation"
+                                                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    placeholder="Confirm new password">
+                                                <small class="text-gray-500">Leave both blank to keep current password</small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -328,13 +356,23 @@
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Avatar</label>
                                         <div class="flex items-center space-x-4">
-                                            @if ($teacher->avatar)
+                                            @php
+                                                $currentAvatar = null;
+                                                // Check teacher avatar first
+                                                if ($teacher->avatar && Storage::disk('public')->exists($teacher->avatar)) {
+                                                    $currentAvatar = asset('storage/' . $teacher->avatar);
+                                                }
+                                                // Check user avatar second
+                                                elseif ($teacher->user && $teacher->user->avatar && $teacher->user->avatar !== 'default-avatar.png' && Storage::disk('public')->exists($teacher->user->avatar)) {
+                                                    $currentAvatar = asset('storage/' . $teacher->user->avatar);
+                                                }
+                                            @endphp
+
+                                            @if ($currentAvatar)
                                                 <div class="relative">
-                                                    <img src="{{ asset('storage/' . $teacher->avatar) }}"
-                                                        alt="Current Avatar"
-                                                        class="w-20 h-20 rounded-full border-2 border-gray-300">
-                                                    <div
-                                                        class="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm">
+                                                    <img src="{{ $currentAvatar }}" alt="Current Avatar"
+                                                        class="w-20 h-20 rounded-full border-2 border-gray-300 object-cover">
+                                                    <div class="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm">
                                                         <input type="checkbox" name="remove_avatar" id="remove_avatar"
                                                             class="hidden">
                                                         <label for="remove_avatar"
@@ -352,11 +390,18 @@
                                                         Remove avatar
                                                     </label>
                                                 </div>
+                                            @else
+                                                <div class="text-center">
+                                                    <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-300">
+                                                        <i class="fas fa-user text-gray-400 text-2xl"></i>
+                                                    </div>
+                                                    <p class="text-sm text-gray-500 mt-1">No avatar set</p>
+                                                </div>
                                             @endif
                                             <div class="flex-1">
                                                 <input type="file" name="avatar" accept="image/*"
                                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('avatar') border-red-500 @enderror">
-                                                <small class="text-gray-500">Leave blank to keep current avatar</small>
+                                                <small class="text-gray-500">Max 2MB, allowed: JPG, PNG, GIF. Leave blank to keep current</small>
                                                 @error('avatar')
                                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                                 @enderror
@@ -396,20 +441,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Password confirmation functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const passwordField = document.querySelector('input[name="password"]');
-            if (passwordField) {
-                const confirmField = document.createElement('input');
-                confirmField.type = 'password';
-                confirmField.name = 'password_confirmation';
-                confirmField.className = passwordField.className + ' mt-2';
-                confirmField.placeholder = 'Confirm new password';
-
-                passwordField.parentNode.appendChild(confirmField);
-            }
-        });
-    </script>
 @endsection

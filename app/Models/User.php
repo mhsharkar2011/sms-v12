@@ -98,7 +98,7 @@ class User extends Authenticatable
         if ($this->avatar) {
             return asset('storage/' . $this->avatar);
         }
-        return asset('images/default-avatar.png');
+        return asset('storage/default-avatar.png');
     }
 
     public function isActive(): bool

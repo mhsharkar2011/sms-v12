@@ -277,15 +277,10 @@
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
                                                         <div class="flex-shrink-0 h-10 w-10">
-                                                            @if ($teacher->avatar && Storage::exists($teacher->avatar))
-                                                                <img class="h-10 w-10 rounded-full object-cover"
-                                                                    src="{{ asset('storage/avatars' . $teacher->avatar_url) ?? asset('avatars/default-avatar.png') }}"
-                                                                    alt="{{ $teacher->user->name }}">
-                                                            @else
-                                                                <img class="h-10 w-10 rounded-full object-cover"
-                                                                    src="{{ asset('avatars/default-avatar.png') }}"
-                                                                    alt="{{ $teacher->user->name }}">
-                                                            @endif
+                                                            <img class="h-10 w-10 rounded-full object-cover"
+                                                                src="{{ $teacher->avatar_url }}"
+                                                            alt="{{ $teacher->user->name ?? 'Teacher' }}"
+                                                             onerror="this.src='{{ asset('storage/default-avatar.png') }}'">
                                                         </div>
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white
@@ -295,12 +290,12 @@
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center space-x-2">
                                                             <p class="text-sm font-semibold text-gray-900 truncate">
-                                                                {{ $teacher->name }}</p>
+                                                                {{ $teacher->user->name }}</p>
                                                             @if ($teacher->status == 'active')
                                                                 <span
                                                                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
                                                                     <i class="fas fa-award mr-1 text-xs"></i>
-                                                                    Verified
+                                                                    {{ $teacher->user->email_verified_at }}
                                                                 </span>
                                                             @endif
                                                         </div>

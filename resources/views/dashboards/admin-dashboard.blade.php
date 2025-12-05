@@ -13,7 +13,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-                        <p class="text-gray-600 mt-1">Welcome back, {{ Auth::user()->name }}! Here's what's happening today.</p>
+                        <p class="text-gray-600 mt-1">Welcome back, {{ Auth::user()->email }}! Here's what's happening today.</p>
                     </div>
                     <div class="flex items-center space-x-4">
                         <div class="relative">

@@ -92,6 +92,12 @@ class UserManagementController extends Controller
         try {
             DB::beginTransaction();
 
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                // $avatarName = 'User_'.time() . '_' . $request->file('avatar')->getClientOriginalName();
+                $avatarName = 'user_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $userAvatarPath = $request->file('avatar')->storeAs('avatars/users', $avatarName, 'public');
+            }
             // Create user with hashed password
             $userData = [
                 'name' => $validated['name'],
@@ -100,12 +106,10 @@ class UserManagementController extends Controller
                 'status' => $validated['status'],
                 'phone' => $validated['phone'] ?? null,
                 'address' => $validated['address'] ?? null,
+                'avatar' => $userAvatarPath ?? null,
             ];
 
-            // Handle avatar upload
-            if ($request->hasFile('avatar')) {
-                $userData['avatar'] = $request->file('avatar')->store('avatars', 'public');
-            }
+
 
             $user = User::create($userData);
 
@@ -168,24 +172,28 @@ class UserManagementController extends Controller
         $oldStatus = $user->status;
 
         DB::transaction(function () use ($validated, $user, $request, $oldStatus) {
-            $updateData = [
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'status' => $validated['status'],
-                'phone' => $validated['phone'] ?? null,
-                'address' => $validated['address'] ?? null,
-            ];
 
-            if ($request->filled('password')) {
-                $updateData['password'] = Hash::make($validated['password']);
+             if ($request->filled('password')) {
+                $updatePassword = Hash::make($validated['password']);
             }
 
             if ($request->hasFile('avatar')) {
                 if ($user->avatar) {
                     Storage::disk('public')->delete($user->avatar);
                 }
-                $updateData['avatar'] = $request->file('avatar')->store('avatars', 'public');
+                $avatarName = 'user_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $userAvatarPath = $request->file('avatar')->storeAs('avatars/users', $avatarName, 'public');
             }
+
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => $updatePassword ?? $user->password,
+                'status' => $validated['status'],
+                'phone' => $validated['phone'] ?? null,
+                'address' => $validated['address'] ?? null,
+                'avatar' => $userAvatarPath ?? $user->avatar,
+            ];
 
             $user->update($updateData);
             $user->syncRoles([$validated['role']]);

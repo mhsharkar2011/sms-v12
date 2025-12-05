@@ -7,12 +7,13 @@ use App\Models\Department;
 use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
-use Illuminate\Container\Attributes\Storage;
+
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use phpDocumentor\Reflection\Types\Nullable;
 
@@ -208,12 +209,12 @@ class TeacherManagementController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $teacher = Teacher::findOrFail($id); // Teacher extends User
+        $teacher = Teacher::with('user')->findOrFail($id);
 
         $validated = $request->validate([
             // User fields
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $teacher->id,
+            'email' => 'required|email|unique:users,email,' . $teacher->user_id,
             'phone' => 'nullable|string|max:20',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,on_leave,inactive',
@@ -234,28 +235,64 @@ class TeacherManagementController extends Controller
         ]);
 
         try {
+            DB::beginTransaction();
+
             // Handle avatar removal
-            if ($request->has('remove_avatar') && $teacher->avatar) {
-                Storage::disk('public')->delete($teacher->avatar);
-                $teacher->avatar = null;
+            if ($request->has('remove_avatar')) {
+                // Delete teacher avatar
+                if ($teacher->avatar) {
+                    Storage::disk('public')->delete($teacher->avatar);
+                    $teacher->avatar = null;
+                }
+                // Delete user avatar
+                if ($teacher->user && $teacher->user->avatar && $teacher->user->avatar !== 'default-avatar.png') {
+                    Storage::disk('public')->delete($teacher->user->avatar);
+                    $teacher->user->avatar = 'default-avatar.png';
+                    $teacher->user->save();
+                }
             }
 
             // Handle avatar upload
             if ($request->hasFile('avatar')) {
+                // Delete old teacher avatar
                 if ($teacher->avatar) {
                     Storage::disk('public')->delete($teacher->avatar);
                 }
 
+                // Delete old user avatar if not default
+                if ($teacher->user && $teacher->user->avatar && $teacher->user->avatar !== 'default-avatar.png') {
+                    Storage::disk('public')->delete($teacher->user->avatar);
+                }
+
                 $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
                 $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
+
+                // Update teacher avatar
                 $teacher->avatar = $avatarPath;
+
+                // Also update user avatar
+                if ($teacher->user) {
+                    $teacher->user->avatar = $avatarPath;
+                    $teacher->user->save();
+                }
             }
 
-            // Prepare update data
-            $updateData = [
+            // Update User model
+            $userData = [
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'phone' => $validated['phone'] ?? null,
+                'status' => $validated['status'],
+            ];
+
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($validated['password']);
+            }
+
+            $teacher->user->update($userData);
+
+            // Update Teacher model
+            $teacherData = [
                 'department_id' => $validated['department_id'],
                 'teacher_id' => $validated['teacher_id'],
                 'date_of_birth' => $validated['date_of_birth'] ?? null,
@@ -266,20 +303,16 @@ class TeacherManagementController extends Controller
                 'salary' => $validated['salary'] ?? null,
                 'address' => $validated['address'] ?? null,
                 'bio' => $validated['bio'] ?? null,
-                'status' => $validated['status'],
-                'type' => 'teacher',
             ];
 
-            // Update password if provided
-            if ($request->filled('password')) {
-                $updateData['password'] = bcrypt($validated['password']);
-            }
+            $teacher->update($teacherData);
 
-            $teacher->update($updateData);
+            DB::commit();
 
             return redirect()->route('admin.teachers.index')
                 ->with('success', 'Teacher updated successfully!');
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Failed to update teacher: ' . $e->getMessage());
