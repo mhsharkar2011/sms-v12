@@ -107,10 +107,6 @@ class Teacher extends Model
         return asset('images/default-avatar.png');
     }
 
-
-
-
-
     // Accessor for age
     public function getAgeAttribute()
     {

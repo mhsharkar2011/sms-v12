@@ -246,19 +246,19 @@ class StudentManagementController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Student $student)
     {
-        $student = User::role('student')->findOrFail($id);
+        $student = User::role('student')->findOrFail($student->user_id);
         return view('admin.students.show', compact('student'));
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Student $student)
+    public function edit(string $id)
     {
 
-        $student = Student::where('user_id', $student->User_id)->firstOrFail();
+        $student = Student::with('user')->findOrFail($id);
 
         // Find student by ID and load relationships
         $student->load(['user.roles', 'schoolClass']);

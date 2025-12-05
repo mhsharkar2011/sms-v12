@@ -165,8 +165,8 @@
                                                 </div>
                                                 <div>
                                                     <label class="text-sm font-medium text-gray-500">Full Name</label>
-                                                    <p class="text-gray-900 font-semibold">{{ $student->first_name }}
-                                                        {{ $student->last_name }}</p>
+                                                    <p class="text-gray-900 font-semibold">{{ $student->user->full_name }}
+                                                       </p>
                                                 </div>
                                             </div>
                                             <div class="flex items-start space-x-3">

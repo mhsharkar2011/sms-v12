@@ -338,7 +338,7 @@
                                                         <i class="fas fa-eye mr-1 text-xs"></i>
                                                         View
                                                     </a>
-                                                    <a href="{{ route('admin.students.edit', $student->id) }}"
+                                                    <a href="{{ route('admin.students.edit', $student) }}"
                                                         class="inline-flex items-center px-3 py-1.5 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 transition-colors"
                                                         title="Edit Student">
                                                         <i class="fas fa-edit mr-1 text-xs"></i>
