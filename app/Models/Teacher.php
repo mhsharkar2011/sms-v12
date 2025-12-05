@@ -14,8 +14,6 @@ class Teacher extends Model
         'user_id',
         'teacher_id',
         'department_id',
-        'first_name',
-        'last_name',
         'email',
         'phone',
         'subject',
@@ -73,9 +71,12 @@ class Teacher extends Model
     public function getAvatarUrlAttribute()
     {
         if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
+            return asset('storage/avatars/teachers/' . $this->avatar);
         }
-        return asset('images/default-avatar.png');
+        else
+        {
+            return asset('avatars/default-avatar.png');
+        }
     }
 
     // Accessor for age

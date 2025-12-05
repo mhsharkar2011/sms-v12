@@ -23,7 +23,7 @@ class TeacherManagementController extends Controller
      */
     public function index()
     {
-        $teachers = Teacher::with('department')->paginate(10);
+        $teachers = Teacher::with('user', 'department')->paginate(10);
 
         $totalTeachers = Teacher::count();
         $activeTeachers = Teacher::where('status', 'active')->count();
@@ -60,16 +60,31 @@ class TeacherManagementController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Debug first
+        \Log::info('Creating teacher - Step 1: Validation started');
+        \Log::info('Request method: ' . $request->method());
+        \Log::info('Is ajax: ' . $request->ajax());
+        \Log::info('Has file avatar: ' . ($request->hasFile('avatar') ? 'Yes' : 'No'));
+
+        if ($request->hasFile('avatar')) {
+            \Log::info('Avatar file details:', [
+                'name' => $request->file('avatar')->getClientOriginalName(),
+                'size' => $request->file('avatar')->getSize(),
+                'mime' => $request->file('avatar')->getMimeType(),
+            ]);
+        }
+
+        $userValidated = $request->validate([
             // User fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,on_leave,inactive',
+        ]);
 
+        $teacherValidated = $request->validate([
             // Teacher fields
             'teacher_id' => 'required|string|unique:teachers,teacher_id',
             'department_id' => 'required|exists:departments,id',
@@ -79,70 +94,87 @@ class TeacherManagementController extends Controller
             'date_of_joining' => 'nullable|date',
             'gender' => 'nullable|in:male,female,other',
             'salary' => 'nullable|numeric|min:0',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'address' => 'nullable|string',
             'bio' => 'nullable|string',
+            'status' => 'required|in:active,on_leave,inactive',
         ]);
+
+        \Log::info('Step 2: Validation passed');
 
         try {
             DB::beginTransaction();
 
+            \Log::info('Step 3: Transaction started');
+
             // Handle avatar upload
-            $avatarPath = null;
+            $userAvatarPath = null;
+            $teacherAvatarPath = null;
+
             if ($request->hasFile('avatar')) {
-                $avatarName = 'teacher_' . time() . '.' . $request->file('avatar')->getClientOriginalExtension();
-                $avatarPath = $request->file('avatar')->storeAs('avatars/teachers', $avatarName, 'public');
+                \Log::info('Step 4: Processing avatar upload');
+
+                // For User
+                $userAvatarName = 'user_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $userAvatarPath = $request->file('avatar')->storeAs('avatars/users', $userAvatarName, 'public');
+                \Log::info('User avatar saved: ' . $userAvatarPath);
+
+                // For Teacher (optional - can be same or different)
+                $teacherAvatarName = 'teacher_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $teacherAvatarPath = $request->file('avatar')->storeAs('avatars/teachers', $teacherAvatarName, 'public');
+                \Log::info('Teacher avatar saved: ' . $teacherAvatarPath);
+            } else {
+                \Log::info('Step 4: No avatar uploaded, using defaults');
+                $userAvatarPath = 'default-avatar.png'; // Store string for default
+                $teacherAvatarPath = null; // Teacher gets null
             }
 
+            \Log::info('Step 5: Creating user');
             // Create User account
             $user = User::create([
-                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'phone' => $validated['phone'] ?? null,
-                'avatar' => $avatarPath,
-                'status' => $validated['status'], // or use a default like 'active'
-                'address' => $validated['address'] ?? null,
+                'name' => $userValidated['first_name'] . ' ' . $userValidated['last_name'],
+                'email' => $userValidated['email'],
+                'password' => Hash::make($userValidated['password']),
+                'phone' => $userValidated['phone'] ?? null,
+                'status' => $userValidated['status'],
+                'avatar' => $userAvatarPath,
             ]);
+
+            \Log::info('User created with ID: ' . $user->id);
 
             // Assign teacher role
             $user->assignRole('teacher');
+            \Log::info('Role assigned: teacher');
 
-            // Prepare teacher data (exclude user-specific fields)
-            $teacherData = [
-                'user_id' => $user->id,
-                'teacher_id' => $validated['teacher_id'],
-                'department_id' => $validated['department_id'],
-                'subject' => $validated['subject'],
-                'qualification' => $validated['qualification'] ?? null,
-                'date_of_birth' => $validated['date_of_birth'] ?? null,
-                'date_of_joining' => $validated['date_of_joining'] ?? null,
-                'gender' => $validated['gender'] ?? null,
-                'salary' => $validated['salary'] ?? null,
-                'bio' => $validated['bio'] ?? null,
-                'status' => $validated['status'],
-            ];
-
+            \Log::info('Step 6: Creating teacher');
             // Create the teacher
-            $teacher = Teacher::create($teacherData);
+            $teacher = Teacher::create([
+                'user_id' => $user->id,
+                'teacher_id' => $teacherValidated['teacher_id'],
+                'department_id' => $teacherValidated['department_id'],
+                'subject' => $teacherValidated['subject'],
+                'qualification' => $teacherValidated['qualification'] ?? null,
+                'date_of_birth' => $teacherValidated['date_of_birth'] ?? null,
+                'date_of_joining' => $teacherValidated['date_of_joining'] ?? null,
+                'gender' => $teacherValidated['gender'] ?? null,
+                'salary' => $teacherValidated['salary'] ?? null,
+                'bio' => $teacherValidated['bio'] ?? null,
+                'status' => $teacherValidated['status'],
+                'avatar' => $teacherAvatarPath, // Can be null
+                'address' => $teacherValidated['address'] ?? null,
+            ]);
+
+            \Log::info('Teacher created with ID: ' . $teacher->id);
 
             DB::commit();
-
-            // Log success
-            Log::info('Teacher created successfully', [
-                'teacher_id' => $teacher->teacher_id,
-                'user_id' => $user->id,
-                'email' => $user->email
-            ]);
+            \Log::info('Step 7: Transaction committed');
 
             return redirect()->route('admin.teachers.index')
                 ->with('success', 'Teacher added successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-
-            Log::error('Error creating teacher: ' . $e->getMessage(), [
-                'request' => $request->except(['password', 'password_confirmation']),
-                'trace' => $e->getTraceAsString()
-            ]);
+            \Log::error('Error in teacher creation: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return redirect()->back()
                 ->with('error', 'Error creating teacher: ' . $e->getMessage())

@@ -276,17 +276,20 @@
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
-                                                        <div
-                                                            class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-                                                            {{ substr($teacher->name, 0, 2) }}
+                                                        <div class="flex-shrink-0 h-10 w-10">
+                                                            @if ($teacher->avatar && Storage::exists($teacher->avatar))
+                                                                <img class="h-10 w-10 rounded-full object-cover"
+                                                                    src="{{ asset('storage/avatars' . $teacher->avatar_url) ?? asset('avatars/default-avatar.png') }}"
+                                                                    alt="{{ $teacher->user->name }}">
+                                                            @else
+                                                                <img class="h-10 w-10 rounded-full object-cover"
+                                                                    src="{{ asset('avatars/default-avatar.png') }}"
+                                                                    alt="{{ $teacher->user->name }}">
+                                                            @endif
                                                         </div>
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white
-                                                    {{ $teacher->status == 'active'
-                                                        ? 'bg-green-400'
-                                                        : ($teacher->status == 'on_leave'
-                                                            ? 'bg-yellow-400'
-                                                            : 'bg-red-400') }}">
+                                                    {{ $teacher->status == 'active' ? 'bg-green-400' : ($teacher->status == 'on_leave' ? 'bg-yellow-400' : 'bg-red-400') }}">
                                                         </div>
                                                     </div>
                                                     <div class="flex-1 min-w-0">

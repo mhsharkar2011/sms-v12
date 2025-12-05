@@ -1,66 +1,78 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
 use App\Http\Controllers\Controller;
+
 use App\Models\Guardian;
+use App\Models\Student;
 use Illuminate\Http\Request;
 
 class GuardianManagementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        return view('admin.guardians.index');
+        $guardians = Guardian::with(['user', 'students'])
+            ->latest()
+            ->paginate(20);
+
+        return view('guardians.index', compact('guardians'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        $students = Student::active()->get();
+        return view('admin.guardians.create', compact('students'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'relationship' => 'required|string|max:100',
+            'occupation' => 'nullable|string|max:255',
+            'employer' => 'nullable|string|max:255',
+            'work_phone' => 'nullable|string|max:20',
+            'work_email' => 'nullable|email|max:255',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_phone' => 'nullable|string|max:20',
+            'emergency_contact_relationship' => 'nullable|string|max:100',
+            'medical_notes' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'is_primary' => 'boolean',
+            'can_pickup' => 'boolean',
+            'receive_sms_alerts' => 'boolean',
+            'receive_email_alerts' => 'boolean',
+            'is_active' => 'boolean',
+        ]);
+        $guardian = Guardian::create($validated);
+        if ($request->has('student_ids')) {
+            $guardian->students()->attach($request->input('student_ids'));
+        }
+        return redirect()->route('guardians.index')
+            ->with('success', 'Guardian created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Guardian $guardian)
     {
-        //
+        $guardian->load(['user', 'students', 'addresses']);
+        return view('guardians.show', compact('guardian'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Guardian $guardian)
     {
-        //
+        $guardian->load('user');
+        return view('guardians.edit', compact('guardian'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Guardian $guardian)
     {
-        //
+        // Validation and update logic here
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Guardian $guardian)
     {
-        //
+        $guardian->delete();
+        return redirect()->route('guardians.index')
+            ->with('success', 'Guardian deleted successfully.');
     }
 }

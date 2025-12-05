@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\ClassManagementController;
+use App\Http\Controllers\Admin\GuardianManagementController;
 use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
@@ -79,7 +80,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/users', UserManagementController::class);
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
         Route::resource('/students', StudentManagementController::class);
-        Route::resource('/guardians', TeacherManagementController::class);
+        Route::resource('/guardians', GuardianManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
         Route::resource('/classes', ClassManagementController::class);
         Route::resource('/subjects', SubjectManagementController::class);

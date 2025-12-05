@@ -58,7 +58,7 @@
                                         @enderror
                                     </div>
 
-                                     <div>
+                                    <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
                                         <input type="text" name="last_name" value="{{ old('last_name') }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('last_name') border-red-500 @enderror"
@@ -248,13 +248,26 @@
                                     @enderror
                                 </div>
 
+                                <!-- Avatar Field -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Avatar</label>
-                                    <input type="file" name="avatar" accept="image/*"
-                                        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('avatar') border-red-500 @enderror">
-                                    @error('avatar')
-                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                    @enderror
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Avatar (Optional)</label>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="flex-shrink-0">
+                                            <img id="avatar-preview"
+                                                class="h-20 w-20 rounded-full object-cover border-2 border-gray-300"
+                                                src="{{ asset('avatars/default-avatar.png') }}" alt="Avatar preview">
+                                        </div>
+                                        <div class="flex-1">
+                                            <input type="file" name="avatar" id="avatar" accept="image/*"
+                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('avatar') border-red-500 @enderror"
+                                                onchange="previewAvatar(event)">
+                                            @error('avatar')
+                                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                            <p class="mt-1 text-xs text-gray-500">Maximum file size: 2MB. Allowed
+                                                formats:JPG, PNG, GIF</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -276,3 +289,23 @@
         </div>
     </div>
 @endsection
+
+
+@push('scripts')
+    <script>
+        function previewAvatar(event) {
+            const input = event.target;
+            const preview = document.getElementById('avatar-preview');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+@endpush
