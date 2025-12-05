@@ -15,7 +15,7 @@ class GuardianManagementController extends Controller
             ->latest()
             ->paginate(20);
 
-        return view('guardians.index', compact('guardians'));
+        return view('admin.guardians.index', compact('guardians'));
     }
 
     public function create()

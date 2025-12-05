@@ -82,7 +82,7 @@ class TeacherManagementController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
-            'status' => 'required|in:active,on_leave,inactive',
+            'status' => 'required|in:active,on_leave,inactive,pending',
         ]);
 
         $teacherValidated = $request->validate([

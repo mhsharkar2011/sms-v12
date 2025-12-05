@@ -176,7 +176,7 @@
                                         class="flex-1 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                                         <option value="">Select Student</option>
                                         @foreach ($students as $student)
-                                            <option value="{{ $student->id }}">{{ $student->full_name }}</option>
+                                            <option value="{{ $student->id }}">{{ $student->user->name }}</option>
                                         @endforeach
                                     </select>
                                     <button type="button" onclick="addStudentField()"
@@ -218,7 +218,7 @@
                     class="flex-1 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                 <option value="">Select Student</option>
                 @foreach ($students as $student)
-                <option value="{{ $student->id }}">{{ $student->full_name }}</option>
+                <option value="{{ $student->id }}">{{ $student->user->name }}</option>
                 @endforeach
             </select>
             <button type="button"

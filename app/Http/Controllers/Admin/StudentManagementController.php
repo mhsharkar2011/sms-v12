@@ -26,7 +26,7 @@ class StudentManagementController extends Controller
         $search = $request->get('search');
 
         // Build query with filters - only get students
-        $students = User::role('student')
+        $students = Student::with('user')
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })
@@ -59,19 +59,29 @@ class StudentManagementController extends Controller
      */
     public function store(Request $request)
     {
+          // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                Log::info('Avatar file details:', [
+                    'name' => $request->file('avatar')->getClientOriginalName(),
+                    'size' => $request->file('avatar')->getSize(),
+                    'mime' => $request->file('avatar')->getMimeType(),
+                ]);
+            }
+
         // Validate the request
-        $validated = $request->validate([
+        $userValidation = $request->validate([
             // User fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'required|in:active,inactive,pending',
-
+            'status' => 'required|in:active,on_leave,inactive,pending',
+        ]);
+        $studentValidation = $request->validate([
             // Student fields
             'student_id' => 'nullable|string|unique:students,student_id',
+            'class_id' => 'nullable|exists:school_classes,id',
             'admission_number' => 'nullable|string|unique:students,admission_number',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female,other',
@@ -82,13 +92,12 @@ class StudentManagementController extends Controller
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:100',
             'state' => 'nullable|string|max:100',
-            'pincode' => 'nullable|string|max:20',
+            'postal_code' => 'nullable|string|max:20',
             'country' => 'nullable|string|max:100',
             'emergency_contact_name' => 'nullable|string|max:255',
             'emergency_contact_phone' => 'nullable|string|max:20',
             'emergency_contact_relation' => 'nullable|string|max:100',
             'admission_date' => 'required|date',
-            'class_id' => 'nullable|exists:school_classes,id',
             'grade_level' => 'required|string|max:50',
             'roll_number' => 'nullable|string|max:50',
             'section' => 'nullable|string|max:50',
@@ -100,73 +109,88 @@ class StudentManagementController extends Controller
             'special_instructions' => 'nullable|string',
             'is_boarder' => 'sometimes|boolean',
             'uses_transport' => 'sometimes|boolean',
+            'status' => 'required|in:active,on_leave,inactive,pending',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Handle avatar upload
-            $avatarPath = null;
+            Log::info('Step 3: Transaction started');
+
+             // Handle avatar upload
+            $userAvatarPath = null;
+            $studentAvatarPath = null;
+
             if ($request->hasFile('avatar')) {
-                $avatarPath = $request->file('avatar')->store('avatars', 'public');
+                Log::info('Step 4: Processing avatar upload');
+                // For User
+                $userAvatarName = 'user_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $userAvatarPath = $request->file('avatar')->storeAs('avatars/users', $userAvatarName, 'public');
+                Log::info('User avatar saved: ' . $userAvatarPath);
+
+                // For Teacher (optional - can be same or different)
+                $studentAvatarName = 'student_' . time() . '_' . uniqid() . '.' . $request->file('avatar')->getClientOriginalExtension();
+                $studentAvatarPath = $request->file('avatar')->storeAs('avatars/students', $studentAvatarName, 'public');
+                Log::info('Teacher avatar saved: ' . $studentAvatarPath);
+            } else {
+                Log::info('Step 4: No avatar uploaded, using defaults');
+                $userAvatarPath = 'default-avatar.png'; // Store string for default
+                $studentAvatarPath = null; // Teacher gets null
             }
+
 
             // Create User account
             $user = User::create([
-                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'phone' => $validated['phone'] ?? null,
-                'avatar' => $avatarPath,
-                'status' => $validated['status'],
-                'address' => $validated['address'] ?? null,
+                'name' => $userValidation['first_name'] . ' ' . $userValidation['last_name'],
+                'email' => $userValidation['email'],
+                'password' => Hash::make($userValidation['password']),
+                'phone' => $userValidation['phone'] ?? null,
+                'avatar' => $userAvatarPath,
+                'status' => $userValidation['status'],
+                'address' => $userValidation['address'] ?? null,
             ]);
 
             // Assign student role
             $user->assignRole('student');
 
             // Process array fields for allergies and medications
-            $allergies = !empty($validated['allergies']) ?
-                array_map('trim', explode(',', $validated['allergies'])) : [];
-            $medications = !empty($validated['medications']) ?
-                array_map('trim', explode(',', $validated['medications'])) : [];
+            $allergies = !empty($studentValidation['allergies']) ?
+                array_map('trim', explode(',', $studentValidation['allergies'])) : [];
+            $medications = !empty($studentValidation['medications']) ?
+                array_map('trim', explode(',', $studentValidation['medications'])) : [];
 
             // Create Student record
             $studentData = [
                 'user_id' => $user->id,
-                'student_id' => $validated['student_id'] ?? Student::generateStudentId(),
-                'admission_number' => $validated['admission_number'] ?? Student::generateAdmissionNumber(),
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
-                'date_of_birth' => $validated['date_of_birth'],
-                'gender' => $validated['gender'],
-                'blood_group' => $validated['blood_group'] ?? null,
-                'nationality' => $validated['nationality'] ?? null,
-                'religion' => $validated['religion'] ?? null,
-                'caste' => $validated['caste'] ?? null,
-                'address' => $validated['address'] ?? null,
-                'city' => $validated['city'] ?? null,
-                'state' => $validated['state'] ?? null,
-                'pincode' => $validated['pincode'] ?? null,
-                'country' => $validated['country'] ?? null,
-                'emergency_contact_name' => $validated['emergency_contact_name'] ?? null,
-                'emergency_contact_phone' => $validated['emergency_contact_phone'] ?? null,
-                'emergency_contact_relation' => $validated['emergency_contact_relation'] ?? null,
-                'admission_date' => $validated['admission_date'],
-                'class_id' => $validated['class_id'] ?? null,
-                'grade_level' => $validated['grade_level'],
-                'roll_number' => $validated['roll_number'] ?? null,
-                'section' => $validated['section'] ?? null,
-                'academic_year' => $validated['academic_year'],
-                'avatar' => $avatarPath,
-                'medical_notes' => $validated['medical_notes'] ?? null,
+                'student_id' => $studentValidation['student_id'] ?? Student::generateStudentId(),
+                'class_id' => $studentValidation['class_id'] ?? null,
+                'admission_number' => $studentValidation['admission_number'] ?? Student::generateAdmissionNumber(),
+                'date_of_birth' => $studentValidation['date_of_birth'],
+                'gender' => $studentValidation['gender'],
+                'blood_group' => $studentValidation['blood_group'] ?? null,
+                'nationality' => $studentValidation['nationality'] ?? null,
+                'religion' => $studentValidation['religion'] ?? null,
+                'caste' => $studentValidation['caste'] ?? null,
+                'address' => $studentValidation['address'] ?? null,
+                'city' => $studentValidation['city'] ?? null,
+                'state' => $studentValidation['state'] ?? null,
+                'postal_code' => $studentValidation['postal_code'] ?? null,
+                'country' => $studentValidation['country'] ?? null,
+                'emergency_contact_name' => $studentValidation['emergency_contact_name'] ?? null,
+                'emergency_contact_phone' => $studentValidation['emergency_contact_phone'] ?? null,
+                'emergency_contact_relation' => $studentValidation['emergency_contact_relation'] ?? null,
+                'admission_date' => $studentValidation['admission_date'],
+                'grade_level' => $studentValidation['grade_level'],
+                'roll_number' => $studentValidation['roll_number'] ?? null,
+                'section' => $studentValidation['section'] ?? null,
+                'academic_year' => $studentValidation['academic_year'],
+                'avatar' => $studentAvatarPath,
+                'medical_notes' => $studentValidation['medical_notes'] ?? null,
                 'allergies' => $allergies,
                 'medications' => $medications,
-                'transport_route' => $validated['transport_route'] ?? null,
-                'special_instructions' => $validated['special_instructions'] ?? null,
-                'status' => $validated['status'],
+                'transport_route' => $studentValidation['transport_route'] ?? null,
+                'special_instructions' => $studentValidation['special_instructions'] ?? null,
+                'status' => $studentValidation['status'],
                 'is_boarder' => $request->has('is_boarder') ? true : false,
                 'uses_transport' => $request->has('uses_transport') ? true : false,
             ];

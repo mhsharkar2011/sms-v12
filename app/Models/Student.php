@@ -16,11 +16,11 @@ class Student extends Model
 
     protected $fillable = [
         'user_id', // Add this
+        'first_name',
+        'last_name',
         'student_id',
         'class_id',
         'admission_number',
-        'first_name',
-        'last_name',
         'email',
         'phone',
         'date_of_birth',
@@ -32,7 +32,7 @@ class Student extends Model
         'address',
         'city',
         'state',
-        'pincode',
+        'postal_code',
         'country',
         'emergency_contact_name',
         'emergency_contact_phone',
