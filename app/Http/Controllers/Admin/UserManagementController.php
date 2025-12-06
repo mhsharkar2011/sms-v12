@@ -53,7 +53,7 @@ class UserManagementController extends Controller
             'adminUsers' => User::role('admin')->count(),
             'teacherUsers' => User::role('teacher')->count(),
             'studentUsers' => User::role('student')->count(),
-            'parentUsers' => User::role('parent')->count(),
+            'parentUsers' => User::role('guardian')->count(),
             'pendingUsers' => User::where('status', 'pending')->count(),
             'inactiveUsers' => User::where('status', 'inactive')->count(),
         ];

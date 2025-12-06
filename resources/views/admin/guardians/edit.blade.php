@@ -27,7 +27,7 @@
             </div>
 
             <div class="bg-white shadow rounded-lg">
-                <form action="{{ route('guardians.update', $guardian) }}" method="POST">
+                <form action="{{ route('admin.guardians.update', $guardian) }}" method="POST">
                     @csrf
                     @method('PUT')
 
@@ -219,7 +219,7 @@
 
                     <!-- Form Actions -->
                     <div class="px-6 py-3 bg-gray-50 text-right sm:px-6 rounded-b-lg">
-                        <a href="{{ route('guardians.show', $guardian) }}"
+                        <a href="{{ route('admin.guardians.show', $guardian) }}"
                             class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3">
                             Cancel
                         </a>
