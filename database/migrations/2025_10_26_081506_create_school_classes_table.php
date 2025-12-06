@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('code');
             $table->string('grade_level');
+            $table->date('academic_year')->nullable();
             $table->string('section');
             $table->integer('capacity')->default(40);
             $table->integer('current_strength')->default(0);

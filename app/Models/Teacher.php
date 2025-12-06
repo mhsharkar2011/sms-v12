@@ -47,15 +47,23 @@ class Teacher extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-     public function getFullNameAttribute()
+    public function getFullNameAttribute()
     {
         return $this->user->name ?? '';
     }
 
-    // Relationship with classes
-    public function classes()
+    // // Relationship with classes
+    // public function classes()
+    // {
+    //     return $this->belongsToMany(SchoolClass::class, 'teacher_class')
+    //         ->withTimestamps();
+    // }
+
+
+    public function schoolClasses()
     {
         return $this->belongsToMany(SchoolClass::class, 'teacher_class')
+            ->withPivot('subject')
             ->withTimestamps();
     }
 

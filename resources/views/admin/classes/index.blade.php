@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar />
+        <x-admin-sidebar active-route="admin.classes.index" />
 
         <div class="flex-1 overflow-auto">
             <div class="container mx-auto p-6">
@@ -196,17 +196,41 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                @if ($class->classTeacher)
+                                                @php
+                                                    // Try to get teacher through different methods
+                                                    $teacher = null;
+
+                                                    // Method 1: Use eager loaded teachers relationship
+                                                    if (
+                                                        $class->relationLoaded('teachers') &&
+                                                        $class->teachers->count() > 0
+                                                    ) {
+                                                        $teacher = $class->teachers->first();
+                                                    }
+                                                    // Method 2: Try to load teachers if not loaded
+                                                    elseif (method_exists($class, 'teachers')) {
+                                                        $teacher = $class->teachers()->first();
+                                                    }
+                                                @endphp
+
+                                                @if ($teacher)
                                                     <div class="flex items-center">
                                                         <div
                                                             class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xs font-bold mr-3">
-                                                            {{ substr($class->classTeacher->name, 0, 1) }}
+                                                            @php
+                                                                $teacherName =
+                                                                    optional($teacher->user)->name ??
+                                                                    ($teacher->name ?? '?');
+                                                                echo strtoupper(substr($teacherName, 0, 1));
+                                                            @endphp
                                                         </div>
                                                         <div>
                                                             <div class="text-sm font-medium text-gray-900">
-                                                                {{ $class->classTeacher->name }}</div>
+                                                                {{ optional($teacher->user)->name ?? ($teacher->name ?? 'Unknown Teacher') }}
+                                                            </div>
                                                             <div class="text-xs text-gray-500">
-                                                                {{ $class->classTeacher->email ?? '' }}</div>
+                                                                {{ optional($teacher->user)->email ?? ($teacher->email ?? '') }}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 @else

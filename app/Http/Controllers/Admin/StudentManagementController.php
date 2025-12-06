@@ -89,7 +89,6 @@ class StudentManagementController extends Controller
             'phone' => 'nullable|string|max:20',
             'password' => 'required|string|min:8|confirmed',
             'address' => 'nullable|string|max:500',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,on_leave,inactive,pending',
         ]);
         $studentValidation = $request->validate([
@@ -280,27 +279,56 @@ class StudentManagementController extends Controller
     public function update(Request $request, $id)
     {
         $student = Student::findOrFail($id);
+
         $user = $student->user;
 
         // Validation rules (similar to store but with unique email ignore)
-        $validated = $request->validate([
+        $userValidation = $request->validate([
             // User fields
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'nullable|string|min:8|confirmed',
             'phone' => 'nullable|string|max:20',
-            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'status' => 'required|in:active,inactive,pending',
-            'remove_avatar' => 'sometimes|boolean',
+            'password' => 'required|string|min:8|confirmed',
+            'address' => 'nullable|string|max:500',
+            'status' => 'required|in:active,on_leave,inactive,pending',
+        ]);
 
-            // Student fields (similar to store but with unique ignores)
-            'student_id' => 'nullable|string|unique:students,student_id,' . $student->id,
-            'admission_number' => 'nullable|string|unique:students,admission_number,' . $student->id,
+        $studentValidation = $request->validate([
+            // Student fields
+            'student_id' => 'nullable|string|unique:students,student_id',
+            'class_id' => 'nullable|exists:school_classes,id',
+            'admission_number' => 'nullable|string|unique:students,admission_number',
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'date_of_birth' => 'required|date',
             'gender' => 'required|in:male,female,other',
-            // ... include all other validation rules from store method
+            'blood_group' => 'nullable|string|max:10',
+            'nationality' => 'nullable|string|max:100',
+            'religion' => 'nullable|string|max:100',
+            'caste' => 'nullable|string|max:100',
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_phone' => 'nullable|string|max:20',
+            'emergency_contact_relation' => 'nullable|string|max:100',
+            'admission_date' => 'required|date',
+            'grade_level' => 'required|string|max:50',
+            'roll_number' => 'nullable|string|max:50',
+            'section' => 'nullable|string|max:50',
+            'academic_year' => 'required|string|max:20',
+            'medical_notes' => 'nullable|string',
+            'allergies' => 'nullable|string',
+            'medications' => 'nullable|string',
+            'transport_route' => 'nullable|string|max:255',
+            'special_instructions' => 'nullable|string',
+            'is_boarder' => 'sometimes|boolean',
+            'uses_transport' => 'sometimes|boolean',
+            'status' => 'required|in:active,inactive,graduated,transferred,suspended',
         ]);
+
 
         try {
             DB::beginTransaction();
@@ -323,32 +351,30 @@ class StudentManagementController extends Controller
 
             // Update User account
             $userData = [
-                'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
+                'name' => $userValidation['first_name'] . ' ' . $userValidation['last_name'],
+                'email' => $userValidation['email'],
+                'phone' => $userValidation['phone'] ?? null,
                 'avatar' => $avatarPath,
-                'status' => $validated['status'],
-                'address' => $validated['address'] ?? null,
+                'status' => $userValidation['status'],
+                'address' => $userValidation['address'] ?? null,
             ];
 
             // Only update password if provided
-            if (!empty($validated['password'])) {
-                $userData['password'] = Hash::make($validated['password']);
+            if (!empty($userValidation['password'])) {
+                $userData['password'] = Hash::make($userValidation['password']);
             }
 
             $user->update($userData);
 
             // Update Student record (similar to store method but with update)
             $studentData = [
-                'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
-                'date_of_birth' => $validated['date_of_birth'],
-                'gender' => $validated['gender'],
-                // ... include all other student fields
+                'user_id'=> $user->id,
+                'email' => $studentValidation['email'],
+                'phone' => $studentValidation['phone'] ?? null,
+                'date_of_birth' => $studentValidation['date_of_birth'],
+                'gender' => $studentValidation['gender'],
                 'avatar' => $avatarPath,
-                'status' => $validated['status'],
+                'status' => $studentValidation['status'],
             ];
 
             $student->update($studentData);

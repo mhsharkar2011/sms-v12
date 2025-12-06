@@ -36,6 +36,24 @@
 
                 <div class="max-w-4xl mx-auto">
                     <!-- Flash Messages -->
+                    @if (session('success'))
+                        <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-6">
+                            <div class="flex items-center space-x-2">
+                                <span class="material-icons-sharp text-sm">check_circle</span>
+                                <span class="font-medium">{{ session('success') }}</span>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
+                            <div class="flex items-center space-x-2">
+                                <span class="material-icons-sharp text-sm">error</span>
+                                <span class="font-medium">{{ session('error') }}</span>
+                            </div>
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                             <div class="flex items-center space-x-2">
@@ -53,242 +71,7 @@
                     <!-- Form Card -->
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                         <form action="{{ route('admin.classes.store') }}" method="POST">
-                            @csrf
-
-                            <!-- Basic Information Section -->
-                            <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Class Name -->
-                                    <div>
-                                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Class Name *
-                                        </label>
-                                        <input type="text" name="name" id="name" value="{{ old('name') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('name') border-red-500 @enderror"
-                                            placeholder="e.g., Mathematics 101" required>
-                                        @error('name')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Class Code -->
-                                    <div>
-                                        <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Class Code *
-                                        </label>
-                                        <input type="text" name="code" id="code" value="{{ old('code') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('code') border-red-500 @enderror"
-                                            placeholder="e.g., MATH-101" required>
-                                        @error('code')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Grade Level -->
-                                    <div>
-                                        <label for="grade_level" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Grade Level *
-                                        </label>
-                                        <select name="grade_level" id="grade_level"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('grade_level') border-red-500 @enderror"
-                                            required>
-                                            <option value="">Select Grade Level</option>
-                                            @foreach (['Kindergarten', 'Grade 1', 'Grade 2', 'Grade 3', 'Grade 4', 'Grade 5', 'Grade 6', 'Grade 7', 'Grade 8', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12'] as $level)
-                                                <option value="{{ $level }}"
-                                                    {{ old('grade_level') == $level ? 'selected' : '' }}>
-                                                    {{ $level }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('grade_level')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Section -->
-                                    <div>
-                                        <label for="section" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Section *
-                                        </label>
-                                        <input type="text" name="section" id="section" value="{{ old('section') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('section') border-red-500 @enderror"
-                                            placeholder="e.g., A, B, C" required>
-                                        @error('section')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Class Details Section -->
-                            <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4">Class Details</h2>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Subject -->
-                                    <div>
-                                        <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Subject
-                                        </label>
-                                        <input type="text" name="subject" id="subject" value="{{ old('subject') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('subject') border-red-500 @enderror"
-                                            placeholder="e.g., Mathematics">
-                                        @error('subject')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Room Number -->
-                                    <div>
-                                        <label for="room_number" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Room Number
-                                        </label>
-                                        <input type="text" name="room_number" id="room_number"
-                                            value="{{ old('room_number') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('room_number') border-red-500 @enderror"
-                                            placeholder="e.g., Room 101">
-                                        @error('room_number')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Academic Year -->
-                                    <div>
-                                        <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Academic Year *
-                                        </label>
-                                        <input type="text" name="academic_year" id="academic_year"
-                                            value="{{ old('academic_year', date('Y') . '-' . (date('Y') + 1)) }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('academic_year') border-red-500 @enderror"
-                                            placeholder="e.g., 2024-2025" required>
-                                        @error('academic_year')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Capacity -->
-                                    <div>
-                                        <label for="capacity" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Maximum Capacity *
-                                        </label>
-                                        <input type="number" name="capacity" id="capacity"
-                                            value="{{ old('capacity', 30) }}" min="1" max="100"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('capacity') border-red-500 @enderror"
-                                            required>
-                                        @error('capacity')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Schedule & Additional Information -->
-                            <div class="p-6 border-b border-gray-200">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4">Schedule & Additional Information</h2>
-
-                                <div class="grid grid-cols-1 gap-6">
-                                    <!-- Description -->
-                                    <div>
-                                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Class Description
-                                        </label>
-                                        <textarea name="description" id="description" rows="4"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent @error('description') border-red-500 @enderror"
-                                            placeholder="Enter class description...">{{ old('description') }}</textarea>
-                                        @error('description')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Schedule Information -->
-                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                        <!-- Start Time -->
-                                        <div>
-                                            <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">
-                                                Start Time
-                                            </label>
-                                            <input type="time" name="start_time" id="start_time"
-                                                value="{{ old('start_time') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        </div>
-
-                                        <!-- End Time -->
-                                        <div>
-                                            <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">
-                                                End Time
-                                            </label>
-                                            <input type="time" name="end_time" id="end_time"
-                                                value="{{ old('end_time') }}"
-                                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        </div>
-
-                                        <!-- Days of Week -->
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                                Meeting Days
-                                            </label>
-                                            <div class="flex flex-wrap gap-2">
-                                                @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
-                                                    <label class="inline-flex items-center">
-                                                        <input type="checkbox" name="meeting_days[]"
-                                                            value="{{ $day }}"
-                                                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                            {{ in_array($day, old('meeting_days', [])) ? 'checked' : '' }}>
-                                                        <span
-                                                            class="ml-1 text-sm text-gray-700">{{ substr($day, 0, 3) }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Status & Teacher Assignment -->
-                            <div class="p-6">
-                                <h2 class="text-xl font-semibold text-gray-900 mb-4">Status & Teacher Assignment</h2>
-
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <!-- Status -->
-                                    <div>
-                                        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Status *
-                                        </label>
-                                        <select name="status" id="status"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            required>
-                                            <option value="active"
-                                                {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>
-                                                Inactive</option>
-                                            <option value="planned" {{ old('status') == 'planned' ? 'selected' : '' }}>
-                                                Planned</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- Teacher Assignment -->
-                                    <div>
-                                        <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Assign Teacher
-                                        </label>
-                                        <select name="teacher_id" id="teacher_id"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                            <option value="">Select a Teacher</option>
-                                            @if (isset($teachers) && $teachers->count())
-                                                @foreach ($teachers as $teacher)
-                                                    <option value="{{ $teacher->id }}"
-                                                        {{ old('teacher_id') == $teacher->id ? 'selected' : '' }}>
-                                                        {{ $teacher->name }} - {{ $teacher->email }}
-                                                    </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                        <p class="mt-1 text-sm text-gray-500">You can assign a teacher later if needed</p>
-                                    </div>
-                                </div>
-                            </div>
+                            @include('admin.classes.partials.form-fields')
 
                             <!-- Form Actions -->
                             <div class="px-6 py-4 bg-gray-50 border-t border-gray-200">
@@ -402,6 +185,15 @@
             }
         });
 
+        // Validate academic year format
+        document.getElementById('academic_year').addEventListener('blur', function() {
+            const pattern = /^\d{4}-\d{4}$/;
+            if (!pattern.test(this.value)) {
+                alert('Academic year must be in the format: YYYY-YYYY');
+                this.focus();
+            }
+        });
+
         // Form submission validation
         document.querySelector('form').addEventListener('submit', function(e) {
             const requiredFields = ['name', 'code', 'grade_level', 'section', 'academic_year', 'capacity'];
@@ -417,9 +209,17 @@
                 }
             });
 
+            // Validate academic year format
+            const academicYear = document.getElementById('academic_year').value;
+            const yearPattern = /^\d{4}-\d{4}$/;
+            if (academicYear && !yearPattern.test(academicYear)) {
+                isValid = false;
+                document.getElementById('academic_year').classList.add('border-red-500');
+            }
+
             if (!isValid) {
                 e.preventDefault();
-                alert('Please fill in all required fields marked with *');
+                alert('Please fill in all required fields correctly');
             }
         });
     </script>
