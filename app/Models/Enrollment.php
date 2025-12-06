@@ -15,6 +15,7 @@ class Enrollment extends Model
         'class_id',
         'enrollment_id',
         'enrollment_date',
+        'academic_year',
         'start_date',
         'end_date',
         'status',

@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Role;
 
 class Student extends Model
 {
-    use HasFactory, SoftDeletes, HasAvatarUrl;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id', // Add this
@@ -96,6 +96,12 @@ class Student extends Model
     public function schoolClass(): BelongsTo
     {
         return $this->belongsTo(SchoolClass::class, 'class_id');
+    }
+
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
     }
 
     /**

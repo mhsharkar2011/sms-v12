@@ -23,6 +23,7 @@ return new class extends Migration
             // Enrollment details
             $table->string('enrollment_id')->unique()->nullable(); // Custom enrollment ID
             $table->date('enrollment_date')->nullable();
+            $table->date('academic_year')->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
 
