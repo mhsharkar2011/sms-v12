@@ -117,12 +117,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'studentEnrollments'])->name('students.enrollments');
         Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
         Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
+        Route::get('/enrollments/{enrollment}/print', [EnrollmentController::class, 'print'])->name('enrollments.print');
         // Enrollment Routes End ========================================================================================================================
 
         // Attendance Routes Start ======================================================================================================================
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         // Attendance Routes End =========================================================================================================================
-        
+
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');

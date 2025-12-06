@@ -14,7 +14,7 @@ use Spatie\Permission\Models\Role;
 
 class Student extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes,HasAvatarUrl;
 
     protected $fillable = [
         'user_id', // Add this

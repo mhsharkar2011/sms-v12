@@ -70,21 +70,27 @@ class EnrollmentController extends Controller
             ->whereDoesntHave('enrollments', function ($query) use ($request) {
                 $query->where('status', 'enrolled');
             })
-            ->orderByHasUser('name')
+            // Join with users table to order by user's name
+            ->join('users', 'students.user_id', '=', 'users.id')
+            ->orderBy('users.name')
+            ->select('students.*') // Important: select only student columns
             ->get();
 
-        $classes = SchoolClass::withCount('students')
-            ->active()
-            ->orderBy('name')
-            ->get()
-            ->filter(function ($class) {
-                return $class->hasAvailableSeats();
-            });
+        $classes = SchoolClass::withCount('students')->get();
 
-        $selectedClass = $request->class_id ? SchoolClass::find($request->class_id) : null;
-        $selectedStudent = $request->student_id ? Student::find($request->student_id) : null;
+        // Get selected class from request if exists
+        $selectedClass = null;
+        if ($request->has('class_id')) {
+            $selectedClass = SchoolClass::find($request->class_id);
+        }
 
-        return view('admin.enrollments.create', compact('students', 'classes', 'selectedClass', 'selectedStudent'));
+        // Get selected student from request if exists
+        $selectedStudent = null;
+        if ($request->has('student_id')) {
+            $selectedStudent = Student::with('user')->find($request->student_id);
+        }
+
+        return view('admin.enrollments.create', compact('students','classes', 'selectedClass','selectedStudent'));
     }
 
     /**

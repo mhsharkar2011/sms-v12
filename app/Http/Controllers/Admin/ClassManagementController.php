@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\Teacher;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -13,11 +14,15 @@ class ClassManagementController extends Controller
 {
     public function index()
     {
-        $classes = SchoolClass::with('classTeacher')
-            ->withCount('students')
-            ->orderBy('grade_level')
-            ->orderBy('section')
-            ->paginate(12);
+        // $classes = SchoolClass::with('classTeacher')
+        //     ->withCount('students')
+        //     ->orderBy('grade_level')
+        //     ->orderBy('section')
+        //     ->paginate(12);
+
+        $classes = SchoolClass::with(['teachers.user'])
+        ->withCount('students')
+        ->paginate(10);
 
         $totalClasses = SchoolClass::count();
         $activeClasses = SchoolClass::where('status', 'active')->count();

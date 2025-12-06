@@ -2,6 +2,80 @@
 
 @section('title', 'Enroll Student')
 
+
+@push('head')
+    <script>
+        // Define functions in global scope FIRST
+        function selectStudent(element) {
+            console.log('Selecting student:', element);
+            const studentId = element.getAttribute('data-student-id');
+            const studentName = element.getAttribute('data-student-name');
+            const studentEmail = element.getAttribute('data-student-email');
+
+            // Set hidden input
+            document.getElementById('student_id').value = studentId;
+
+            // Update display
+            document.getElementById('selectedStudentName').textContent = studentName;
+            document.getElementById('selectedStudentEmail').textContent = studentEmail;
+            document.getElementById('selectedStudentDisplay').classList.remove('hidden');
+
+            // Highlight selected card
+            document.querySelectorAll('.student-card').forEach(card => {
+                card.classList.remove('bg-blue-100', 'border-blue-300');
+                card.style.borderWidth = '1px';
+            });
+            element.classList.add('bg-blue-100', 'border-blue-300');
+            element.style.borderWidth = '2px';
+        }
+
+        function selectClass(element) {
+            console.log('Selecting class:', element);
+            const classId = element.getAttribute('data-class-id');
+            const className = element.getAttribute('data-class-name');
+            const classCode = element.getAttribute('data-class-code');
+            const availableSeats = element.getAttribute('data-available-seats');
+
+            // Set hidden input
+            document.getElementById('class_id').value = classId;
+
+            // Update display
+            document.getElementById('selectedClassName').textContent = `${className} (${classCode})`;
+            document.getElementById('selectedClassDetails').textContent =
+                `Grade: ${element.querySelector('.flex.justify-between:nth-child(1) span.font-medium').textContent}, Section: ${element.querySelector('.flex.justify-between:nth-child(2) span.font-medium').textContent}`;
+            document.getElementById('selectedClassSeats').textContent = `Available seats: ${availableSeats}`;
+            document.getElementById('selectedClassDisplay').classList.remove('hidden');
+
+            // Highlight selected card
+            document.querySelectorAll('.class-card').forEach(card => {
+                card.classList.remove('bg-green-100', 'border-green-300');
+                card.style.borderWidth = '1px';
+            });
+            element.classList.add('bg-green-100', 'border-green-300');
+            element.style.borderWidth = '2px';
+        }
+
+        function clearStudentSelection() {
+            document.getElementById('student_id').value = '';
+            document.getElementById('selectedStudentDisplay').classList.add('hidden');
+            document.querySelectorAll('.student-card').forEach(card => {
+                card.classList.remove('bg-blue-100', 'border-blue-300');
+                card.style.borderWidth = '1px';
+            });
+        }
+
+        function clearClassSelection() {
+            document.getElementById('class_id').value = '';
+            document.getElementById('selectedClassDisplay').classList.add('hidden');
+            document.querySelectorAll('.class-card').forEach(card => {
+                card.classList.remove('bg-green-100', 'border-green-300');
+                card.style.borderWidth = '1px';
+            });
+        }
+    </script>
+@endpush
+
+
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
         <x-admin-sidebar />
@@ -117,6 +191,7 @@
                                             data-student-id="{{ $student->id }}"
                                             data-student-name="{{ $student->user->name }}"
                                             data-student-email="{{ $student->user->email }}" onclick="selectStudent(this)">
+
                                             <div class="flex items-center space-x-3">
                                                 <div class="flex-shrink-0">
                                                     <div
@@ -169,12 +244,15 @@
                                 <h2 class="text-xl font-semibold text-gray-900 mb-4">2. Select Class</h2>
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
                                     @foreach ($classes as $class)
                                         <div class="class-card border border-gray-200 rounded-lg p-4 hover:bg-green-50 transition-colors cursor-pointer"
                                             data-class-id="{{ $class->id }}" data-class-name="{{ $class->name }}"
                                             data-class-code="{{ $class->code }}"
                                             data-available-seats="{{ $class->available_seats }}"
                                             onclick="selectClass(this)">
+
+
                                             <div class="flex justify-between items-start mb-2">
                                                 <div>
                                                     <h3 class="font-medium text-gray-900">{{ $class->name }}</h3>
@@ -343,115 +421,6 @@
         </div>
     </div>
 
-    @push('scripts')
-        <script>
-            // Filter students based on search
-            function filterStudents() {
-                const search = document.getElementById('student_search').value.toLowerCase();
-                const cards = document.querySelectorAll('.student-card');
-
-                cards.forEach(card => {
-                    const name = card.getAttribute('data-student-name').toLowerCase();
-                    const email = card.getAttribute('data-student-email').toLowerCase();
-
-                    if (name.includes(search) || email.includes(search)) {
-                        card.style.display = 'block';
-                    } else {
-                        card.style.display = 'none';
-                    }
-                });
-            }
-
-            // Select student
-            function selectStudent(element) {
-                const studentId = element.getAttribute('data-student-id');
-                const studentName = element.getAttribute('data-student-name');
-                const studentEmail = element.getAttribute('data-student-email');
-
-                // Set hidden input
-                document.getElementById('student_id').value = studentId;
-
-                // Update display
-                document.getElementById('selectedStudentName').textContent = studentName;
-                document.getElementById('selectedStudentEmail').textContent = studentEmail;
-                document.getElementById('selectedStudentDisplay').classList.remove('hidden');
-
-                // Highlight selected card
-                document.querySelectorAll('.student-card').forEach(card => {
-                    card.classList.remove('bg-blue-100', 'border-blue-300');
-                });
-                element.classList.add('bg-blue-100', 'border-blue-300');
-            }
-
-            // Clear student selection
-            function clearStudentSelection() {
-                document.getElementById('student_id').value = '';
-                document.getElementById('selectedStudentDisplay').classList.add('hidden');
-                document.querySelectorAll('.student-card').forEach(card => {
-                    card.classList.remove('bg-blue-100', 'border-blue-300');
-                });
-            }
-
-            // Select class
-            function selectClass(element) {
-                const classId = element.getAttribute('data-class-id');
-                const className = element.getAttribute('data-class-name');
-                const classCode = element.getAttribute('data-class-code');
-                const availableSeats = element.getAttribute('data-available-seats');
-
-                // Set hidden input
-                document.getElementById('class_id').value = classId;
-
-                // Update display
-                document.getElementById('selectedClassName').textContent = `${className} (${classCode})`;
-                document.getElementById('selectedClassDetails').textContent =
-                    `${element.querySelector('.text-sm:nth-child(2)').textContent}`;
-                document.getElementById('selectedClassSeats').textContent = `Available seats: ${availableSeats}`;
-                document.getElementById('selectedClassDisplay').classList.remove('hidden');
-
-                // Highlight selected card
-                document.querySelectorAll('.class-card').forEach(card => {
-                    card.classList.remove('bg-green-100', 'border-green-300');
-                });
-                element.classList.add('bg-green-100', 'border-green-300');
-            }
-
-            // Clear class selection
-            function clearClassSelection() {
-                document.getElementById('class_id').value = '';
-                document.getElementById('selectedClassDisplay').classList.add('hidden');
-                document.querySelectorAll('.class-card').forEach(card => {
-                    card.classList.remove('bg-green-100', 'border-green-300');
-                });
-            }
-
-            // Initialize with pre-selected values
-            document.addEventListener('DOMContentLoaded', function() {
-                @if ($selectedStudent)
-                    const studentCard = document.querySelector(
-                        `.student-card[data-student-id="{{ $selectedStudent->id }}"]`);
-                    if (studentCard) {
-                        selectStudent(studentCard);
-                    }
-                @endif
-
-                @if ($selectedClass)
-                    const classCard = document.querySelector(`.class-card[data-class-id="{{ $selectedClass->id }}"]`);
-                    if (classCard) {
-                        selectClass(classCard);
-                    }
-                @endif
-            });
-
-            // Form validation
-            document.querySelector('form').addEventListener('submit', function(e) {
-                if (!document.getElementById('student_id').value || !document.getElementById('class_id').value) {
-                    e.preventDefault();
-                    alert('Please select both a student and a class.');
-                }
-            });
-        </script>
-    @endpush
 
     @push('styles')
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
