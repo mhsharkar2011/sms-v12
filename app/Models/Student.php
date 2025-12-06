@@ -2,22 +2,27 @@
 
 namespace App\Models;
 
+use App\Traits\HasAvatarUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 
 class Student extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAvatarUrl;
 
     protected $fillable = [
-        'student_id',
-        'admission_number',
+        'user_id', // Add this
         'first_name',
         'last_name',
+        'student_id',
+        'class_id',
+        'admission_number',
         'email',
         'phone',
         'date_of_birth',
@@ -29,13 +34,12 @@ class Student extends Model
         'address',
         'city',
         'state',
-        'pincode',
+        'postal_code',
         'country',
         'emergency_contact_name',
         'emergency_contact_phone',
         'emergency_contact_relation',
         'admission_date',
-        'class_id',
         'grade_level',
         'roll_number',
         'section',
@@ -68,6 +72,24 @@ class Student extends Model
         'uses_transport' => 'boolean',
     ];
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get full name of the student.
+     */
+    public function getFullNameAttribute(): string
+    {
+        return $this->user->name ?? '';
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
     /**
      * Get the school class that the student belongs to.
      */
@@ -91,15 +113,6 @@ class Student extends Model
     {
         return $this->hasOne(StudentAddress::class)->where('is_primary', true);
     }
-
-    /**
-     * Get full name of the student.
-     */
-    public function getFullNameAttribute(): string
-    {
-        return $this->first_name . ' ' . $this->last_name;
-    }
-
     /**
      * Get age of the student.
      */

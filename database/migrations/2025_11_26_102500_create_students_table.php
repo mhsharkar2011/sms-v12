@@ -10,23 +10,21 @@ return new class extends Migration
     {
         Schema::create('students', function (Blueprint $table) {
             $table->id();
+            $table->string('user_id')->unique()->nullable();
             $table->string('student_id')->unique();
             $table->string('admission_number')->unique()->nullable()->comment('Custom admission number: ADM001, ADM002, etc.');
-            $table->string('first_name');
-            $table->string('last_name');
-            $table->string('email')->unique()->nullable();
             $table->string('phone')->nullable();
             $table->date('date_of_birth');
             $table->enum('gender', ['male', 'female', 'other']);
             $table->string('blood_group')->nullable();
-            $table->string('nationality')->default('Indian');
+            $table->string('nationality')->default('Bangladeshi');
             $table->string('religion')->nullable();
             $table->string('caste')->nullable();
             $table->text('address')->nullable();
             $table->string('city')->nullable();
             $table->string('state')->nullable();
-            $table->string('pincode')->nullable();
-            $table->string('country')->default('India');
+            $table->string('postal_code')->nullable();
+            $table->string('country')->default('Bangladesh');
 
             // Emergency Contact Information (Separate from guardians)
             $table->string('emergency_contact_name')->nullable();
@@ -81,7 +79,7 @@ return new class extends Migration
             $table->string('address_line_2')->nullable();
             $table->string('city');
             $table->string('state');
-            $table->string('pincode');
+            $table->string('postal_code');
             $table->string('country')->default('India');
             $table->boolean('is_primary')->default(false);
             $table->text('notes')->nullable();

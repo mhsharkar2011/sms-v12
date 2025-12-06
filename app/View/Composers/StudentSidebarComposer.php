@@ -2,109 +2,134 @@
 
 namespace App\View\Composers;
 
-use App\Models\User;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Cache;
+use App\Models\Attendance;
+use App\Models\Exam;
+use App\Models\SchoolClass;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Teacher;
+use Illuminate\Support\Facades\Auth;
 
 class StudentSidebarComposer
 {
-    /**
-     * Bind data to the view.
-     */
-    public function compose(View $view)
-    {
-        $user = auth()->user();
-        $currentRoute = Route::currentRouteName();
+    public $activeRoute;
+    public $user;
 
-        $view->with([
-            'sidebarUser' => $user,
-            'menuItems' => $this->getStudentMenuItems(),
-            'activeStates' => $this->calculateActiveStates($currentRoute),
-            'quickStats' => $this->getStudentQuickStats(),
-        ]);
+    public function __construct($activeRoute = null)
+    {
+        $this->activeRoute = $activeRoute;
+        $this->user = Auth::user();
     }
 
-    /**
-     * Get menu items for student sidebar
-     */
-    protected function getStudentMenuItems()
+    protected function getMenuItems()
     {
-        return [
+        $totalStudents = Student::count();
+        $totalTeachers = Teacher::count();
+        $totalClasses = SchoolClass::count();
+        $totalSubjects = Subject::count();
+        $totalAttendance = Attendance::count();
+        $totalExams = Exam::count();
+
+        $items = [
             [
                 'route' => 'student.dashboard',
-                'icon' => '📊',
+                'icon' => '🏠',
                 'label' => 'Dashboard',
-                'description' => 'Overview & Analytics',
+                'description' => 'Overview & Updates',
+                'badge' => null,
+                'badgeColor' => null
             ],
             [
-                'route' => 'student.profile',
-                'icon' => '👤',
-                'label' => 'My Profile',
-                'description' => 'Personal information',
+                'route' => 'student.index',
+                'icon' => '🎓',
+                'label' => 'Students',
+                'description' => 'Student records',
+                'badge' => $totalStudents,
+                'badgeColor' => 'bg-blue-500'
             ],
             [
-                'route' => 'student.courses',
+                'route' => 'student.teachers.profile',
+                'icon' => '👨‍🏫',
+                'label' => 'Teachers',
+                'description' => 'Teacher profiles',
+                'badge' => $totalTeachers,
+                'badgeColor' => 'bg-green-500'
+            ],
+            [
+                'route' => 'student.classes.index',
+                'icon' => '🏫',
+                'label' => 'Classes',
+                'description' => 'Class management',
+                'badge' => $totalClasses,
+                'badgeColor' => 'bg-yellow-500'
+            ],
+            [
+                'route' => 'student.subjects.index',
                 'icon' => '📚',
-                'label' => 'My Courses',
-                'description' => 'Course materials',
+                'label' => 'Subjects',
+                'description' => 'Course catalog',
+                'badge' => $totalSubjects,
+                'badgeColor' => 'bg-purple-500'
             ],
             [
-                'route' => 'student.grades',
-                'icon' => '📝',
-                'label' => 'Grades',
-                'description' => 'View results',
-            ],
-            [
-                'route' => 'student.attendance',
+                'route' => 'student.attendance.index',
                 'icon' => '📅',
                 'label' => 'Attendance',
                 'description' => 'Track presence',
+                'badge' => $totalAttendance > 0 ? $totalAttendance : "NULL",
+                'badgeColor' => $totalAttendance > 0 ? 'bg-red-500' : "bg-gray-500",
             ],
             [
-                'route' => 'student.schedule',
-                'icon' => '⏰',
-                'label' => 'Schedule',
-                'description' => 'Class timetable',
+                'route' => 'student.exams',
+                'icon' => '📝',
+                'label' => 'Exams',
+                'description' => 'Tests & results',
+                'badge' => $totalExams > 0 ? $totalExams : "NULL",
+                'badgeColor' => $totalExams > 0 ? 'bg-yellow-500' : "bg-gray-500",
+            ],
+            [
+                'route' => 'student.reports',
+                'icon' => '📈',
+                'label' => 'Reports',
+                'description' => 'Analytics & insights',
+                'badge' => null
+            ],
+        ];
+        return $items;
+    }
+
+    public function bottomMenuItems()
+    {
+        return [
+            [
+                'route' => 'student.profile',
+                'icon' => '👤',
+                'label' => 'Profile',
+                'description' => 'Account Settings'
+            ],
+            [
+                'route' => 'student.settings',
+                'icon' => '⚙️',
+                'label' => 'Settings',
+                'description' => 'Preferences'
+            ],
+            [
+                'route' => 'logout',
+                'icon' => '🚪',
+                'label' => 'Logout',
+                'description' => 'Sign out',
+                'method' => 'POST'
             ],
         ];
     }
 
-    /**
-     * Get quick stats for student sidebar
-     */
-    protected function getStudentQuickStats()
+    public function isActive($route)
     {
-        $user = auth()->user();
-
-        return [
-            'current_gpa' => '3.8',
-            'attendance_rate' => '94%',
-            'completed_courses' => '12',
-            'pending_assignments' => '3',
-        ];
+        return $this->activeRoute === $route || request()->routeIs($route);
     }
 
-    /**
-     * Calculate active states for menu items
-     */
-    protected function calculateActiveStates($currentRoute)
+    public function render()
     {
-        $menuItems = $this->getStudentMenuItems();
-        $activeStates = [];
-
-        foreach ($menuItems as $item) {
-            $activeStates[$item['route']] = $this->isActive($currentRoute, $item['route']);
-        }
-
-        return $activeStates;
-    }
-
-    /**
-     * Check if a route is active
-     */
-    protected function isActive($currentRoute, $route)
-    {
-        return $currentRoute === $route || str_starts_with($currentRoute, $route . '.');
+        return view('components.student-sidebar');
     }
 }

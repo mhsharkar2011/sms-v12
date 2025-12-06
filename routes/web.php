@@ -1,14 +1,18 @@
 <?php
 
-use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
-use App\Http\Controllers\Parent\DashboardController as ParentDashboard;
+use App\Http\Controllers\Parent\DashboardController as GuardianDashboard;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
+use App\Http\Controllers\Admin\ClassManagementController;
+use App\Http\Controllers\Admin\GuardianManagementController;
+use App\Http\Controllers\Admin\SubjectManagementController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,14 +21,28 @@ Route::get('/', function () {
     return view('landing');
 })->name('home');
 
+
+// routes/web.php
+
+// Posts
+Route::resource('posts', PostController::class);
+
+// Comments
+Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
+
+
 // Authentication Routes
 require __DIR__ . '/auth.php';
 
 // Add profile routes if they don't exist
 Route::middleware('auth')->group(function () {
-    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::get('/profile/{user}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/{user}/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/{user}', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/{user}/posts', [ProfileController::class, 'posts'])->name('users.posts');
 });
 
 // Protected Routes
@@ -51,44 +69,23 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Parent Routes
-    Route::prefix('parent')->name('parent.')->middleware('role:parent')->group(function () {
-        Route::get('/dashboard', [ParentDashboard::class, 'index'])->name('dashboard');
-        Route::get('/children', [ParentDashboard::class, 'children'])->name('children')->middleware('permission:view child grades');
+    Route::prefix('guardian')->name('guardian.')->middleware('role:guardian')->group(function () {
+        Route::get('/dashboard', [GuardianDashboard::class, 'index'])->name('dashboard');
+        Route::get('/children', [GuardianDashboard::class, 'children'])->name('children')->middleware('permission:view child grades');
     });
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
-        Route::get('/profiles', [AdminDashboard::class, 'adminProfile'])->name('profile');
-        Route::get('/profile', [AdminDashboard::class, 'adminProfileEdit'])->name('profile.edit');
-        Route::put('/profile', [AdminDashboard::class, 'adminProfileUpdate'])->name('profile.update');
-        Route::put('/profile/password', [AdminDashboard::class, 'adminProfileUpdatePassword'])->name('profile.password');
-
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-
-        // User Management Route
         Route::resource('/users', UserManagementController::class);
         Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
-
-        // Student Management Route
         Route::resource('/students', StudentManagementController::class);
-        // Teacher Management
+        Route::resource('/guardians', GuardianManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
-        // Class Management
         Route::resource('/classes', ClassManagementController::class);
-
-        // Student assignment routes
+        Route::resource('/subjects', SubjectManagementController::class);
         Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
         Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
-
-
-        // // Student routes
-        // Route::get('/students', [\App\Http\Controllers\Admin\StudentManagementController::class, 'index'])->name('students.index');
-        // Route::get('/students', [StudentManagementController::class, 'create'])->name('students.create');
-        // Route::post('/students', [StudentManagementController::class, 'store'])->name('students.store');
-        // Route::get('/students/{student}', [StudentManagementController::class, 'show'])->name('students.show');
-        // Route::get('/students/{student}/edit', [StudentManagementController::class, 'edit'])->name('students.edit');
-        // Route::put('/students/{student}', [StudentManagementController::class, 'update'])->name('students.update');
-        // Route::delete('/students/{student}', [StudentManagementController::class, 'destroy'])->name('students.destroy');
 
 
 
@@ -98,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
         Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
         Route::get('/classes/dashboard', [AdminDashboard::class, 'classes'])->name('classes.dashboard');
-        Route::get('/subjects', [AdminDashboard::class, 'subjects'])->name('subjects');
+        Route::get('/subjects/dashboard', [AdminDashboard::class, 'subjects'])->name('subjects.dashboard');
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');

@@ -14,17 +14,15 @@ return new class extends Migration
             $table->string('code');
             $table->string('grade_level');
             $table->string('section');
-            $table->foreignId('class_teacher_id')->nullable()->constrained('teachers');
             $table->integer('capacity')->default(40);
             $table->integer('current_strength')->default(0);
             $table->string('room_number')->nullable();
             $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('academic_year')->default('2024-2025');
             $table->timestamps();
             $table->softDeletes();
 
-            $table->unique(['grade_level', 'section', 'academic_year']);
+            $table->unique(['grade_level', 'section']);
         });
     }
 

@@ -2,8 +2,13 @@
 
 namespace App\View\Composers;
 
+use App\Models\Guardian;
 use App\Models\SchoolClass;
+use App\Models\Student;
+use App\Models\Subject;
+use App\Models\Teacher;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
@@ -12,7 +17,7 @@ class AdminSidebarComposer
 {
     public function compose(View $view)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $view->with([
             'sidebarData' => $this->getSidebarData(),
@@ -24,12 +29,12 @@ class AdminSidebarComposer
 
     protected function getSidebarData()
     {
-        $pendingUsersCount = User::where('status', 'active')->count();
         $totalUserCount = User::count();
         $adminUserCount = User::role('admin')->count();
-        $studentUserCount = User::role('student')->count();
-        $teacherUserCount = User::role('teacher')->count();
-        $parentUserCount = User::role('parent')->count();
+        $totalStudent = Student::count();
+        $totalTeacher = Teacher::count();
+        $totalGuardian = Guardian::count();
+        $totalClasses = SchoolClass::count();
 
         $menuItems = [
             [
@@ -38,65 +43,81 @@ class AdminSidebarComposer
                 'label' => 'Dashboard',
                 'description' => 'Overview & Analytics',
                 'badge' => $adminUserCount,
+                'badgeColor' => 'bg-blue-100'
             ],
             [
                 'route' => 'admin.users.index',
                 'icon' => '👥',
                 'label' => 'User Management',
                 'description' => 'Manage all users',
-                'badge' => $pendingUsersCount > 0 ? $pendingUsersCount : null,
-                'badgeColor' => $pendingUsersCount > 0 ? 'bg-gray-400' : null
+                'badge' => $totalUserCount,
+                'badgeColor' => 'bg-green-100'
             ],
             [
                 'route' => 'admin.students.index',
                 'icon' => '🎓',
                 'label' => 'Students',
                 'description' => 'Student records',
-                'badge' => $studentUserCount,
-                'badgeColor' => 'bg-blue-500'
+                'badge' => $totalStudent,
+                'badgeColor' => 'bg-red-100'
             ],
             [
                 'route' => 'admin.teachers.index',
                 'icon' => '👨‍🏫',
                 'label' => 'Teachers',
                 'description' => 'Faculty management',
-                'badge' => $teacherUserCount,
-                'badgeColor' => 'bg-green-500'
+                'badge' => $totalTeacher > 0 ? $totalTeacher : "NULL",
+                'badgeColor' => $totalTeacher > 0 ? 'bg-green-100' : "bg-yellow-100",
+            ],
+             [
+                'route' => 'admin.guardians.index',
+                'icon' => '👨‍🏫',
+                'label' => 'Guardians',
+                'description' => 'GUardian management',
+                'badge' => $totalGuardian > 0 ? $totalGuardian : "NULL",
+                'badgeColor' => $totalGuardian > 0 ? 'bg-brown-100' : "bg-gray-100",
             ],
             [
                 'route' => 'admin.classes.index',
                 'icon' => '🏫',
                 'label' => 'Classes',
                 'description' => 'Class management',
-                'badge' => SchoolClass::count(),
+                'badge' => $totalClasses,
+                'badgeColor' => 'bg-purple-100'
+
             ],
             [
-                'route' => 'admin.subjects',
+                'route' => 'admin.subjects.index',
                 'icon' => '📚',
                 'label' => 'Subjects',
                 'description' => 'Course catalog',
-                'badge' => null
+                'badge' => Subject::where('is_active', true)->count(),
+                'badgeColor' => 'bg-blue-200',
+
             ],
             [
                 'route' => 'admin.attendance',
                 'icon' => '📅',
                 'label' => 'Attendance',
                 'description' => 'Track presence',
-                'badge' => '3'
+                'badge' => '3',
+                'badgeColor' => 'bg-red-100',
             ],
             [
                 'route' => 'admin.exams',
                 'icon' => '📝',
                 'label' => 'Exams',
                 'description' => 'Tests & results',
-                'badge' => '8'
+                'badge' => '8',
+                'badgeColor' => 'bg-yellow-100',
             ],
             [
                 'route' => 'admin.reports',
                 'icon' => '📈',
                 'label' => 'Reports',
                 'description' => 'Analytics & insights',
-                'badge' => null
+                'badge' => "NULL",
+                'badgeColor' => 'bg-yellow-100',
             ],
         ];
 
@@ -122,7 +143,7 @@ class AdminSidebarComposer
         $unreadCount = 0;
         try {
             if (Schema::hasTable('notifications')) {
-                $unreadCount = auth()->user()->unreadNotifications->count();
+                $unreadCount = Auth::user()->unreadNotifications->count();
             }
         } catch (\Exception $e) {
             $unreadCount = 0;
@@ -130,9 +151,10 @@ class AdminSidebarComposer
 
         return [
             [
-                'route' => 'admin.profile',
-                'icon' => '👤',
                 'label' => 'My Profile',
+                'route' => 'profile.show',
+                'params' => ['user' => auth()->user()],
+                'icon' => '👤',
                 'description' => 'Account settings'
             ],
             [
@@ -161,12 +183,14 @@ class AdminSidebarComposer
 
     protected function getQuickStats()
     {
+        $totalUserCount = User::count();
         $totalStudent = User::role('student')->count();
         $totalTeacher = User::role('teacher')->count();
         $totalClass = SchoolClass::count();
         $totalUserPending = User::where('status', 'pending')->count();
 
         return [
+            'total_users' => $totalUserCount,
             'total_students' => $totalStudent,
             'total_teachers' => $totalTeacher,
             'total_classes' => $totalClass,

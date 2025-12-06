@@ -3,17 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Student;
-use App\Models\Teacher;
 use App\Models\User;
-use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalStudent = User::role('student')->where('status', 'active')->count();
-        return view('dashboards.admin-dashboard', compact('totalStudent'));
+        return view('dashboards.admin-dashboard');
     }
 
     public function users()
@@ -42,19 +38,14 @@ class DashboardController extends Controller
             'pendingAdmins'
         ));
     }
-    public function adminProfileEdit()
+    public function ProfileShow()
     {
-        return view('admin.profiles.index');
+        return view('profile.show');
     }
-    public function adminProfileUpdate()
+    public function ProfileEdit()
     {
-        return view('admin.profiles.edit');
+        return view('profile.edit');
     }
-    public function adminProfileUpdatePassword()
-    {
-        return view('admin.profiles.edit');
-    }
-
     public function students()
     {
         return view('dashboards.student-dashboard');
@@ -66,10 +57,10 @@ class DashboardController extends Controller
         return view('dashboards.teacher-dashboard', compact('teachers'));
     }
 
-    public function parents()
+    public function guardians()
     {
-        $parents = $parents ?? null;
-        return view('dashboards.parent-dashboard', compact('parents'));
+        $guardians = $guardians ?? null;
+        return view('dashboards.guardian-dashboard', compact('guardians'));
     }
 
     public function classes()

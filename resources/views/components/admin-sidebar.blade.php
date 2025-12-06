@@ -17,7 +17,7 @@
         </div>
     </div>
 
-    <!-- Quick Stats -->
+    {{-- <!-- Quick Stats -->
     @if (!$compact && !empty($quickStats))
         <div class="p-4 border-b border-gray-200 bg-gray-50">
             <div class="space-y-2">
@@ -35,7 +35,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endif --}}
 
     <!-- Navigation Menu -->
     <nav class="flex-1 overflow-y-auto py-4">

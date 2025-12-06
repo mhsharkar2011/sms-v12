@@ -27,7 +27,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-blue-600">Total Users</p>
-                                <p class="text-2xl font-bold text-blue-400">{{ $stats['totalUsers'] }}</p>
+                                <p class="text-2xl font-bold text-blue-400">{{ $stats['total_users'] }}</p>
                             </div>
                             <div class="p-3 bg-blue-100 rounded-lg">
                                 <i class="fas fa-users text-blue-600"></i>
@@ -38,7 +38,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-green-600">Active Users</p>
-                                <p class="text-2xl font-bold text-green-400">{{ $stats['activeUsers'] }}</p>
+                                <p class="text-2xl font-bold text-green-400">{{ $stats['active_users'] }}</p>
                             </div>
                             <div class="p-3 bg-green-100 rounded-lg">
                                 <i class="fas fa-user-check text-green-600"></i>
@@ -49,7 +49,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-yellow-600">Pending</p>
-                                <p class="text-2xl font-bold text-yellow-400">{{ $stats['pendingUsers'] }}</p>
+                                <p class="text-2xl font-bold text-yellow-400">{{ $stats['pending_users'] }}</p>
                             </div>
                             <div class="p-3 bg-yellow-100 rounded-lg">
                                 <i class="fas fa-clock text-yellow-600"></i>
@@ -60,7 +60,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-red-600">Inactive Users</p>
-                                <p class="text-2xl font-bold text-red-400">{{ $stats['inActiveUsers'] }}</p>
+                                <p class="text-2xl font-bold text-red-400">{{ $stats['inactive_users'] }}</p>
                             </div>
                             <div class="p-3 bg-red-100 rounded-lg">
                                 <i class="fas fa-shield-alt text-red-400"></i>
@@ -155,8 +155,9 @@
                                                 <div class="flex items-center">
                                                     <div class="flex-shrink-0 h-10 w-10">
                                                         <img class="h-10 w-10 rounded-full object-cover"
-                                                            src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
-                                                            alt="{{ $user->name }}">
+                                                            src="{{ $user->avatar_url }}"
+                                                            alt="{{ $user->name ?? 'User' }}"
+                                                            onerror="this.src='{{ asset('storage/default-avatar.png') }}'">
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900">{{ $user->name }}
@@ -202,8 +203,8 @@
                                                         <i class="fas fa-edit mr-1 text-xs"></i>
                                                         Edit
                                                     </a>
-                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST"
-                                                        class="inline">
+                                                    <form action="{{ route('admin.users.destroy', $user) }}"
+                                                        method="POST" class="inline">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"

@@ -12,8 +12,6 @@ class SchoolClassSeeder extends Seeder
         // Clear existing classes to avoid conflicts
         SchoolClass::query()->delete();
 
-        $academicYear = '2024-2025';
-
         // Define classes with unique grade_level + section combinations
         $classes = [
             // Nursery to UKG - Single section
@@ -30,38 +28,38 @@ class SchoolClassSeeder extends Seeder
             ['name' => 'Class 2', 'code' => 'C2B', 'grade_level' => '2', 'section' => 'B'],
             ['name' => 'Class 2', 'code' => 'C2C', 'grade_level' => '2', 'section' => 'C'],
 
-            ['name' => 'Class 3', 'code' => 'C3A', 'grade_level' => '3', 'section' => 'A'],
-            ['name' => 'Class 3', 'code' => 'C3B', 'grade_level' => '3', 'section' => 'B'],
-            ['name' => 'Class 3', 'code' => 'C3C', 'grade_level' => '3', 'section' => 'C'],
+            // ['name' => 'Class 3', 'code' => 'C3A', 'grade_level' => '3', 'section' => 'A'],
+            // ['name' => 'Class 3', 'code' => 'C3B', 'grade_level' => '3', 'section' => 'B'],
+            // ['name' => 'Class 3', 'code' => 'C3C', 'grade_level' => '3', 'section' => 'C'],
 
-            ['name' => 'Class 4', 'code' => 'C4A', 'grade_level' => '4', 'section' => 'A'],
-            ['name' => 'Class 4', 'code' => 'C4B', 'grade_level' => '4', 'section' => 'B'],
+            // ['name' => 'Class 4', 'code' => 'C4A', 'grade_level' => '4', 'section' => 'A'],
+            // ['name' => 'Class 4', 'code' => 'C4B', 'grade_level' => '4', 'section' => 'B'],
 
-            ['name' => 'Class 5', 'code' => 'C5A', 'grade_level' => '5', 'section' => 'A'],
-            ['name' => 'Class 5', 'code' => 'C5B', 'grade_level' => '5', 'section' => 'B'],
+            // ['name' => 'Class 5', 'code' => 'C5A', 'grade_level' => '5', 'section' => 'A'],
+            // ['name' => 'Class 5', 'code' => 'C5B', 'grade_level' => '5', 'section' => 'B'],
 
             // Grade 6-8 - Multiple sections
-            ['name' => 'Class 6', 'code' => 'C6A', 'grade_level' => '6', 'section' => 'A'],
-            ['name' => 'Class 6', 'code' => 'C6B', 'grade_level' => '6', 'section' => 'B'],
+            // ['name' => 'Class 6', 'code' => 'C6A', 'grade_level' => '6', 'section' => 'A'],
+            // ['name' => 'Class 6', 'code' => 'C6B', 'grade_level' => '6', 'section' => 'B'],
 
-            ['name' => 'Class 7', 'code' => 'C7A', 'grade_level' => '7', 'section' => 'A'],
-            ['name' => 'Class 7', 'code' => 'C7B', 'grade_level' => '7', 'section' => 'B'],
+            // ['name' => 'Class 7', 'code' => 'C7A', 'grade_level' => '7', 'section' => 'A'],
+            // ['name' => 'Class 7', 'code' => 'C7B', 'grade_level' => '7', 'section' => 'B'],
 
-            ['name' => 'Class 8', 'code' => 'C8A', 'grade_level' => '8', 'section' => 'A'],
-            ['name' => 'Class 8', 'code' => 'C8B', 'grade_level' => '8', 'section' => 'B'],
+            // ['name' => 'Class 8', 'code' => 'C8A', 'grade_level' => '8', 'section' => 'A'],
+            // ['name' => 'Class 8', 'code' => 'C8B', 'grade_level' => '8', 'section' => 'B'],
 
             // Grade 9-10 - Single section
-            ['name' => 'Class 9', 'code' => 'C9', 'grade_level' => '9', 'section' => 'A'],
-            ['name' => 'Class 10', 'code' => 'C10', 'grade_level' => '10', 'section' => 'A'],
+            // ['name' => 'Class 9', 'code' => 'C9', 'grade_level' => '9', 'section' => 'A'],
+            // ['name' => 'Class 10', 'code' => 'C10', 'grade_level' => '10', 'section' => 'A'],
 
-            // Grade 11-12 - Different streams with different sections to avoid conflicts
-            ['name' => 'Class 11 Science', 'code' => 'C11S', 'grade_level' => '11', 'section' => 'A'],
-            ['name' => 'Class 11 Commerce', 'code' => 'C11C', 'grade_level' => '11', 'section' => 'B'], // Changed to B
-            ['name' => 'Class 11 Arts', 'code' => 'C11A', 'grade_level' => '11', 'section' => 'C'],     // Changed to C
+            // // Grade 11-12 - Different streams with different sections to avoid conflicts
+            // ['name' => 'Class 11 Science', 'code' => 'C11S', 'grade_level' => '11', 'section' => 'A'],
+            // ['name' => 'Class 11 Commerce', 'code' => 'C11C', 'grade_level' => '11', 'section' => 'B'], // Changed to B
+            // ['name' => 'Class 11 Arts', 'code' => 'C11A', 'grade_level' => '11', 'section' => 'C'],     // Changed to C
 
-            ['name' => 'Class 12 Science', 'code' => 'C12S', 'grade_level' => '12', 'section' => 'A'],
-            ['name' => 'Class 12 Commerce', 'code' => 'C12C', 'grade_level' => '12', 'section' => 'B'], // Changed to B
-            ['name' => 'Class 12 Arts', 'code' => 'C12A', 'grade_level' => '12', 'section' => 'C'],     // Changed to C
+            // ['name' => 'Class 12 Science', 'code' => 'C12S', 'grade_level' => '12', 'section' => 'A'],
+            // ['name' => 'Class 12 Commerce', 'code' => 'C12C', 'grade_level' => '12', 'section' => 'B'], // Changed to B
+            // ['name' => 'Class 12 Arts', 'code' => 'C12A', 'grade_level' => '12', 'section' => 'C'],     // Changed to C
         ];
 
         $createdCount = 0;
@@ -70,7 +68,6 @@ class SchoolClassSeeder extends Seeder
             // Check if this combination already exists to avoid duplicates
             $exists = SchoolClass::where('grade_level', $classData['grade_level'])
                 ->where('section', $classData['section'])
-                ->where('academic_year', $academicYear)
                 ->exists();
 
             if ($exists) {
@@ -83,13 +80,11 @@ class SchoolClassSeeder extends Seeder
                 'code' => $classData['code'],
                 'grade_level' => $classData['grade_level'],
                 'section' => $classData['section'],
-                'class_teacher_id' => null,
                 'capacity' => $this->getCapacity($classData['grade_level']),
                 'current_strength' => 0,
                 'room_number' => $this->generateRoomNumber($classData['grade_level'], $classData['section']),
-                'description' => $classData['name'] . ' - Academic Year ' . $academicYear,
+                'description' => $classData['name'],
                 'status' => 'active',
-                'academic_year' => $academicYear,
             ]);
 
             $createdCount++;

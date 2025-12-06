@@ -2,17 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\HasAvatarUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Teacher extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasAvatarUrl;
 
     protected $fillable = [
+        'user_id',
         'teacher_id',
-        'name',
+        'department_id',
         'email',
         'phone',
         'subject',
@@ -23,7 +26,9 @@ class Teacher extends Model
         'date_of_joining',
         'qualification',
         'bio',
-        'last_login_at'
+        // 'last_login_at',
+        // 'subjects_taught',
+
     ];
 
     protected $casts = [
@@ -36,6 +41,16 @@ class Teacher extends Model
     protected $attributes = [
         'status' => 'active'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+     public function getFullNameAttribute()
+    {
+        return $this->user->name ?? '';
+    }
 
     // Relationship with classes
     public function classes()
@@ -50,13 +65,14 @@ class Teacher extends Model
         return $this->hasMany(TeacherSubject::class);
     }
 
-    // Accessor for avatar URL
-    public function getAvatarUrlAttribute()
+    public function department()
     {
-        if ($this->avatar) {
-            return asset('storage/' . $this->avatar);
-        }
-        return asset('images/default-avatar.png');
+        return $this->belongsTo(Department::class);
+    }
+    // Accessor for department name with fallback
+    public function getDepartmentNameAttribute()
+    {
+        return $this->department ? $this->department->name : 'No Department';
     }
 
     // Accessor for age
@@ -88,6 +104,12 @@ class Teacher extends Model
     public function primarySubject()
     {
         return $this->hasOne(TeacherSubject::class)->where('is_primary', true);
+    }
+
+    // Check if teacher is active
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 
     /**

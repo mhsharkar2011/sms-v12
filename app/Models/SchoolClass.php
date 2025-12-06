@@ -18,20 +18,17 @@ class SchoolClass extends Model
         'code',
         'grade_level',
         'section',
-        'class_teacher_id',
         'capacity',
         'current_strength',
         'room_number',
         'description',
         'status',
-        'academic_year'
     ];
 
     protected $attributes = [
         'status' => 'active',
         'capacity' => 40,
         'current_strength' => 0,
-        'academic_year' => '2024-2025'
     ];
 
     protected $casts = [
@@ -53,7 +50,7 @@ class SchoolClass extends Model
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(Teacher::class, 'teacher_class')
-                    ->withPivot('subject', 'academic_year')
+                    ->withPivot('subject')
                     ->withTimestamps();
     }
 
@@ -141,10 +138,10 @@ class SchoolClass extends Model
     /**
      * Scope by academic year
      */
-    public function scopeByAcademicYear($query, $academicYear)
-    {
-        return $query->where('academic_year', $academicYear);
-    }
+    // public function scopeByAcademicYear($query, $academicYear)
+    // {
+    //     return $query->where('academic_year', $academicYear);
+    // }
 
     /**
      * Scope classes with available seats

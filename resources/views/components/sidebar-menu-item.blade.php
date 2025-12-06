@@ -22,7 +22,7 @@
         </button>
     </form>
 @else
-    <a href="{{ route($item['route']) }}" class="{{ $baseClasses }}{{ $activeClasses }}{{ $compactClasses }}">
+    <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="{{ $baseClasses }}{{ $activeClasses }}{{ $compactClasses }}">
         <span class="text-lg {{ $compact ? '' : 'mr-3' }}">{{ $item['icon'] }}</span>
         @if(!$compact)
             <div class="flex-1 min-w-0">

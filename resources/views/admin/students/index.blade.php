@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar active-route="admin.students" />
+        <x-admin-sidebar active-route="admin.students.index" />
 
         <div class="flex-1 overflow-auto">
             <!-- Header -->
@@ -41,23 +41,20 @@
             <div class="container mx-auto p-6">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Total Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['totalStudents']))
-                                        {{ $stats['totalStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['total_students'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span
                                         class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full flex items-center">
                                         <i class="fas fa-arrow-up text-xs mr-1"></i>
-                                        12% growth
+                                        {{ $stats['active_percentage'] }}%
                                     </span>
                                 </div>
                             </div>
@@ -67,26 +64,18 @@
                         </div>
                     </div>
 
+                    <!-- Active Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Active Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['activeStudents']))
-                                        {{ $stats['activeStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['activeStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full">
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['activeStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            active
-                                        @else
-                                            0% active
-                                        @endif
+                                        {{ number_format($stats['active_percentage'], 1) }}% active
                                     </span>
                                 </div>
                             </div>
@@ -96,26 +85,18 @@
                         </div>
                     </div>
 
+                    <!-- Pending Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-purple-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Pending Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['pendingStudents']))
-                                        {{ $stats['pendingStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['pendingStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span class="text-xs text-purple-600 bg-purple-50 px-2 py-1 rounded-full">
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['pendingStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            pending
-                                        @else
-                                            0% pending
-                                        @endif
+                                        {{ number_format($stats['pendingPercentage'], 1) }}% pending
                                     </span>
                                 </div>
                             </div>
@@ -125,28 +106,20 @@
                         </div>
                     </div>
 
+                    <!-- Inactive Students Card -->
                     <div
                         class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500 hover:shadow-md transition-shadow">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-600">Inactive Students</p>
                                 <p class="text-2xl font-bold text-gray-900 mt-1">
-                                    @if (isset($stats) && is_array($stats) && isset($stats['inactiveStudents']))
-                                        {{ $stats['inactiveStudents'] }}
-                                    @else
-                                        0
-                                    @endif
+                                    {{ $stats['inactiveStudents'] }}
                                 </p>
                                 <div class="flex items-center mt-2">
                                     <span
                                         class="text-xs text-orange-600 bg-orange-50 px-2 py-1 rounded-full flex items-center">
                                         <i class="fas fa-info-circle text-xs mr-1"></i>
-                                        @if (isset($stats) && isset($stats['totalStudents']) && $stats['totalStudents'] > 0)
-                                            {{ number_format(($stats['inactiveStudents'] / $stats['totalStudents']) * 100, 1) }}%
-                                            inactive
-                                        @else
-                                            0% inactive
-                                        @endif
+                                        {{ number_format($stats['inactivePercentage'], 1) }}% inactive
                                     </span>
                                 </div>
                             </div>
@@ -189,14 +162,12 @@
                             <select name="role"
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                                 <option value="">All Roles</option>
-                                @if (isset($roles))
-                                    @foreach ($roles as $role)
-                                        <option value="{{ $role->name }}"
-                                            {{ request('role') == $role->name ? 'selected' : '' }}>
-                                            {{ ucfirst($role->name) }}
-                                        </option>
-                                    @endforeach
-                                @endif
+                                @foreach ($roles as $role)
+                                    <option value="{{ $role->name }}"
+                                        {{ request('role') == $role->name ? 'selected' : '' }}>
+                                        {{ ucfirst($role->name) }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 
@@ -288,8 +259,8 @@
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
                                                         <img class="h-12 w-12 rounded-xl object-cover border-2 border-white shadow-sm"
-                                                            src="{{ $student->avatar ? asset('storage/' . $student->avatar) : asset('images/default-avatar.png') }}"
-                                                            alt="{{ $student->name }}">
+                                                            src="{{ $student->avatar_url }}"
+                                                            alt="{{ $student->full_name }}">
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-3 h-3
                                                             {{ $student->status == 'active'
@@ -303,7 +274,7 @@
                                                     <div class="flex-1 min-w-0">
                                                         <div class="flex items-center space-x-2">
                                                             <p class="text-sm font-semibold text-gray-900 truncate">
-                                                                {{ $student->name }}</p>
+                                                                {{ $student->full_name }}</p>
                                                             @if ($student->status == 'active')
                                                                 <span
                                                                     class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800">
@@ -312,16 +283,16 @@
                                                                 </span>
                                                             @endif
                                                         </div>
-                                                        <p class="text-sm text-gray-500 truncate">{{ $student->email }}
+                                                        <p class="text-sm text-gray-500 truncate">{{ $student->user->email }}
                                                         </p>
-                                                        <p class="text-xs text-gray-400 mt-1">ID: {{ $student->id }}</p>
+                                                        <p class="text-xs text-gray-400 mt-1">ID: {{ $student->student_id }}</p>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900">
-                                                    @if ($student->roles->count() > 0)
-                                                        {{ ucfirst($student->roles->first()->name) }}
+                                                    @if ($student->user->roles->count() > 0)
+                                                        {{ ucfirst($student->user->roles->first()->name) }}
                                                     @else
                                                         <span class="text-gray-400">No role</span>
                                                     @endif
@@ -367,7 +338,7 @@
                                                         <i class="fas fa-eye mr-1 text-xs"></i>
                                                         View
                                                     </a>
-                                                    <a href="{{ route('admin.students.edit', $student->id) }}"
+                                                    <a href="{{ route('admin.students.edit', $student) }}"
                                                         class="inline-flex items-center px-3 py-1.5 border border-blue-300 rounded-lg text-sm font-medium text-blue-700 bg-white hover:bg-blue-50 transition-colors"
                                                         title="Edit Student">
                                                         <i class="fas fa-edit mr-1 text-xs"></i>
