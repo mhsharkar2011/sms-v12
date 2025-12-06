@@ -16,13 +16,19 @@ class SchoolClass extends Model
     protected $fillable = [
         'name',
         'code',
+        'slug',
         'grade_level',
         'section',
-        'capacity',
-        'current_strength',
+        'subject',
         'room_number',
+        'academic_year',
+        'capacity',
         'description',
+        'start_time',
+        'end_time',
+        'meeting_days',
         'status',
+        'teacher_id'
     ];
 
     protected $attributes = [
@@ -33,15 +39,16 @@ class SchoolClass extends Model
 
     protected $casts = [
         'capacity' => 'integer',
-        'current_strength' => 'integer',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
     ];
 
     /**
-     * Get the class teacher for this class
+     * Get the teacher assigned to this class.
      */
-    public function classTeacher(): BelongsTo
+    public function teacher(): BelongsTo
     {
-        return $this->belongsTo(Teacher::class, 'class_teacher_id');
+        return $this->belongsTo(Teacher::class, 'teacher_id');
     }
 
     /**
@@ -50,17 +57,88 @@ class SchoolClass extends Model
     public function teachers(): BelongsToMany
     {
         return $this->belongsToMany(Teacher::class, 'teacher_class')
-                    ->withPivot('subject')
-                    ->withTimestamps();
+            ->withPivot('subject')
+            ->withTimestamps();
     }
 
     /**
-     * Get students in this class
+     * Get the students enrolled in this class.
      */
     public function students(): HasMany
     {
-        return $this->hasMany(Student::class, 'class_id');
+        return $this->hasMany(Student::class, 'class_id')
+            ->where('role', 'student')
+            ->orderBy('name');
     }
+
+    /**
+     * Get the enrollments for this class.
+     */
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class, 'class_id');
+    }
+
+    /**
+     * Get the number of enrolled students.
+     */
+    public function getEnrolledCountAttribute(): int
+    {
+        return $this->students()->count();
+    }
+
+    /**
+     * Check if class has available seats.
+     */
+    public function hasAvailableSeats(): bool
+    {
+        return $this->enrolled_count < $this->capacity;
+    }
+
+    /**
+     * Get available seats count.
+     */
+    public function getAvailableSeatsAttribute(): int
+    {
+        return max(0, $this->capacity - $this->enrolled_count);
+    }
+
+    /**
+     * Scope active classes.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope by academic year.
+     */
+    public function scopeAcademicYear($query, $year)
+    {
+        return $query->where('academic_year', $year);
+    }
+
+    /**
+     * Scope by grade level.
+     */
+    public function scopeGradeLevel($query, $gradeLevel)
+    {
+        return $query->where('grade_level', $gradeLevel);
+    }
+
+    /**
+     * Get meeting days as array.
+     */
+    public function getMeetingDaysArrayAttribute(): array
+    {
+        if (!$this->meeting_days) {
+            return [];
+        }
+
+        return explode(',', $this->meeting_days);
+    }
+
 
     /**
      * Get subjects taught in this class
@@ -103,13 +181,6 @@ class SchoolClass extends Model
         return "{$this->grade_level}-{$this->section}";
     }
 
-    /**
-     * Accessor for available seats
-     */
-    public function getAvailableSeatsAttribute(): int
-    {
-        return max(0, $this->capacity - $this->current_strength);
-    }
 
     /**
      * Accessor for is_full status
@@ -119,13 +190,6 @@ class SchoolClass extends Model
         return $this->current_strength >= $this->capacity;
     }
 
-    /**
-     * Scope active classes
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('status', 'active');
-    }
 
     /**
      * Scope by grade level

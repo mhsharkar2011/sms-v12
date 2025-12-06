@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar />
+        <x-admin-sidebar active-route="admin.classes.index" />
 
         <div class="flex-1 overflow-auto">
             <div class="container mx-auto p-6">
