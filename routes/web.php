@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\EnrollmentController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboard;
 use App\Http\Controllers\Teacher\DashboardController as TeacherDashboard;
@@ -76,27 +77,52 @@ Route::middleware(['auth'])->group(function () {
 
     // Admin Routes
     Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
+
+        // Dashboard Route =============================================================================================================================
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
-        Route::resource('/users', UserManagementController::class);
-        Route::delete('/users/{user}/avatar', [UserManagementController::class, 'removeAvatar'])->name('users.avatar.remove');
-        Route::resource('/students', StudentManagementController::class);
-        Route::resource('/guardians', GuardianManagementController::class);
-        Route::resource('/teachers', TeacherManagementController::class);
-        Route::resource('/classes', ClassManagementController::class);
-        Route::resource('/subjects', SubjectManagementController::class);
-        Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
-        Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
-
-
-
-        // In your routes file
-        // Dashboard Route
         Route::get('/students/dashboard', [AdminDashboard::class, 'students'])->name('students.dashboard');
         Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
         Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
         Route::get('/classes/dashboard', [AdminDashboard::class, 'classes'])->name('classes.dashboard');
         Route::get('/subjects/dashboard', [AdminDashboard::class, 'subjects'])->name('subjects.dashboard');
+        // Dashboard End ================================================================================================================================
+
+
+        Route::resource('/users', UserManagementController::class);
+        Route::resource('/students', StudentManagementController::class);
+        Route::resource('/teachers', TeacherManagementController::class);
+        Route::resource('/classes', ClassManagementController::class);
+        Route::resource('/subjects', SubjectManagementController::class);
+        Route::resource('/guardians', GuardianManagementController::class);
+
+
+        // Enrollment Routes Start ===================================================================================================================
+        Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+        Route::get('/enrollments/create', [EnrollmentController::class, 'create'])->name('enrollments.create');
+        Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
+        Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('enrollments.show');
+        Route::get('/enrollments/{enrollment}/edit', [EnrollmentController::class, 'edit'])->name('enrollments.edit');
+        Route::put('/enrollments/{enrollment}', [EnrollmentController::class, 'update'])->name('enrollments.update');
+        Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
+        // Enrollment Actions
+        Route::post('/enrollments/{enrollment}/approve', [EnrollmentController::class, 'approve'])->name('enrollments.approve');
+        Route::post('/enrollments/{enrollment}/withdraw', [EnrollmentController::class, 'withdraw'])->name('enrollments.withdraw');
+        Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('enrollments.complete');
+        Route::post('/enrollments/{enrollment}/payment', [EnrollmentController::class, 'recordPayment'])->name('enrollments.payment');
+        Route::post('/enrollments/{enrollment}/attendance', [EnrollmentController::class, 'updateAttendance'])->name('enrollments.attendance');
+        Route::post('/enrollments/{enrollment}/transfer', [EnrollmentController::class, 'transfer'])->name('enrollments.transfer');
+        // Class-specific enrollments
+        Route::get('/classes/{class}/enrollments', [EnrollmentController::class, 'classEnrollments'])->name('classes.enrollments');
+        // Student-specific enrollments
+        Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'studentEnrollments'])->name('students.enrollments');
+        Route::get('/classes/{class}/students-data', [ClassManagementController::class, 'getStudentsData'])->name('classes.students-data');
+        Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign-students');
+        // Enrollment Routes End ========================================================================================================================
+
+        // Attendance Routes Start ======================================================================================================================
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
+        // Attendance Routes End =========================================================================================================================
+        
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');
