@@ -277,10 +277,7 @@
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
                                                         <div class="flex-shrink-0 h-10 w-10">
-                                                            <img class="h-10 w-10 rounded-full object-cover"
-                                                                src="{{ $teacher->avatar_url }}"
-                                                            alt="{{ $teacher->user->name ?? 'Teacher' }}"
-                                                             onerror="this.src='{{ asset('storage/default-avatar.png') }}'">
+                                                            <img class="h-10 w-10 rounded-full object-cover" src="{{ $teacher->avatar_url }}" alt="{{ $teacher->user->name ?? 'Teacher' }}">
                                                         </div>
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white

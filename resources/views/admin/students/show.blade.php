@@ -58,7 +58,7 @@
                                             <div
                                                 class="w-32 h-32 rounded-2xl bg-gradient-to-br from-blue-100 to-purple-100 p-1.5 shadow-lg">
                                                 <img class="w-full h-full rounded-2xl object-cover border-4 border-white"
-                                                    src="{{ $student->avatar_url ? asset('storage/' . $student->avatar_url) : asset('images/default-avatar.png') }}"
+                                                    src="{{ $student->avatar_url }}"
                                                     alt="{{ $student->full_name }}">
                                             </div>
                                             <div

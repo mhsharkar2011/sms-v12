@@ -46,9 +46,7 @@
                             <div class="flex flex-col md:flex-row md:items-center justify-between">
                                 <div class="flex items-center space-x-4">
                                     @if($teacher->avatar)
-                                        <img src="{{ asset('storage/' . $teacher->avatar) }}"
-                                             alt="{{ $teacher->name }}"
-                                             class="w-20 h-20 rounded-full border-4 border-white/50 shadow-lg">
+                                        <img src="{{$teacher->avatar_url }}" alt="{{ $teacher->name }}" class="w-20 h-20 rounded-full border-4 border-white/50 shadow-lg">
                                     @else
                                         <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/50 shadow-lg">
                                             <i class="fas fa-user text-white text-3xl"></i>

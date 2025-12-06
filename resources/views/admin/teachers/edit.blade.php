@@ -356,22 +356,9 @@ use Illuminate\Support\Facades\Storage;
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 mb-2">Avatar</label>
                                         <div class="flex items-center space-x-4">
-                                            @php
-                                                $currentAvatar = null;
-                                                // Check teacher avatar first
-                                                if ($teacher->avatar && Storage::disk('public')->exists($teacher->avatar)) {
-                                                    $currentAvatar = asset('storage/' . $teacher->avatar);
-                                                }
-                                                // Check user avatar second
-                                                elseif ($teacher->user && $teacher->user->avatar && $teacher->user->avatar !== 'default-avatar.png' && Storage::disk('public')->exists($teacher->user->avatar)) {
-                                                    $currentAvatar = asset('storage/' . $teacher->user->avatar);
-                                                }
-                                            @endphp
-
-                                            @if ($currentAvatar)
                                                 <div class="relative">
-                                                    <img src="{{ $currentAvatar }}" alt="Current Avatar"
-                                                        class="w-20 h-20 rounded-full border-2 border-gray-300 object-cover">
+                                                    <img src="{{ $teacher->avatar_url }}" alt="Current Avatar" class="w-20 h-20 rounded-full border-2 border-gray-300 object-cover">
+
                                                     <div class="absolute -top-1 -right-1 bg-white rounded-full p-1 shadow-sm">
                                                         <input type="checkbox" name="remove_avatar" id="remove_avatar"
                                                             class="hidden">
@@ -390,14 +377,6 @@ use Illuminate\Support\Facades\Storage;
                                                         Remove avatar
                                                     </label>
                                                 </div>
-                                            @else
-                                                <div class="text-center">
-                                                    <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border-2 border-gray-300">
-                                                        <i class="fas fa-user text-gray-400 text-2xl"></i>
-                                                    </div>
-                                                    <p class="text-sm text-gray-500 mt-1">No avatar set</p>
-                                                </div>
-                                            @endif
                                             <div class="flex-1">
                                                 <input type="file" name="avatar" accept="image/*"
                                                     class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('avatar') border-red-500 @enderror">

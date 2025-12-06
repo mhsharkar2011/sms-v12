@@ -26,7 +26,7 @@ class StudentManagementController extends Controller
         $classFilter = $request->get('class_id');
 
         // Build query with filters
-        $students = Student::with(['user', 'user.roles', 'schoolClass'])
+        $students = Student::with('user', 'user.roles', 'schoolClass')
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })
@@ -254,9 +254,9 @@ class StudentManagementController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Student $student)
+    public function edit(String $id)
     {
-        $student = Student::findOrFail($student->id);
+        $student = Student::findOrFail($id);
         // Find student by ID and load relationships
         $student->load(['user.roles', 'schoolClass']);
         $user = $student->user;

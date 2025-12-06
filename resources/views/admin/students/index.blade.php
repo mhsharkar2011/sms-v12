@@ -259,7 +259,7 @@
                                                 <div class="flex items-center space-x-4">
                                                     <div class="relative">
                                                         <img class="h-12 w-12 rounded-xl object-cover border-2 border-white shadow-sm"
-                                                            src="{{ $student->avatar_url ? asset('storage/' . $student->avatar_url) : asset('images/default-avatar.png') }}"
+                                                            src="{{ $student->avatar_url }}"
                                                             alt="{{ $student->full_name }}">
                                                         <div
                                                             class="absolute -bottom-1 -right-1 w-3 h-3
