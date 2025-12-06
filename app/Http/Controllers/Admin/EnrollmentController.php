@@ -90,7 +90,7 @@ class EnrollmentController extends Controller
             $selectedStudent = Student::with('user')->find($request->student_id);
         }
 
-        return view('admin.enrollments.create', compact('students','classes', 'selectedClass','selectedStudent'));
+        return view('admin.enrollments.create', compact('students', 'classes', 'selectedClass', 'selectedStudent'));
     }
 
     /**
@@ -162,7 +162,7 @@ class EnrollmentController extends Controller
      */
     public function edit(Enrollment $enrollment)
     {
-        $students = Student::with('user')->orderByHasUser('name')->get();
+        $students = Student::with('user')->orderBy('id')->get();
         $classes = SchoolClass::active()->orderBy('name')->get();
 
         return view('admin.enrollments.edit', compact('enrollment', 'students', 'classes'));
@@ -460,5 +460,17 @@ class EnrollmentController extends Controller
             ->paginate(20);
 
         return view('admin.enrollments.student', compact('student', 'enrollments'));
+    }
+
+    public function print(Enrollment $enrollment)
+    {
+        // Load payments if the relationship exists
+        if (method_exists($enrollment, 'payments')) {
+            $enrollment->load(['student.user', 'class', 'payments']);
+        } else {
+            $enrollment->load(['student.user', 'class']);
+        }
+
+        return view('admin.enrollments.print', compact('enrollment'));
     }
 }

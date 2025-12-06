@@ -2,6 +2,7 @@
 
 namespace App\View\Composers;
 
+use App\Models\Enrollment;
 use App\Models\Guardian;
 use App\Models\SchoolClass;
 use App\Models\Student;
@@ -31,6 +32,7 @@ class AdminSidebarComposer
     {
         $totalUserCount = User::count();
         $adminUserCount = User::role('admin')->count();
+        $totalEnrollment = Enrollment::count();
         $totalStudent = Student::count();
         $totalTeacher = Teacher::count();
         $totalGuardian = Guardian::count();
@@ -43,6 +45,14 @@ class AdminSidebarComposer
                 'label' => 'Dashboard',
                 'description' => 'Overview & Analytics',
                 'badge' => $adminUserCount,
+                'badgeColor' => 'bg-blue-100'
+            ],
+             [
+                'route' => 'admin.enrollments.index',
+                'icon' => '📊',
+                'label' => 'Enrollment',
+                'description' => 'Overview & Analytics',
+                'badge' => $totalEnrollment,
                 'badgeColor' => 'bg-blue-100'
             ],
             [

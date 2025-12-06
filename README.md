@@ -26,3 +26,8 @@ resources/views/admin/enrollments/
 └── student.blade.php    # Enrollments for a specific student
 
 
+## Final Work
+
+-- Student Create done
+-- Student Delete Pending
+-- 

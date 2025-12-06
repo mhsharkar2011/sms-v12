@@ -53,8 +53,8 @@ class ModelHasRolesSeeder extends Seeder
             ['email' => 'student5@school.test', 'roles' => ['student']],
 
             // Parents
-            ['email' => 'parent1@school.test', 'roles' => ['parent']],
-            ['email' => 'parent2@school.test', 'roles' => ['parent']],
+            ['email' => 'parent1@school.test', 'roles' => ['guardian']],
+            ['email' => 'parent2@school.test', 'roles' => ['guardian']],
 
             // Accountant
             ['email' => 'accountant@school.test', 'roles' => ['accountant']],
@@ -90,7 +90,7 @@ class ModelHasRolesSeeder extends Seeder
                     'admin' => 'admin',
                     'teacher' => 'teacher',
                     'student' => 'student',
-                    'parent' => 'parent',
+                    'guardian' => 'guardian',
                     'accountant' => 'accountant',
                     default => 'student',
                 };
@@ -191,17 +191,9 @@ class ModelHasRolesSeeder extends Seeder
 
             // Parents
             [
-                'name' => 'Parent One',
-                'email' => 'parent1@school.test',
+                'name' => 'Guardian One',
+                'email' => 'guardian@school.test',
                 'password' => Hash::make('password'),
-
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Parent Two',
-                'email' => 'parent2@school.test',
-                'password' => Hash::make('password'),
-
                 'email_verified_at' => now(),
             ],
 
