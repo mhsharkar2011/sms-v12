@@ -35,7 +35,6 @@ class AdminSidebarComposer
         $totalTeacher = Teacher::count();
         $totalGuardian = Guardian::count();
         $totalClasses = SchoolClass::count();
-        // $parentCount = Parent::count();
 
         $menuItems = [
             [

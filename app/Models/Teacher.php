@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasAvatarUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,7 +51,7 @@ class Teacher extends Model
     {
         return $this->user->name ?? '';
     }
-    
+
     // Relationship with classes
     public function classes()
     {
@@ -75,43 +76,43 @@ class Teacher extends Model
     }
 
     // Accessor for avatar URL
-    public function getAvatarUrlAttribute()
-    {
-        // FIRST: Check if TEACHER has a custom avatar (highest priority)
-        if ($this->avatar) {
-            // If it's a storage path (uploaded avatar)
-            if (Storage::disk('public')->exists($this->avatar)) {
-                return asset('storage/' . $this->avatar);
-            }
-            // If it's the default avatar string
-            elseif ($this->avatar === 'default-avatar.png') {
-                return asset('images/default-avatar.png');
-            }
-            // If it's a relative path without storage prefix
-            elseif (str_starts_with($this->avatar, 'avatars/')) {
-                return asset('storage/' . $this->avatar);
-            }
-        }
+    // public function getAvatarUrlAttribute()
+    // {
+    //     // FIRST: Check if TEACHER has a custom avatar (highest priority)
+    //     if ($this->avatar) {
+    //         // If it's a storage path (uploaded avatar)
+    //         if (Storage::disk('public')->exists($this->avatar)) {
+    //             return asset('storage/' . $this->avatar);
+    //         }
+    //         // If it's the default avatar string
+    //         elseif ($this->avatar === 'default-avatar.png') {
+    //             return asset('images/default-avatar.png');
+    //         }
+    //         // If it's a relative path without storage prefix
+    //         elseif (str_starts_with($this->avatar, 'avatars/')) {
+    //             return asset('storage/' . $this->avatar);
+    //         }
+    //     }
 
-        // SECOND: Check if USER has an avatar (second priority)
-        if ($this->user && $this->user->avatar) {
-            // If user has uploaded avatar
-            if (Storage::disk('public')->exists($this->user->avatar)) {
-                return asset('storage/' . $this->user->avatar);
-            }
-            // If user has default avatar string
-            elseif ($this->user->avatar === 'default-avatar.png') {
-                return asset('images/default-avatar.png');
-            }
-            // If it's a relative path
-            elseif (str_starts_with($this->user->avatar, 'avatars/')) {
-                return asset('storage/' . $this->user->avatar);
-            }
-        }
+    //     // SECOND: Check if USER has an avatar (second priority)
+    //     if ($this->user && $this->user->avatar) {
+    //         // If user has uploaded avatar
+    //         if (Storage::disk('public')->exists($this->user->avatar)) {
+    //             return asset('storage/' . $this->user->avatar);
+    //         }
+    //         // If user has default avatar string
+    //         elseif ($this->user->avatar === 'default-avatar.png') {
+    //             return asset('images/default-avatar.png');
+    //         }
+    //         // If it's a relative path
+    //         elseif (str_starts_with($this->user->avatar, 'avatars/')) {
+    //             return asset('storage/' . $this->user->avatar);
+    //         }
+    //     }
 
-        // FINAL: Default fallback
-        return asset('images/default-avatar.png');
-    }
+    //     // FINAL: Default fallback
+    //     return asset('images/default-avatar.png');
+    // }
 
     // Accessor for age
     public function getAgeAttribute()
