@@ -185,7 +185,7 @@
                                 </div>
                             </a>
 
-                            <a href="{{ route('admin.reports') }}" class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group">
+                            <a href="{{ route('admin.reports.index') }}" class="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-colors group">
                                 <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition-colors">
                                     <i class="fas fa-chart-bar text-green-600 text-sm"></i>
                                 </div>

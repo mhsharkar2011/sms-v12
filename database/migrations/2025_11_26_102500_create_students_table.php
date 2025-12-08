@@ -37,7 +37,7 @@ return new class extends Migration
             $table->foreignId('section_id')->constrained('sections');
             $table->string('grade_level')->nullable();
             $table->string('roll_number')->nullable();
-            // $table->string('section')->nullable();
+            // $table->string('section')->nullable(); // REMOVED - using section_id instead
             $table->string('academic_year')->default('2024-2025');
 
             // Additional Information
@@ -60,14 +60,16 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            // Indexes
+            // Indexes - FIXED: Changed 'section' to 'section_id'
+            $table->index(['class_id', 'section_id'], 'students_class_section_index');
             $table->index('student_id');
             $table->index('admission_number');
             $table->index('class_id');
+            $table->index('section_id'); // Added
             $table->index('roll_number');
             $table->index('status');
             $table->index(['class_id', 'roll_number']);
-            $table->index(['class_id', 'section']);
+            // REMOVED: $table->index(['class_id', 'section']); // This was causing the error
             $table->index('created_at');
         });
 
@@ -116,7 +118,7 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained()->onDelete('cascade');
             $table->string('academic_year');
             $table->foreignId('class_id')->constrained('school_classes');
-            $table->string('section')->nullable();
+            $table->string('section')->nullable(); // This stores section name as string for historical records
             $table->string('roll_number');
             $table->decimal('overall_percentage', 5, 2)->nullable();
             $table->string('final_grade')->nullable();

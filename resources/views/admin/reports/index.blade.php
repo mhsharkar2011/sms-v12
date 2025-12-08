@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar />
+        <x-admin-sidebar active-route="admin.reports.index"/>
 
         <div class="flex-1 overflow-auto">
             <div class="container mx-auto p-6">
@@ -157,7 +157,7 @@
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-bold text-gray-900">Attendance Trend (Last 5 Days)</h2>
-                            <a href="{{ route('attendance.report') }}"
+                            <a href="{{ route('admin.attendance') }}"
                                 class="text-sm text-blue-600 hover:text-blue-800">View Details</a>
                         </div>
                         <div class="h-64 flex items-end justify-between space-x-2">
@@ -189,7 +189,7 @@
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-bold text-gray-900">Performance by Subject</h2>
-                            <a href="{{ route('academic.report') }}" class="text-sm text-blue-600 hover:text-blue-800">View
+                            <a href="{{ route('admin.reports.academic') }}" class="text-sm text-blue-600 hover:text-blue-800">View
                                 Details</a>
                         </div>
                         <div class="space-y-4">
@@ -237,11 +237,11 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Academic Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Student performance, grades, and progress reports</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('academic.generate') }}"
+                            <a href="{{ route('admin.academic.generate') }}"
                                 class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors text-center">
                                 Generate
                             </a>
-                            <a href="{{ route('academic.export') }}"
+                            <a href="{{ route('admin.academic.export') }}"
                                 class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
@@ -256,11 +256,11 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Attendance Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Student and teacher attendance analytics</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('attendance.generate') }}"
+                            <a href="{{ route('admin.attendance.generate') }}"
                                 class="flex-1 bg-green-600 text-white py-2 rounded-lg text-sm hover:bg-green-700 transition-colors text-center">
                                 Generate
                             </a>
-                            <a href="{{ route('attendance.export') }}"
+                            <a href="{{ route('admin.attendance.export') }}"
                                 class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
@@ -275,11 +275,11 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Financial Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Fee collection, expenses, and financial analytics</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('finance.generate') }}"
+                            <a href="{{ route('admin.finance.generate') }}"
                                 class="flex-1 bg-purple-600 text-white py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors text-center">
                                 Generate
                             </a>
-                            <a href="{{ route('finance.export') }}"
+                            <a href="{{ route('admin.finance.export') }}"
                                 class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
@@ -294,11 +294,11 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Examination Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Exam results, analysis, and statistics</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('exams.generate') }}"
+                            <a href="{{ route('admin.exams.generate') }}"
                                 class="flex-1 bg-orange-600 text-white py-2 rounded-lg text-sm hover:bg-orange-700 transition-colors text-center">
                                 Generate
                             </a>
-                            <a href="{{ route('exams.export') }}"
+                            <a href="{{ route('admin.exams.export') }}"
                                 class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
@@ -306,25 +306,25 @@
                     </div>
 
                     <!-- Staff Reports -->
-                    <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
+                    {{-- <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-red-500">
                         <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
                             <span class="material-icons-sharp text-red-600">groups</span>
                         </div>
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Staff Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Teacher performance and staff analytics</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('staff.generate') }}"
+                            <a href="#"
                                 class="flex-1 bg-red-600 text-white py-2 rounded-lg text-sm hover:bg-red-700 transition-colors text-center">
                                 Generate
                             </a>
-                            <a href="{{ route('staff.export') }}"
+                            <a href="#"
                                 class="w-10 h-10 border border-gray-300 rounded-lg flex items-center justify-center hover:bg-gray-50 transition-colors">
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
                         </div>
-                    </div>
+                    </div> --}}
 
-                    <!-- Inventory Reports -->
+                    {{-- <!-- Inventory Reports -->
                     <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-indigo-500">
                         <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
                             <span class="material-icons-sharp text-indigo-600">inventory</span>
@@ -341,11 +341,11 @@
                                 <span class="material-icons-sharp text-gray-600 text-sm">download</span>
                             </a>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
 
                 <!-- Recent Generated Reports -->
-                <div class="bg-white rounded-xl shadow-sm p-6">
+                {{-- <div class="bg-white rounded-xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold text-gray-900">Recent Reports</h2>
                         <a href="{{ route('reports.history') }}" class="text-sm text-blue-600 hover:text-blue-800">View
@@ -437,10 +437,10 @@
                             </div>
                         @endif
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Custom Report Generator Modal -->
-                <div id="customReportModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
+                {{-- <div id="customReportModal" class="fixed inset-0 bg-gray-500 bg-opacity-75 hidden z-50">
                     <div class="flex items-center justify-center min-h-screen p-4">
                         <div class="bg-white rounded-xl shadow-lg w-full max-w-md">
                             <div class="p-6">
@@ -516,7 +516,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
             </div>
         </div>
     </div>
@@ -595,7 +595,7 @@
 
                 showNotification('Preparing export package...', 'info');
 
-                fetch('{{ route('reports.export.all') }}', {
+                fetch('{{ route('admin.reports.export.all') }}', {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
@@ -762,7 +762,7 @@
 
             // Real-time updates for key metrics
             function updateMetrics() {
-                fetch('{{ route('reports.metrics') }}')
+                fetch('{{ route('admin.reports.metrics') }}')
                     .then(response => response.json())
                     .then(data => {
                         // Update metrics on the page

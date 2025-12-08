@@ -13,7 +13,9 @@ use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\Admin\GuardianManagementController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubjectManagementController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StaffAttendanceController;
@@ -139,6 +141,8 @@ Route::middleware(['auth'])->group(function () {
         // Attendance Routes End =========================================================================================================================
 
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
+        Route::get('/exams/report', [AdminDashboard::class, 'examsReport'])->name('exams.export');
+        Route::get('/exams/generate',[ExamController::class,'examGenerate'])->name('exams.generate');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');
 
         //Admin Notifications Route
@@ -148,10 +152,27 @@ Route::middleware(['auth'])->group(function () {
 
         // Admin Reports =======================================================================================================================================
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('/reports/academic', [ReportController::class, 'adminAcademicReports'])->name('reports.index');
+        Route::get('/reports/academic', [ReportController::class, 'adminAcademicReports'])->name('reports.academic');
         Route::get('/reports/finance', [ReportController::class, 'adminFinanceReports'])->name('reports.index');
         Route::get('/reports/attendance', [ReportController::class, 'adminStudentAttendanceReports'])->name('reports.index');
         Route::get('/reports/student/exam', [ReportController::class, 'adminStudentExaminationReports'])->name('reports.index');
+
+        Route::get('/metrics', [ReportController::class, 'getMetrics'])->name('reports.metrics');
+        Route::post('/academic/generate', [ReportController::class, 'generateAcademicReport'])->name('academic.generate');
+        Route::get('/academic/export', [ReportController::class, 'exportAcademicReport'])->name('academic.export');
+        Route::post('/attendance/generate', [ReportController::class, 'generateAttendanceReport'])->name('attendance.generate');
+        Route::get('/attendance/export', [ReportController::class, 'exportAttendanceReport'])->name('attendance.export');
+        Route::post('/finance/generate', [ReportController::class, 'generateFinancialReport'])->name('finance.generate');
+        Route::get('/finance/export', [ReportController::class, 'exportFinancialReport'])->name('finance.export');
+        Route::post('/custom', [ReportController::class, 'generateCustomReport'])->name('reports.custom');
+        Route::post('/export-all', [ReportController::class, 'exportAllReports'])->name('reports.export.all');
+        Route::get('/view/{id}', [ReportController::class, 'viewReport'])->name('reports.view');
+        Route::get('/download/{id}', [ReportController::class, 'exportReport'])->name('reports.download');
+        Route::delete('/delete/{id}', [ReportController::class, 'deleteReport'])->name('reports.delete');
+        Route::get('/history', [ReportController::class, 'reportHistory'])->name('reports.history');
+
+        Route::get('/attendance/report', [AttendanceController::class, 'generateReport'])->name('attendance.report');
+        // Route::get('/academic/report', [AcademicController::class, 'generateReport'])->name('academic.report');
     });
 
     // Redirect based on role
