@@ -34,9 +34,10 @@ return new class extends Migration
             // Academic Information
             $table->date('admission_date')->nullable();
             $table->foreignId('class_id')->constrained('school_classes');
+            $table->foreignId('section_id')->constrained('sections');
             $table->string('grade_level')->nullable();
             $table->string('roll_number')->nullable();
-            $table->string('section')->nullable();
+            // $table->string('section')->nullable();
             $table->string('academic_year')->default('2024-2025');
 
             // Additional Information

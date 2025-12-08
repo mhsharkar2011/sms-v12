@@ -157,6 +157,32 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Add this section to your main attendance view -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                    <a href="{{ route('student-attendance.index') }}"
+                        class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Student Attendance</h3>
+                                <p class="text-gray-600 mt-1">Manage student attendance records</p>
+                            </div>
+                            <span class="material-icons-sharp text-blue-600 text-2xl">school</span>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('staff-attendance.index') }}"
+                        class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Staff Attendance</h3>
+                                <p class="text-gray-600 mt-1">Manage staff and teacher attendance</p>
+                            </div>
+                            <span class="material-icons-sharp text-green-600 text-2xl">groups</span>
+                        </div>
+                    </a>
+                </div>
+
             </div>
         </div>
     </div>

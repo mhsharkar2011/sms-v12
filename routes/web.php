@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StaffAttendanceController;
+use App\Http\Controllers\StudentAttendanceController;
 use Illuminate\Support\Facades\Route;
 
 // Landing Page
@@ -48,7 +50,7 @@ Route::middleware('auth')->group(function () {
 
 // Protected Routes
 Route::middleware(['auth'])->group(function () {
-    // Student Routes
+    // Student Routes Start ====================================================================================================================
     Route::prefix('student')->name('student.')->middleware('role:student')->group(function () {
         Route::get('/dashboard', [StudentDashboard::class, 'index'])->name('dashboard');
         Route::get('/attendance', [StudentDashboard::class, 'attendance'])->name('attendance');
@@ -61,13 +63,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/settings', [StudentDashboard::class, 'settings'])->name('settings');
         Route::get('/exams', [StudentDashboard::class, 'exams'])->name('exams');
     });
+    // Student Attendance Routes
+    Route::resource('student-attendance', StudentAttendanceController::class);
+    Route::get('attendance/students-by-class-section', [StudentAttendanceController::class, 'getStudentsByClassSection'])->name('attendance.students-by-class-section');
+    Route::get('attendance/attendance-by-date', [StudentAttendanceController::class, 'getAttendanceByDate']);
 
-    // Teacher Routes
+    // Student Routes End ===============================================================================================================================
+
+    // Teacher Routes Start
     Route::prefix('teacher')->name('teacher.')->middleware('role:teacher')->group(function () {
         Route::get('/dashboard', [TeacherDashboard::class, 'index'])->name('dashboard');
         Route::get('/courses', [TeacherDashboard::class, 'courses'])->name('courses')->middleware('permission:create courses');
         Route::get('/assignments', [TeacherDashboard::class, 'assignments'])->name('assignments')->middleware('permission:manage assignments');
     });
+    // Staff Attendance Routes
+    Route::resource('staff-attendance', StaffAttendanceController::class);
+    Route::get('attendance/staff-attendance-by-date', [StaffAttendanceController::class, 'getAttendanceByDate']);
+    //  Teacher Routes End ===================================================================================================================================
+
 
     // Parent Routes
     Route::prefix('guardian')->name('guardian.')->middleware('role:guardian')->group(function () {
@@ -75,9 +88,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/children', [GuardianDashboard::class, 'children'])->name('children')->middleware('permission:view child grades');
     });
 
-    // Admin Routes
-    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
 
+    // Admin Routes Start ==============================================================================================================================
+    Route::prefix('admin')->name('admin.')->middleware('role:admin')->group(function () {
         // Dashboard Route =============================================================================================================================
         Route::get('/dashboard', [AdminDashboard::class, 'index'])->name('dashboard');
         Route::get('/students/dashboard', [AdminDashboard::class, 'students'])->name('students.dashboard');
@@ -87,14 +100,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/subjects/dashboard', [AdminDashboard::class, 'subjects'])->name('subjects.dashboard');
         // Dashboard End ================================================================================================================================
 
-
         Route::resource('/users', UserManagementController::class);
         Route::resource('/students', StudentManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
         Route::resource('/classes', ClassManagementController::class);
         Route::resource('/subjects', SubjectManagementController::class);
         Route::resource('/guardians', GuardianManagementController::class);
-
 
         // Enrollment Routes Start ===================================================================================================================
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
@@ -104,14 +115,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/enrollments/{enrollment}/edit', [EnrollmentController::class, 'edit'])->name('enrollments.edit');
         Route::put('/enrollments/{enrollment}', [EnrollmentController::class, 'update'])->name('enrollments.update');
         Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('enrollments.destroy');
-        // Enrollment Actions
+
+        // Enrollment Actions =========================================================================================================================
         Route::post('/enrollments/{enrollment}/approve', [EnrollmentController::class, 'approve'])->name('enrollments.approve');
         Route::post('/enrollments/{enrollment}/withdraw', [EnrollmentController::class, 'withdraw'])->name('enrollments.withdraw');
         Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('enrollments.complete');
         Route::post('/enrollments/{enrollment}/payment', [EnrollmentController::class, 'recordPayment'])->name('enrollments.payment');
         Route::post('/enrollments/{enrollment}/attendance', [EnrollmentController::class, 'updateAttendance'])->name('enrollments.attendance');
         Route::post('/enrollments/{enrollment}/transfer', [EnrollmentController::class, 'transfer'])->name('enrollments.transfer');
-        // Class-specific enrollments
+
+        // Class-specific enrollments =====================================================================================================================
         Route::get('/classes/{class}/enrollments', [EnrollmentController::class, 'classEnrollments'])->name('classes.enrollments');
         // Student-specific enrollments
         Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'studentEnrollments'])->name('students.enrollments');
