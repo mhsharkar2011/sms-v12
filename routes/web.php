@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\ClassManagementController;
 use App\Http\Controllers\Admin\GuardianManagementController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\PostController;
@@ -138,34 +139,20 @@ Route::middleware(['auth'])->group(function () {
         // Attendance Routes End =========================================================================================================================
 
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
-        Route::get('/reports', [AdminDashboard::class, 'reports'])->name('reports');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');
 
         //Admin Notifications Route
         Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications');
         Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllRead');
         Route::post('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+
+        // Admin Reports =======================================================================================================================================
+        Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/academic', [ReportController::class, 'adminAcademicReports'])->name('reports.index');
+        Route::get('/reports/finance', [ReportController::class, 'adminFinanceReports'])->name('reports.index');
+        Route::get('/reports/attendance', [ReportController::class, 'adminStudentAttendanceReports'])->name('reports.index');
+        Route::get('/reports/student/exam', [ReportController::class, 'adminStudentExaminationReports'])->name('reports.index');
     });
-
-
-    // // Admin Report Routes
-    // Route::middleware(['auth', 'role:admin'])->prefix('admin/reports')->name('admin.reports.')->group(function () {
-    //     Route::get('/academic', function () {
-    //         return view('admin.reports.academic');
-    //     })->name('academic');
-
-    //     Route::get('/financial', function () {
-    //         return view('admin.reports.financial');
-    //     })->name('financial');
-
-    //     Route::get('/attendance', function () {
-    //         return view('admin.reports.attendance');
-    //     })->name('attendance');
-
-    //     Route::get('/examination', function () {
-    //         return view('admin.reports.examination');
-    //     })->name('examination');
-    // });
 
     // Redirect based on role
     Route::get('/dashboard', function () {

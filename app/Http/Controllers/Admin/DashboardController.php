@@ -88,8 +88,13 @@ class DashboardController extends Controller
         return view('admin.settings');
     }
 
-    public function reports()
+    public function adminReports()
     {
-        return view('admin.reports');
+        return view('admin.reports.index');
+    }
+
+    public function adminAcademicReports()
+    {
+        return view('admin.reports.academic');
     }
 }

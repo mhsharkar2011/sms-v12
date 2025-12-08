@@ -122,7 +122,7 @@ class AdminSidebarComposer
                 'badgeColor' => 'bg-yellow-100',
             ],
             [
-                'route' => 'admin.reports',
+                'route' => 'admin.reports.index',
                 'icon' => '📈',
                 'label' => 'Reports',
                 'description' => 'Analytics & insights',
