@@ -89,12 +89,19 @@ class StudentAttendanceController extends Controller
             'remark' => 'nullable|string|max:255'
         ]);
 
-        $studentAttendance->update($request->all());
+        $studentAttendance->update([
+            'status' => $request->status,
+            'check_in_time' => $request->check_in_time,
+            'check_out_time' => $request->check_out_time,
+            'remark' => $request->remark
+        ]);
 
         return redirect()->route('student-attendance.index')
             ->with('success', 'Attendance updated successfully!');
     }
 
+
+    
     public function destroy(StudentAttendance $studentAttendance)
     {
         $studentAttendance->delete();

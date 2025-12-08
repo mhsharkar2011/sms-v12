@@ -231,7 +231,7 @@
                                 </button>
                             </div>
                             <div class="flex space-x-3">
-                                <!-- Delete Form -->
+                                {{-- <!-- Delete Form -->
                                 <form action="{{ route('student-attendance.destroy', $studentAttendance) }}"
                                     method="POST"
                                     onsubmit="return confirm('Are you sure you want to delete this attendance record?');">
@@ -241,7 +241,7 @@
                                         class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
                                         Delete
                                     </button>
-                                </form>
+                                </form> --}}
 
                                 <button type="submit"
                                     class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
