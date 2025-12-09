@@ -90,11 +90,10 @@ class SchoolClass extends Model
     //     // return $this->hasMany(Student::class)->where('type', 'student');
     // }
 
-    public function students()
-    {
-        return $this->belongsToMany(Student::class, 'class_student', 'class_id', 'student_id')
-            ->withTimestamps();
-    }
+   public function students()
+{
+    return $this->hasMany(Student::class, 'class_id');
+}
 
     public function subjects()
     {

@@ -1,4 +1,3 @@
-<!-- resources/views/admin/classes/modals/bulk-assign.blade.php -->
 <div id="bulkAssignModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         <!-- Modal Header -->
