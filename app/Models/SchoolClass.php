@@ -72,7 +72,7 @@ class SchoolClass extends Model
     }
 
 
-        /**
+    /**
      * Get all teachers assigned to this class (for multiple subjects)
      */
     public function teachers(): BelongsToMany
@@ -82,12 +82,24 @@ class SchoolClass extends Model
             ->withTimestamps();
     }
 
-    
+
+    // public function students()
+    // {
+    //     return $this->hasMany(Student::class, 'class_id');
+    //     // Or if you need filtering, use a different column name
+    //     // return $this->hasMany(Student::class)->where('type', 'student');
+    // }
+
     public function students()
     {
-        return $this->hasMany(Student::class, 'class_id');
-        // Or if you need filtering, use a different column name
-        // return $this->hasMany(Student::class)->where('type', 'student');
+        return $this->belongsToMany(Student::class, 'class_student', 'class_id', 'student_id')
+            ->withTimestamps();
+    }
+
+    public function subjects()
+    {
+        return $this->belongsToMany(Subject::class, 'class_subject', 'class_id', 'subject_id')
+            ->withTimestamps();
     }
     /**
      * Get the enrollments for this class.
@@ -158,14 +170,14 @@ class SchoolClass extends Model
     }
 
 
-    /**
-     * Get subjects taught in this class
-     */
-    public function subjects()
-    {
-        // This can return unique subjects from teacher_class pivot or a separate subjects table
-        return $this->teachers()->distinct()->pluck('subject');
-    }
+    // /**
+    //  * Get subjects taught in this class
+    //  */
+    // public function subjects()
+    // {
+    //     // This can return unique subjects from teacher_class pivot or a separate subjects table
+    //     return $this->teachers()->distinct()->pluck('subject');
+    // }
 
     /**
      * Get attendance records for this class

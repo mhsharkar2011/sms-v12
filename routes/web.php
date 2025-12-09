@@ -22,6 +22,7 @@ use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StudentAttendanceController;
 use Illuminate\Support\Facades\Route;
+use PhpParser\Builder\ClassConst;
 
 // Landing Page
 Route::get('/', function () {
@@ -72,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('attendance/students-by-class-section', [StudentAttendanceController::class, 'getStudentsByClassSection'])->name('attendance.students-by-class-section');
     Route::get('attendance/attendance-by-date', [StudentAttendanceController::class, 'getAttendanceByDate']);
 
+
     // Student Routes End ===============================================================================================================================
 
     // Teacher Routes Start
@@ -111,9 +113,40 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('sections/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->name('sections.toggle-status');
         Route::post('sections/{section}/restore', [SectionController::class, 'restore'])->name('sections.restore');
         Route::delete('sections/{section}/force-delete', [SectionController::class, 'forceDelete'])->name('sections.force-delete');
-        Route::resource('/classes', ClassManagementController::class);
         Route::resource('/subjects', SubjectManagementController::class);
         Route::resource('/guardians', GuardianManagementController::class);
+
+        // Class Route and Student & Teacher Assignment Start =============================================================================================
+        Route::resource('/classes', ClassManagementController::class);
+        // Route::get('/{class}/students', [ClassManagementController::class, 'getStudentsForAssignment']);
+        // // Route::get('/{class}/teachers', [ClassManagementController::class, 'getTeachersForAssignment']);
+        // Route::get('/{class}/teachers', [ClassManagementController::class, 'getTeachersForAssignment'])->name('teachers.data');
+        // Route::post('/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('assignStudents');
+        // Route::post('/{class}/assign-teacher', [ClassManagementController::class, 'assignTeacher'])->name('assignTeacher');
+
+
+         Route::get('/classes/{class}/students', [ClassManagementController::class, 'getStudentsForAssignment'])->name('classes.students.data');
+
+        Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign.students');
+
+        Route::get('/classes/{class}/teachers', [ClassManagementController::class, 'getTeachersForAssignment'])->name('classes.teachers.data');
+
+        Route::post('/classes/{class}/assign-teacher', [ClassManagementController::class, 'assignTeacher'])->name('classes.assign.teacher');
+
+        // Bulk operations
+        Route::post('/bulk-assign', [ClassManagementController::class, 'bulkAssignStudents'])->name('bulk.assign');
+
+
+
+           Route::get('class/schedule',[ClassManagementController::class, 'classSchedule'])->name('classes.schedule');
+           Route::get('class/schedule/edit',[ClassManagementController::class, 'classSchedule'])->name('classes.schedule.edit');
+           Route::get('class/reports',[ClassManagementController::class, 'classReport'])->name('classes.reports');
+        //    Route::get('class/schedule',[ClassManagementController::class, 'classReport'])->name('classes.reports');
+           Route::get('class/activity',[ClassManagementController::class, 'classActivity'])->name('classes.activity');
+           Route::get('class/attendance',[ClassManagementController::class, 'classAttendance'])->name('classes.attendance');
+           Route::get('class/grades',[ClassManagementController::class, 'classGrade'])->name('classes.grades');
+           Route::get('class/exports',[ClassManagementController::class, 'classExport'])->name('classes.export');
+        // Class Route and Student & Teacher Assignment End =============================================================================================
 
         // Enrollment Routes Start ===================================================================================================================
         Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');

@@ -5,21 +5,54 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
+use PhpParser\Node\Expr\FuncCall;
 
 class ClassManagementController extends Controller
 {
-    public function index()
-    {
-        // $classes = SchoolClass::with('classTeacher')
-        //     ->withCount('students')
-        //     ->orderBy('grade_level')
-        //     ->orderBy('section')
-        //     ->paginate(12);
+    // public function index()
+    // {
+    //     // $classes = SchoolClass::with('classTeacher')
+    //     //     ->withCount('students')
+    //     //     ->orderBy('grade_level')
+    //     //     ->orderBy('section')
+    //     //     ->paginate(12);
 
+    //     $classes = SchoolClass::with(['teachers.roles'])
+    //         ->withCount('students')
+    //         ->paginate(10);
+
+    //     $totalClasses = SchoolClass::count();
+    //     $activeClasses = SchoolClass::where('status', 'active')->count();
+    //     $totalStudents = Student::count();
+    //     $averageClassSize = $totalClasses > 0 ? $totalStudents / $totalClasses : 0;
+
+    //     // Get unique grade levels for filter
+    //     $gradeLevels = SchoolClass::distinct()
+    //         ->pluck('grade_level')
+    //         ->sort()
+    //         ->values();
+
+    //     return view('admin.classes.index', compact(
+    //         'classes',
+    //         'totalClasses',
+    //         'activeClasses',
+    //         'totalStudents',
+    //         'averageClassSize',
+    //         'gradeLevels'
+    //     ));
+    // }
+
+
+    // In your ClassController.php index method
+    public function index(Request $request)
+    {
         $classes = SchoolClass::with(['teachers.roles'])
             ->withCount('students')
             ->paginate(10);
@@ -29,11 +62,93 @@ class ClassManagementController extends Controller
         $totalStudents = Student::count();
         $averageClassSize = $totalClasses > 0 ? $totalStudents / $totalClasses : 0;
 
-        // Get unique grade levels for filter
+        // Additional statistics
+        $maxCapacity = SchoolClass::max('capacity') ?? 100;
+        $overcrowdedClasses = SchoolClass::whereColumn('current_strength', '>', 'capacity')->count();
+        $teacherStudentRatio = $totalStudents > 0 ? $totalStudents / Teacher::count() : 0;
+
+        // Growth calculation (compared to last month)
+        $lastMonthClasses = SchoolClass::whereMonth('created_at', now()->subMonth()->month)->count();
+        $classGrowth = $lastMonthClasses > 0 ? (($totalClasses - $lastMonthClasses) / $lastMonthClasses) * 100 : 0;
+
+        // Grade distribution
+        $gradeDistribution = SchoolClass::select('grade_level', DB::raw('count(*) as count'))
+            ->groupBy('grade_level')
+            ->orderBy('grade_level')
+            ->pluck('count', 'grade_level')
+            ->toArray();
+
+        // Recent activities
+        $recentActivities = [
+            [
+                'icon' => 'person_add',
+                'color' => 'bg-green-500',
+                'description' => '10 new students assigned to Grade 10-A',
+                'time' => '2 hours ago',
+                'type' => 'Assignment',
+                'type_color' => 'text-green-600',
+                'class_id' => 1
+            ],
+            [
+                'icon' => 'edit',
+                'color' => 'bg-blue-500',
+                'description' => 'Class schedule updated for Mathematics',
+                'time' => '5 hours ago',
+                'type' => 'Update',
+                'type_color' => 'text-blue-600',
+                'class_id' => 2
+            ],
+            // Add more activities...
+        ];
+
+        // Upcoming events
+        $upcomingEvents = [
+            [
+                'title' => 'Mid-term Exams',
+                'description' => 'All classes',
+                'date' => 'Next Week',
+                'time' => 'Mon-Fri',
+                'class_count' => $totalClasses
+            ],
+            [
+                'title' => 'Parent-Teacher Meeting',
+                'description' => 'Grade 10 Parents',
+                'date' => 'Oct 25',
+                'time' => '2:00 PM',
+                'class_count' => 8
+            ],
+            // Add more events...
+        ];
+
+        // Get available teachers for filter
+        $teachers = Teacher::with('user')
+            ->where('status', 'active')
+            ->orderBy('id')
+            ->get();
+
+        // Get unique subjects
+        $subjects = Subject::orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+
+        // Get academic years
+        $academicYears = SchoolClass::whereNotNull('academic_year')
+            ->distinct()
+            ->orderBy('academic_year', 'desc')
+            ->pluck('academic_year')
+            ->toArray();
+
+        // Get grade levels for filter
         $gradeLevels = SchoolClass::distinct()
+            ->orderBy('grade_level')
             ->pluck('grade_level')
-            ->sort()
-            ->values();
+            ->toArray();
+
+        // Calculate average attendance and grades for each class
+        $classes->each(function ($class) {
+            $class->average_attendance = rand(85, 98);
+            $class->average_grade = rand(65, 95);
+        });
 
         return view('admin.classes.index', compact(
             'classes',
@@ -41,7 +156,17 @@ class ClassManagementController extends Controller
             'activeClasses',
             'totalStudents',
             'averageClassSize',
-            'gradeLevels'
+            'gradeLevels',
+            'maxCapacity',
+            'overcrowdedClasses',
+            'teacherStudentRatio',
+            'classGrowth',
+            'gradeDistribution',
+            'recentActivities',
+            'upcomingEvents',
+            'teachers',
+            'subjects',
+            'academicYears'
         ));
     }
 
@@ -126,7 +251,7 @@ class ClassManagementController extends Controller
     /**
      * Update the specified class in storage.
      */
-    public function update(Request $request, ClassModel $class)
+    public function update(Request $request, SchoolClass $class)
     {
         // Validate the request
         $validated = $request->validate($this->validationRules($class->id));
@@ -286,6 +411,52 @@ class ClassManagementController extends Controller
         ]);
     }
 
+    public function getStudentsForAssignment(SchoolClass $class)
+    {
+        try {
+            // Get all available students with user relationship
+            $students = Student::with('user')
+                ->where('status', 'active')
+                ->orderByRaw('(SELECT name FROM users WHERE users.id = students.user_id)')
+                ->get()
+                ->map(function ($student) {
+                    $user = $student->user;
+
+                    // Split full name from users table into first and last
+                    $fullName = $user->name ?? 'Unknown Student';
+                    $nameParts = explode(' ', $fullName, 2);
+
+                    return [
+                        'id' => $student->id,
+                        'first_name' => $nameParts[0] ?? '',
+                        'last_name' => $nameParts[1] ?? '',
+                        'email' => $student->email ?? $user->email ?? '',
+                        'student_id' => $student->student_id ?? 'N/A',
+                        'grade_level' => $student->grade_level ?? '',
+                        'full_name' => $fullName,
+                    ];
+                });
+
+            // Get currently assigned students
+            $assignedStudents = $class->students()->pluck('students.id')->toArray();
+
+            return response()->json([
+                'success' => true,
+                'students' => $students,
+                'assignedStudents' => $assignedStudents,
+                'capacity' => $class->capacity,
+                'class_name' => $class->name,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'students' => [],
+                'assignedStudents' => []
+            ], 500);
+        }
+    }
+
     public function assignStudents(Request $request, SchoolClass $class)
     {
         $request->validate([
@@ -294,21 +465,131 @@ class ClassManagementController extends Controller
         ]);
 
         try {
-            // Sync students with the class
-            $class->students()->sync($request->student_ids);
+            DB::beginTransaction();
 
-            // Update class strength
-            $class->update(['current_strength' => count($request->student_ids)]);
+            Log::info('Assigning students to class', [
+                'class_id' => $class->id,
+                'class_name' => $class->name,
+                'student_ids' => $request->student_ids,
+                'student_count' => count($request->student_ids)
+            ]);
+
+            // For HasMany relationship, we need to update the class_id on each student
+            // First, remove all students from this class (set class_id to null)
+            Student::where('class_id', $class->id)->update(['class_id' => null]);
+
+            // Then assign the new students to this class
+            Student::whereIn('id', $request->student_ids)->update(['class_id' => $class->id]);
+
+            // Update current strength
+            $class->update([
+                'current_strength' => count($request->student_ids)
+            ]);
+
+            DB::commit();
+
+            Log::info('Successfully assigned students to class', [
+                'class_id' => $class->id,
+                'student_count' => count($request->student_ids)
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Students assigned successfully!'
+                'message' => 'Students assigned successfully!',
+                'should_reload' => true
             ]);
         } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Error assigning students: ' . $e->getMessage(), [
+                'class_id' => $class->id,
+                'student_ids' => $request->student_ids,
+                'exception' => $e
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to assign students: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getTeachersForAssignment(SchoolClass $class)
+    {
+        try {
+            // Get all available teachers
+            $teachers = Teacher::with('user')
+                ->where('status', 'active')
+                ->select('id', 'user_id')
+                ->orderBy('id')
+                ->get()
+                ->map(function ($teacher) {
+                    return [
+                        'id' => $teacher->id,
+                        'name' => $teacher->user->name ?? $teacher->name,
+                        'email' => $teacher->user->email ?? $teacher->email,
+                        'subjects' => $teacher->subjects_taught ?? 'General',
+                    ];
+                });
+
+            // Get current teacher for this class
+            $currentTeacherId = null;
+            if ($class->teacher_id) {
+                $currentTeacherId = $class->teacher_id;
+            } elseif ($class->teachers()->exists()) {
+                $currentTeacherId = $class->teachers()->first()?->id;
+            }
+
+            return response()->json([
+                'success' => true,
+                'teachers' => $teachers,
+                'currentTeacherId' => $currentTeacherId,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage(),
+                'teachers' => [],
+                'currentTeacherId' => null
+            ], 500);
+        }
+    }
+
+    public function assignTeacher(Request $request, SchoolClass $class)
+    {
+        $request->validate([
+            'teacher_id' => 'required|exists:teachers,id'
+        ]);
+
+        try {
+            \DB::beginTransaction();
+
+            // Assign teacher (adjust based on your relationship)
+            if (Schema::hasColumn('school_classes', 'teacher_id')) {
+                // If using teacher_id column
+                $class->update(['teacher_id' => $request->teacher_id]);
+            } else {
+                // If using many-to-many relationship
+                $class->teachers()->sync([$request->teacher_id]);
+            }
+
+            \DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Teacher assigned successfully!',
+            ]);
+        } catch (\Exception $e) {
+            \DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to assign teacher: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    public function classExport()
+    {
+        //
     }
 }

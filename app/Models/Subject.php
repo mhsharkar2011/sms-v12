@@ -23,6 +23,13 @@ class Subject extends Model
         'credit_hours' => 1
     ];
 
+
+    public function classes()
+    {
+        return $this->belongsToMany(SchoolClass::class, 'class_subject', 'subject_id', 'class_id')
+            ->withTimestamps();
+    }
+
     /**
      * Get timetable entries for this subject
      */
@@ -30,6 +37,7 @@ class Subject extends Model
     {
         return $this->hasMany(Timetable::class);
     }
+
 
     /**
      * Get attendance records for this subject
