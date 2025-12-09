@@ -18,6 +18,7 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\StudentAttendanceController;
 use Illuminate\Support\Facades\Route;
@@ -106,6 +107,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('/users', UserManagementController::class);
         Route::resource('/students', StudentManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
+        Route::resource('/sections', SectionController::class);
+        Route::patch('sections/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->name('sections.toggle-status');
+        Route::post('sections/{section}/restore', [SectionController::class, 'restore'])->name('sections.restore');
+        Route::delete('sections/{section}/force-delete', [SectionController::class, 'forceDelete'])->name('sections.force-delete');
         Route::resource('/classes', ClassManagementController::class);
         Route::resource('/subjects', SubjectManagementController::class);
         Route::resource('/guardians', GuardianManagementController::class);
@@ -142,7 +147,7 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
         Route::get('/exams/report', [AdminDashboard::class, 'examsReport'])->name('exams.export');
-        Route::get('/exams/generate',[ExamController::class,'examGenerate'])->name('exams.generate');
+        Route::get('/exams/generate', [ExamController::class, 'examGenerate'])->name('exams.generate');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');
 
         //Admin Notifications Route

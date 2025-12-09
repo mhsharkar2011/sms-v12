@@ -283,9 +283,10 @@
                                                                 </span>
                                                             @endif
                                                         </div>
-                                                        <p class="text-sm text-gray-500 truncate">{{ $student->user->email }}
-                                                        </p>
-                                                        <p class="text-xs text-gray-400 mt-1">ID: {{ $student->student_id }}</p>
+                                                        <p class="text-sm text-gray-500 truncate">{{ $student->schoolClass->name }}</p>
+                                                        <p class="text-xs text-gray-400 mt-1">Roll : {{ $student->student_id }}</p>
+                                                        <p class="text-xs text-gray-400 mt-1">Shift : {{ $student->section->name }}</p>
+                                                        <p class="text-xs text-gray-400 mt-1">Section : {{ $student->section->code }}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -299,9 +300,10 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">{{ $student->email }}</div>
-                                                @if ($student->phone)
-                                                    <div class="text-xs text-gray-500">{{ $student->phone }}</div>
+                                                <div class="text-sm text-gray-900">{{ 'Guardian:'.$student->emergency_contact_name }}  {{ '(' .$student->emergency_contact_phone . ')' }}</div>
+                                                <div class="text-sm text-gray-900">{{ $student->user->email }}</div>
+                                                @if ($student->user->phone)
+                                                    <div class="text-xs text-gray-500">{{ $student->user->phone }}</div>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">

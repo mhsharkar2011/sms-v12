@@ -1,5 +1,5 @@
 @php
-use Illuminate\Support\Facades\Storage;
+    use Illuminate\Support\Facades\Storage;
 @endphp
 
 @extends('layouts.app')
@@ -114,8 +114,7 @@ use Illuminate\Support\Facades\Storage;
                                         <label for="last_name" class="block text-sm font-medium text-gray-700 mb-2">
                                             Last Name *
                                         </label>
-                                        <input type="text" name="last_name" id="last_name"
-                                            value="{{ old('last_name') }}"
+                                        <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('last_name') border-red-500 @enderror"
                                             required>
                                         @error('last_name')
@@ -280,6 +279,50 @@ use Illuminate\Support\Facades\Storage;
                                         @enderror
                                     </div>
 
+                                    <!-- Section -->
+                                    <div>
+                                        <label for="section_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Section *
+                                        </label>
+                                        <select name="section_id" id="section_id"
+                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('section_id') border-red-500 @enderror"
+                                            required>
+                                            <option value="">Select Section</option>
+                                            @foreach ($sections as $section)
+                                                <option value="{{ $section->id }}"
+                                                    {{ old('section_id') == $section->id ? 'selected' : '' }}
+                                                    data-class-id="{{ $section->class_id }}"
+                                                    data-teacher="{{ $section->teacher?->full_name ?? 'Not Assigned' }}"
+                                                    data-room="{{ $section->room_number ?? 'N/A' }}"
+                                                    data-capacity="{{ $section->capacity }}"
+                                                    data-available="{{ $section->remaining_seats }}">
+                                                    {{ $section->name }} ({{ $section->code }})
+                                                    - {{ $section->class->name }}
+                                                    @if ($section->teacher)
+                                                        - Teacher: {{ $section->teacher->full_name }}
+                                                    @endif
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('section_id')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <div id="sectionInfo" class="mt-2 text-xs text-gray-600 hidden">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-chalkboard-teacher"></i>
+                                                <span id="sectionTeacher">Not Assigned</span>
+                                            </div>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i class="fas fa-door-open"></i>
+                                                <span id="sectionRoom">N/A</span>
+                                            </div>
+                                            <div class="flex items-center gap-2">
+                                                <i class="fas fa-users"></i>
+                                                <span id="sectionCapacity">Capacity: 0/0 (0 seats available)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <!-- Grade Level -->
                                     <div>
                                         <label for="grade_level" class="block text-sm font-medium text-gray-700 mb-2">
@@ -310,20 +353,6 @@ use Illuminate\Support\Facades\Storage;
                                             value="{{ old('roll_number') }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('roll_number') border-red-500 @enderror">
                                         @error('roll_number')
-                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
-                                    </div>
-
-                                    <!-- Section -->
-                                    <div>
-                                        <label for="section" class="block text-sm font-medium text-gray-700 mb-2">
-                                            Section
-                                        </label>
-                                        <input type="text" name="section" id="section"
-                                            value="{{ old('section') }}"
-                                            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('section') border-red-500 @enderror"
-                                            placeholder="A, B, C, etc.">
-                                        @error('section')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -427,8 +456,7 @@ use Illuminate\Support\Facades\Storage;
                                         <label for="caste" class="block text-sm font-medium text-gray-700 mb-2">
                                             Caste
                                         </label>
-                                        <input type="text" name="caste" id="caste"
-                                            value="{{ old('caste') }}"
+                                        <input type="text" name="caste" id="caste" value="{{ old('caste') }}"
                                             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('caste') border-red-500 @enderror">
                                         @error('caste')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -741,7 +769,8 @@ use Illuminate\Support\Facades\Storage;
 
                                         <!-- Student Status -->
                                         <div>
-                                            <label for="student_status" class="block text-sm font-medium text-gray-700 mb-2">
+                                            <label for="student_status"
+                                                class="block text-sm font-medium text-gray-700 mb-2">
                                                 Student Status *
                                             </label>
                                             <select name="student_status" id="student_status"
@@ -806,6 +835,7 @@ use Illuminate\Support\Facades\Storage;
                                 <ul class="mt-2 text-sm text-blue-800 list-disc list-inside space-y-1">
                                     <li>All fields marked with * are required</li>
                                     <li>Student ID and Admission Number are auto-generated</li>
+                                    <li>Select a section to automatically assign class and teacher</li>
                                     <li>Student will be created with a user account for system access</li>
                                     <li>Medical information is important for emergency situations</li>
                                     <li>Emergency contact details are crucial for safety</li>
@@ -854,7 +884,8 @@ use Illuminate\Support\Facades\Storage;
                 placeholder.classList.remove('hidden');
 
                 // Reset auto-generated fields
-                document.getElementById('admission_number').value = '{{ \App\Models\Student::generateAdmissionNumber() }}';
+                document.getElementById('admission_number').value =
+                '{{ \App\Models\Student::generateAdmissionNumber() }}';
                 document.getElementById('student_id').value = '{{ \App\Models\Student::generateStudentId() }}';
                 document.getElementById('academic_year').value = '{{ date('Y') . '-' . (date('Y') + 1) }}';
                 document.getElementById('admission_date').value = '{{ date('Y-m-d') }}';
@@ -862,6 +893,9 @@ use Illuminate\Support\Facades\Storage;
                 document.getElementById('student_status').value = 'active';
                 document.getElementById('nationality').value = 'Indian';
                 document.getElementById('country').value = 'India';
+
+                // Reset section info
+                document.getElementById('sectionInfo').classList.add('hidden');
             }
         }
 
@@ -907,6 +941,62 @@ use Illuminate\Support\Facades\Storage;
                 alert('Passwords do not match. Please check your entries.');
                 document.getElementById('password_confirmation').focus();
             }
+        });
+
+        // Section selection handler
+        document.getElementById('section_id').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const sectionInfo = document.getElementById('sectionInfo');
+
+            if (selectedOption.value) {
+                // Show section info
+                sectionInfo.classList.remove('hidden');
+
+                // Update section details
+                document.getElementById('sectionTeacher').textContent = selectedOption.dataset.teacher;
+                document.getElementById('sectionRoom').textContent = `Room: ${selectedOption.dataset.room}`;
+                document.getElementById('sectionCapacity').textContent =
+                    `Capacity: ${selectedOption.dataset.available}/${selectedOption.dataset.capacity} seats available`;
+
+                // Auto-set class if section has a class
+                if (selectedOption.dataset.classId) {
+                    const classSelect = document.getElementById('class_id');
+                    classSelect.value = selectedOption.dataset.classId;
+                }
+            } else {
+                // Hide section info
+                sectionInfo.classList.add('hidden');
+            }
+        });
+
+        // Filter sections based on selected class
+        document.getElementById('class_id').addEventListener('change', function() {
+            const selectedClassId = this.value;
+            const sectionSelect = document.getElementById('section_id');
+            const options = sectionSelect.querySelectorAll('option');
+
+            // Reset section selection
+            sectionSelect.value = '';
+            document.getElementById('sectionInfo').classList.add('hidden');
+
+            // Show all sections by default if no class selected
+            if (!selectedClassId) {
+                options.forEach(option => {
+                    option.style.display = '';
+                });
+                return;
+            }
+
+            // Filter sections by class
+            options.forEach(option => {
+                if (option.value === '') {
+                    option.style.display = ''; // Keep "Select Section" option
+                } else if (option.dataset.classId === selectedClassId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
         });
     </script>
 @endpush

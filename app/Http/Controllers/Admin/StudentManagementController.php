@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
+use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
@@ -61,9 +62,10 @@ class StudentManagementController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
         $classes = SchoolClass::active()->get();
-        return view('admin.students.create', compact('roles', 'classes'));
+        $sections = Section::active()->with(['class', 'teacher'])->get();
+
+        return view('admin.students.create', compact( 'classes','sections'));
     }
 
     /**
@@ -95,6 +97,7 @@ class StudentManagementController extends Controller
             // Student fields
             'student_id' => 'nullable|string|unique:students,student_id',
             'class_id' => 'nullable|exists:school_classes,id',
+            'section_id' => 'nullable|exists:sections,id',
             'admission_number' => 'nullable|string|unique:students,admission_number',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'date_of_birth' => 'required|date',
@@ -114,7 +117,6 @@ class StudentManagementController extends Controller
             'admission_date' => 'required|date',
             'grade_level' => 'required|string|max:50',
             'roll_number' => 'nullable|string|max:50',
-            'section' => 'nullable|string|max:50',
             'academic_year' => 'required|string|max:20',
             'medical_notes' => 'nullable|string',
             'allergies' => 'nullable|string',
@@ -178,6 +180,7 @@ class StudentManagementController extends Controller
                 'user_id' => $user->id,
                 'student_id' => $studentValidation['student_id'] ?? Student::generateStudentId(),
                 'class_id' => $studentValidation['class_id'] ?? null,
+                'section_id' => $studentValidation['section_id'] ?? null,
                 'admission_number' => $studentValidation['admission_number'] ?? Student::generateAdmissionNumber(),
                 'date_of_birth' => $studentValidation['date_of_birth'],
                 'gender' => $studentValidation['gender'],
@@ -298,6 +301,7 @@ class StudentManagementController extends Controller
             // Student fields
             'student_id' => 'nullable|string|unique:students,student_id',
             'class_id' => 'nullable|exists:school_classes,id',
+            'section_id' => 'nullable|exists:sections,id',
             'admission_number' => 'nullable|string|unique:students,admission_number',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'date_of_birth' => 'required|date',
@@ -317,7 +321,6 @@ class StudentManagementController extends Controller
             'admission_date' => 'required|date',
             'grade_level' => 'required|string|max:50',
             'roll_number' => 'nullable|string|max:50',
-            'section' => 'nullable|string|max:50',
             'academic_year' => 'required|string|max:20',
             'medical_notes' => 'nullable|string',
             'allergies' => 'nullable|string',
@@ -368,7 +371,7 @@ class StudentManagementController extends Controller
 
             // Update Student record (similar to store method but with update)
             $studentData = [
-                'user_id'=> $user->id,
+                'user_id' => $user->id,
                 'email' => $studentValidation['email'],
                 'phone' => $studentValidation['phone'] ?? null,
                 'date_of_birth' => $studentValidation['date_of_birth'],

@@ -48,6 +48,24 @@ class AdminSidebarComposer
                 'badgeColor' => 'bg-blue-100'
             ],
              [
+                'route' => 'admin.classes.index',
+                'icon' => '🏫',
+                'label' => 'Classes',
+                'description' => 'Class management',
+                'badge' => $totalClasses,
+                'badgeColor' => 'bg-purple-100'
+
+            ],
+             [
+                'route' => 'admin.sections.index',
+                'icon' => '🏫',
+                'label' => 'Sections',
+                'description' => 'Class management',
+                'badge' => $totalClasses,
+                'badgeColor' => 'bg-green-100'
+
+            ],
+             [
                 'route' => 'admin.enrollments.index',
                 'icon' => '📊',
                 'label' => 'Enrollment',
@@ -86,15 +104,6 @@ class AdminSidebarComposer
                 'description' => 'GUardian management',
                 'badge' => $totalGuardian > 0 ? $totalGuardian : "NULL",
                 'badgeColor' => $totalGuardian > 0 ? 'bg-brown-100' : "bg-gray-100",
-            ],
-            [
-                'route' => 'admin.classes.index',
-                'icon' => '🏫',
-                'label' => 'Classes',
-                'description' => 'Class management',
-                'badge' => $totalClasses,
-                'badgeColor' => 'bg-purple-100'
-
             ],
             [
                 'route' => 'admin.subjects.index',

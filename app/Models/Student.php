@@ -18,13 +18,14 @@ class Student extends Model
 
     protected $fillable = [
         'user_id', // Add this
+        'section_id',
+        'class_id',
         'first_name',
         'last_name',
         'student_id',
-        'class_id',
         'admission_number',
-        'email',
-        'phone',
+        // 'email',
+        // 'phone',
         'date_of_birth',
         'gender',
         'blood_group',
@@ -42,7 +43,6 @@ class Student extends Model
         'admission_date',
         'grade_level',
         'roll_number',
-        'section',
         'academic_year',
         'avatar',
         'medical_info',
@@ -100,7 +100,7 @@ class Student extends Model
 
     public function section()
     {
-        return $this->belongsTo(Section::class);
+        return $this->belongsTo(Section::class,'section_id');
     }
 
     public function enrollments(): HasMany
