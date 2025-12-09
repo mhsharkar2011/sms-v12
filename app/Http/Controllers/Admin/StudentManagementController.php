@@ -27,7 +27,7 @@ class StudentManagementController extends Controller
         $classFilter = $request->get('class_id');
 
         // Build query with filters
-        $students = Student::with('user', 'user.roles', 'schoolClass')
+        $students = Student::with('user', 'user.roles', 'schoolClass','section')
             ->when($status, function ($query, $status) {
                 return $query->where('status', $status);
             })
@@ -397,8 +397,12 @@ class StudentManagementController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Student $student)
     {
-        // Add your delete logic here
+        $student->delete();
+
+        return redirect()->route('admin.students.index')
+        ->with('success', 'Student deleted successfully');
+
     }
 }

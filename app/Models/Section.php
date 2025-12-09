@@ -13,6 +13,7 @@ class Section extends Model
     protected $fillable = [
         'class_id',
         'teacher_id',
+        'student_id',
         'name',
         'code',
         'capacity',
@@ -39,7 +40,79 @@ class Section extends Model
 
     public function students()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'student_id');
+    }
+
+    /**
+     * Generate next student ID.
+     */
+    public static function generateSectionCode(): string
+    {
+        // Get all existing section codes
+        $existingCodes = static::pluck('code')->toArray();
+
+        // Generate letters A-Z
+        $letters = range('A', 'Z');
+
+        // Find the first available letter
+        foreach ($letters as $letter) {
+            $code = 'SEC-' . $letter;
+            if (!in_array($code, $existingCodes)) {
+                return $code;
+            }
+        }
+
+        // If all A-Z are used, start with numbers
+        $lastNumber = 0;
+        foreach ($existingCodes as $existingCode) {
+            if (preg_match('/SEC-(\d+)$/', $existingCode, $matches)) {
+                $lastNumber = max($lastNumber, (int)$matches[1]);
+            }
+        }
+
+        return 'SEC-' . ($lastNumber + 1);
+    }
+
+    /**
+     * Generate next admission number.
+     */
+    public static function generateRoomNumber($roomType = 'classroom'): string
+    {
+        // Room type prefixes
+        $prefixes = [
+            'classroom' => 'CR',
+            'laboratory' => 'LAB',
+            'library' => 'LIB',
+            'auditorium' => 'AUD',
+            'office' => 'OFF',
+            'sports' => 'GYM',
+            'computer' => 'COM',
+        ];
+
+        $prefix = $prefixes[$roomType] ?? 'RM';
+
+        // Get last room number for this type
+        $lastRoom = static::where('room_number', 'like', $prefix . '-%')
+            ->withTrashed()
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$lastRoom || !$lastRoom->room_number) {
+            // Start with 101 for this type
+            return $prefix . '-101';
+        }
+
+        // Extract number (e.g., "CR-101" -> 101)
+        $lastRoomNumber = $lastRoom->room_number;
+        if (preg_match('/' . $prefix . '-(\d+)/', $lastRoomNumber, $matches)) {
+            $lastNumber = (int)$matches[1];
+            $nextNumber = $lastNumber + 1;
+
+            // Keep 3 digits for standard rooms
+            return $prefix . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+        }
+
+        return $prefix . '-101';
     }
 
     // Scopes

@@ -12,6 +12,9 @@ return new class extends Migration
             $table->id();
             $table->string('user_id')->unique()->nullable();
             $table->string('student_id')->unique();
+            $table->foreignId('teacher_id')->constrained('teachers');
+            $table->foreignId('class_id')->constrained('school_classes');
+            $table->foreignId('section_id')->constrained('sections');
             $table->string('admission_number')->unique()->nullable()->comment('Custom admission number: ADM001, ADM002, etc.');
             $table->date('date_of_birth');
             $table->enum('gender', ['male', 'female', 'other']);
@@ -32,8 +35,6 @@ return new class extends Migration
 
             // Academic Information
             $table->date('admission_date')->nullable();
-            $table->foreignId('class_id')->constrained('school_classes');
-            $table->foreignId('section_id')->constrained('sections');
             $table->string('grade_level')->nullable();
             $table->string('roll_number')->nullable();
             // $table->string('section')->nullable(); // REMOVED - using section_id instead

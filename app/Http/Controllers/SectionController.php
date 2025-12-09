@@ -35,8 +35,10 @@ class SectionController extends Controller
     {
         $classes = SchoolClass::active()->get();
         $teachers = Teacher::active()->get();
+        $sectionCode = Section::generateSectionCode();
+        $roomNumber = Section::generateRoomNumber();
 
-        return view('admin.sections.create', compact('classes', 'teachers'));
+        return view('admin.sections.create', compact('classes', 'teachers','sectionCode','roomNumber'));
     }
 
     public function store(Request $request)

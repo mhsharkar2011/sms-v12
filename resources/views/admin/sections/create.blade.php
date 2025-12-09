@@ -105,13 +105,13 @@
                                         <label for="code" class="block text-sm font-medium text-gray-700 mb-1">
                                             Section Code <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="text" id="code" name="code" value="{{ old('code') }}"
+                                        <input type="text" id="code" name="code" value="{{ old('code',$sectionCode) }}"
                                             class="w-full px-4 py-2.5 border @error('code') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                             placeholder="e.g., SEC-A" required>
                                         @error('code')
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
-                                        <p class="mt-1 text-xs text-gray-500">Unique identifier for the section
+                                        <p class="mt-1 text-xs text-gray-500">Auto-generated section code
                                             (uppercase)</p>
                                     </div>
 
@@ -121,7 +121,7 @@
                                             Room Number
                                         </label>
                                         <input type="text" id="room_number" name="room_number"
-                                            value="{{ old('room_number') }}"
+                                            value="{{ old('room_number',$roomNumber) }}"
                                             class="w-full px-4 py-2.5 border @error('room_number') border-red-500 @else border-gray-300 @enderror rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                                             placeholder="e.g., R-101, Block-A">
                                         @error('room_number')
