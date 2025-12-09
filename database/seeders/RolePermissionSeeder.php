@@ -159,7 +159,7 @@ class RolePermissionSeeder extends Seeder
             'admin',
             'teacher',
             'student',
-            'parent',
+            'guardian',
             'accountant',
         ];
 
@@ -292,7 +292,7 @@ class RolePermissionSeeder extends Seeder
             'view_fees',
             'view_fee_reports',
         ];
-        $roles['parent']->syncPermissions($parentPermissions);
+        $roles['guardian']->syncPermissions($parentPermissions);
 
         // Accountant
         $accountantPermissions = [

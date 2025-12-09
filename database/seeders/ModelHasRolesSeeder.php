@@ -35,10 +35,10 @@ class ModelHasRolesSeeder extends Seeder
 
         $assignments = [
             // Super Admin
-            ['email' => 'superadmin@school.test', 'roles' => ['super_admin']],
+            ['email' => 'superadmin@mail.com', 'roles' => ['super_admin']],
 
             // Admin
-            ['email' => 'admin@school.test', 'roles' => ['admin']],
+            ['email' => 'admin@mail.com', 'roles' => ['admin']],
 
             // Teachers
             ['email' => 'teacher1@school.test', 'roles' => ['teacher']],
@@ -46,15 +46,11 @@ class ModelHasRolesSeeder extends Seeder
             ['email' => 'teacher3@school.test', 'roles' => ['teacher']],
 
             // Students
-            ['email' => 'student1@school.test', 'roles' => ['student']],
-            ['email' => 'student2@school.test', 'roles' => ['student']],
-            ['email' => 'student3@school.test', 'roles' => ['student']],
-            ['email' => 'student4@school.test', 'roles' => ['student']],
-            ['email' => 'student5@school.test', 'roles' => ['student']],
+            ['email' => 'student@mail.com', 'roles' => ['student']],
+            ['email' => 'student1@mail.com', 'roles' => ['student']],
 
             // Parents
-            ['email' => 'parent1@school.test', 'roles' => ['guardian']],
-            ['email' => 'parent2@school.test', 'roles' => ['guardian']],
+            ['email' => 'guardian@mail.com', 'roles' => ['guardian']],
 
             // Accountant
             ['email' => 'accountant@school.test', 'roles' => ['accountant']],
@@ -119,7 +115,7 @@ class ModelHasRolesSeeder extends Seeder
             // Super Admin
             [
                 'name' => 'Super Admin',
-                'email' => 'superadmin@school.test',
+                'email' => 'superadmin@mail.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],
@@ -127,7 +123,7 @@ class ModelHasRolesSeeder extends Seeder
             // Admin
             [
                 'name' => 'School Admin',
-                'email' => 'admin@school.test',
+                'email' => 'admin@mail.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],
@@ -155,44 +151,22 @@ class ModelHasRolesSeeder extends Seeder
             // Students
             [
                 'name' => 'Student One',
-                'email' => 'student1@school.test',
+                'email' => 'student@mail.com',
                 'password' => Hash::make('password'),
 
                 'email_verified_at' => now(),
             ],
             [
                 'name' => 'Student Two',
-                'email' => 'student2@school.test',
+                'email' => 'student1@school.test',
                 'password' => Hash::make('password'),
 
                 'email_verified_at' => now(),
             ],
-            [
-                'name' => 'Student Three',
-                'email' => 'student3@school.test',
-                'password' => Hash::make('password'),
-
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Student Four',
-                'email' => 'student4@school.test',
-                'password' => Hash::make('password'),
-
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Student Five',
-                'email' => 'student5@school.test',
-                'password' => Hash::make('password'),
-
-                'email_verified_at' => now(),
-            ],
-
             // Parents
             [
                 'name' => 'Guardian One',
-                'email' => 'guardian@school.test',
+                'email' => 'guardian@mail.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],
@@ -200,7 +174,7 @@ class ModelHasRolesSeeder extends Seeder
             // Accountant
             [
                 'name' => 'School Accountant',
-                'email' => 'accountant@school.test',
+                'email' => 'accountant@mail.com',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
             ],

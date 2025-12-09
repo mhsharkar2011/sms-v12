@@ -22,7 +22,7 @@ class GuardianSeeder extends Seeder
             [
                 'user' => [
                     'name' => 'John Wilson',
-                    'email' => 'john.wilson@example.com',
+                    'email' => 'jon@mail.com',
                     'phone' => '+1-555-0101',
                     'password' => Hash::make('password'),
                 ],

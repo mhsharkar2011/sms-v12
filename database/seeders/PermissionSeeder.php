@@ -346,9 +346,9 @@ class PermissionSeeder extends Seeder
                 'level' => 30,
             ],
             [
-                'name' => 'parent',
-                'display_name' => 'Parent',
-                'description' => 'Parent/Guardian of student',
+                'name' => 'guardian',
+                'display_name' => 'Guardian',
+                'description' => 'Guardian of student',
                 'color' => '#7952b3',
                 'level' => 20,
             ],
@@ -524,7 +524,7 @@ class PermissionSeeder extends Seeder
             'view_fees',
             'view_notices',
         ];
-        $roles['parent']->syncPermissions($parentPermissions);
+        $roles['guardian']->syncPermissions($parentPermissions);
 
         // Accountant
         $accountantPermissions = [
