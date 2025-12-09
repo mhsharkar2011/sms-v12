@@ -8,7 +8,10 @@ use App\Models\StudentAttendance;
 use App\Models\ExamResult;
 use App\Models\Fee;
 use App\Models\Report;
+use App\Models\SchoolClass;
+use App\Models\Section;
 use App\Models\Subject;
+use Barryvdh\DomPDF\PDF;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use DB;
@@ -18,6 +21,7 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
+         $totalStudents = Student::count();
         try {
             $dateRange = $request->get('date_range', 7);
             $startDate = $this->getStartDate($dateRange, $request);
@@ -61,7 +65,8 @@ class ReportController extends Controller
                 'revenueGrowth',
                 'attendanceTrend',
                 'subjectPerformance',
-                'recentReports'
+                'recentReports',
+                'totalStudents'
             ));
         } catch (\Exception $e) {
             \Log::error('ReportController Error: ' . $e->getMessage());
@@ -70,6 +75,169 @@ class ReportController extends Controller
             return $this->getSampleData();
         }
     }
+
+    public function createAcademicReportForm()
+    {
+        $classes = SchoolClass::active()->get();
+        $sections = Section::active()->with('class')->get();
+        $students = Student::active()->with(['class', 'section'])->get();
+
+        return view('admin.reports.generate', compact('classes', 'sections', 'students'));
+    }
+
+
+    // Generate Academic report
+    public function generateAcademicReport(Request $request)
+    {
+        // Validate the request
+        $validated = $request->validate([
+            'class_id' => 'required|exists:school_classes,id',
+            'section_id' => 'nullable|exists:sections,id',
+            'student_id' => 'nullable|exists:students,id',
+            'report_type' => 'required|in:academic,attendance,progress,transcript',
+            'format' => 'required|in:view,pdf,excel',
+            'date_from' => 'nullable|date',
+            'date_to' => 'nullable|date|after_or_equal:date_from',
+        ]);
+
+        try {
+            // Get report data
+            $reportData = $this->getReportData($validated);
+
+            // Generate based on format
+            switch ($validated['format']) {
+                case 'pdf':
+                    return $this->generatePdfReport($reportData, $validated);
+
+                case 'excel':
+                    return $this->generateExcelReport($reportData, $validated);
+
+                case 'view':
+                default:
+                    return view('admin.reports.view', $reportData);
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to generate report: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    private function getReportData($data)
+    {
+        $query = Student::query()
+            ->with(['class', 'section', 'marks', 'attendances'])
+            ->where('class_id', $data['class_id']);
+
+        // Filter by section if provided
+        if (!empty($data['section_id'])) {
+            $query->where('section_id', $data['section_id']);
+        }
+
+        // Filter by student if provided
+        if (!empty($data['student_id'])) {
+            $query->where('id', $data['student_id']);
+        }
+
+        // Get students
+        $students = $query->get();
+
+        // Get class and section info
+        $class = SchoolClass::find($data['class_id']);
+        $section = !empty($data['section_id']) ? Section::find($data['section_id']) : null;
+
+        return [
+            'students' => $students,
+            'class' => $class,
+            'section' => $section,
+            'report_type' => $data['report_type'],
+            'date_from' => $data['date_from'],
+            'date_to' => $data['date_to'],
+            'generated_at' => now(),
+        ];
+    }
+
+    private function generatePdfReport($data, $params)
+    {
+        // Check if PDF package is installed
+        if (!class_exists('Barryvdh\DomPDF\Facade\Pdf')) {
+            throw new \Exception('PDF package not installed. Please run: composer require barryvdh/laravel-dompdf');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.reports.pdf-template', $data);
+        $filename = $this->getReportFilename($params);
+
+        return $pdf->download($filename . '.pdf');
+    }
+
+    private function generateExcelReport($data, $params)
+    {
+        // For now, return a simple response
+        // You can implement Excel generation later
+        $filename = $this->getReportFilename($params);
+
+        return response()->json([
+            'message' => 'Excel generation not yet implemented',
+            'data' => $data,
+            'filename' => $filename . '.xlsx',
+        ]);
+    }
+
+    private function getReportFilename($params)
+    {
+        $class = SchoolClass::find($params['class_id']);
+        $section = !empty($params['section_id']) ? Section::find($params['section_id']) : null;
+
+        $filename = strtolower($params['report_type']) . '-report';
+        $filename .= '-class-' . str_replace(' ', '-', $class->name);
+
+        if ($section) {
+            $filename .= '-section-' . str_replace(' ', '-', $section->name);
+        }
+
+        if (!empty($params['student_id'])) {
+            $student = Student::find($params['student_id']);
+            $filename .= '-student-' . str_replace(' ', '-', $student->full_name);
+        }
+
+        $filename .= '-' . date('Y-m-d-His');
+
+        return $filename;
+    }
+
+
+
+    // View Reports
+    public function showReportForm()
+    {
+        try {
+            // Get classes - ensure you have data
+            $classes = SchoolClass::active()->get();
+
+            if ($classes->isEmpty()) {
+                // If no classes, create a dummy one for testing
+                $classes = collect([(object)[
+                    'id' => 1,
+                    'name' => 'Sample Class',
+                    'grade_level' => 'Grade 1'
+                ]]);
+            }
+
+            $sections = Section::active()->with('class')->get();
+            $students = Student::active()->with(['class', 'section'])->get();
+
+            return view('admin.reports.generate', compact('classes', 'sections', 'students'));
+        } catch (\Exception $e) {
+            return view('admin.reports.generate', [
+                'classes' => collect(),
+                'sections' => collect(),
+                'students' => collect(),
+                'error' => 'Error loading form data: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+
+
 
     private function calculateStudentGrowth(): float
     {

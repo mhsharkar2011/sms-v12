@@ -4,7 +4,7 @@
 
 @section('content')
     <div class="min-h-screen bg-gray-50 flex">
-        <x-admin-sidebar active-route="admin.reports.index"/>
+        <x-admin-sidebar active-route="admin.reports.index" />
 
         <div class="flex-1 overflow-auto">
             <div class="container mx-auto p-6">
@@ -189,7 +189,8 @@
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-6">
                             <h2 class="text-xl font-bold text-gray-900">Performance by Subject</h2>
-                            <a href="{{ route('admin.reports.academic') }}" class="text-sm text-blue-600 hover:text-blue-800">View
+                            <a href="{{ route('admin.reports.academic') }}"
+                                class="text-sm text-blue-600 hover:text-blue-800">View
                                 Details</a>
                         </div>
                         <div class="space-y-4">
@@ -237,7 +238,8 @@
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Academic Reports</h3>
                         <p class="text-sm text-gray-600 mb-4">Student performance, grades, and progress reports</p>
                         <div class="flex space-x-2">
-                            <a href="{{ route('admin.academic.generate') }}"
+                            <!-- Change the form to link to the form page -->
+                            <a href="{{ route('admin.academic.report.form') }}"
                                 class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors text-center">
                                 Generate
                             </a>

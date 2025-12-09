@@ -163,7 +163,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/reports/student/exam', [ReportController::class, 'adminStudentExaminationReports'])->name('reports.index');
 
         Route::get('/metrics', [ReportController::class, 'getMetrics'])->name('reports.metrics');
-        Route::post('/academic/generate', [ReportController::class, 'generateAcademicReport'])->name('academic.generate');
+        Route::get('/academic/reports/create', [ReportController::class, 'createAcademicReportForm'])->name('academic.reports.create');
+        Route::post('/academic/reports/generate', [ReportController::class, 'generateAcademicReport'])->name('academic..reports.generate');
+        Route::get('/academic/report/form', [ReportController::class, 'showReportForm'])->name('academic.report.form');
         Route::get('/academic/export', [ReportController::class, 'exportAcademicReport'])->name('academic.export');
         Route::post('/attendance/generate', [ReportController::class, 'generateAttendanceReport'])->name('attendance.generate');
         Route::get('/attendance/export', [ReportController::class, 'exportAttendanceReport'])->name('attendance.export');

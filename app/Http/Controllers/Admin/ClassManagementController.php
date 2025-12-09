@@ -20,9 +20,9 @@ class ClassManagementController extends Controller
         //     ->orderBy('section')
         //     ->paginate(12);
 
-        $classes = SchoolClass::with(['teachers.user'])
-        ->withCount('students')
-        ->paginate(10);
+        $classes = SchoolClass::with(['teachers.roles'])
+            ->withCount('students')
+            ->paginate(10);
 
         $totalClasses = SchoolClass::count();
         $activeClasses = SchoolClass::where('status', 'active')->count();
@@ -49,12 +49,15 @@ class ClassManagementController extends Controller
 
     public function create()
     {
-        // Get all teachers for the dropdown
-        $teachers = User::where('role', 'teacher')
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        // Debug: Get first user and see available columns
+        $firstUser = User::first();
+        if ($firstUser) {
+            \Log::info('User attributes:', $firstUser->getAttributes());
+            \Log::info('User columns:', array_keys($firstUser->getAttributes()));
+        }
 
+        // For now, get all active users
+        $teachers = Teacher::with('user')->get();
         return view('admin.classes.create', compact('teachers'));
     }
 
@@ -103,7 +106,7 @@ class ClassManagementController extends Controller
     /**
      * Show the form for editing the specified class.
      */
-    public function edit(ClassModel $class)
+    public function edit(SchoolClass $class)
     {
         // Get all teachers for the dropdown
         $teachers = User::where('role', 'teacher')

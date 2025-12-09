@@ -31,3 +31,12 @@ resources/views/admin/enrollments/
 -- Student Create done
 -- Student Delete Pending
 -- 
+
+## Install PDF Package 
+
+# Install DomPDF
+composer require barryvdh/laravel-dompdf
+
+# Publish the config (optional)
+php artisan vendor:publish --provider="Barryvdh\DomPDF\ServiceProvider"
+
