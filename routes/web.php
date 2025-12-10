@@ -16,7 +16,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\ExamResultController;
+use App\Http\Controllers\Admin\ExamResultController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SectionController;
@@ -191,6 +191,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('exams/{exam}/results', [ExamResultController::class, 'store'])->name('exam-results.store');
         Route::post('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
         Route::patch('exams/{exam}/status', [ExamController::class, 'updateStatus'])->name('exams.update-status');
+        // Bulk results upload
+        Route::post('exams/{exam}/results/bulk', [ExamResultController::class, 'storeBulk'])->name('exams.results.bulk-store');
+        
         Route::get('api/sections-by-class/{classId}', [ExamController::class, 'getSectionsByClass'])->name('api.sections-by-class');
 
 
