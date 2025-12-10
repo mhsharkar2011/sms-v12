@@ -10,12 +10,13 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\StudentManagementController;
 use App\Http\Controllers\Admin\TeacherManagementController;
 use App\Http\Controllers\Admin\ClassManagementController;
+use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\GuardianManagementController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubjectManagementController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\CommentController;
-use App\Http\Controllers\ExamController;
+use App\Http\Controllers\ExamResultController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SectionController;
@@ -125,7 +126,7 @@ Route::middleware(['auth'])->group(function () {
         // Route::post('/{class}/assign-teacher', [ClassManagementController::class, 'assignTeacher'])->name('assignTeacher');
 
 
-         Route::get('/classes/{class}/students', [ClassManagementController::class, 'getStudentsForAssignment'])->name('classes.students.data');
+        Route::get('/classes/{class}/students', [ClassManagementController::class, 'getStudentsForAssignment'])->name('classes.students.data');
 
         Route::post('/classes/{class}/assign-students', [ClassManagementController::class, 'assignStudents'])->name('classes.assign.students');
 
@@ -138,14 +139,14 @@ Route::middleware(['auth'])->group(function () {
 
 
 
-           Route::get('class/schedule',[ClassManagementController::class, 'classSchedule'])->name('classes.schedule');
-           Route::get('class/schedule/edit',[ClassManagementController::class, 'classSchedule'])->name('classes.schedule.edit');
-           Route::get('class/reports',[ClassManagementController::class, 'classReport'])->name('classes.reports');
+        Route::get('class/schedule', [ClassManagementController::class, 'classSchedule'])->name('classes.schedule');
+        Route::get('class/schedule/edit', [ClassManagementController::class, 'classSchedule'])->name('classes.schedule.edit');
+        Route::get('class/reports', [ClassManagementController::class, 'classReport'])->name('classes.reports');
         //    Route::get('class/schedule',[ClassManagementController::class, 'classReport'])->name('classes.reports');
-           Route::get('class/activity',[ClassManagementController::class, 'classActivity'])->name('classes.activity');
-           Route::get('class/attendance',[ClassManagementController::class, 'classAttendance'])->name('classes.attendance');
-           Route::get('class/grades',[ClassManagementController::class, 'classGrade'])->name('classes.grades');
-           Route::get('class/exports',[ClassManagementController::class, 'classExport'])->name('classes.export');
+        Route::get('class/activity', [ClassManagementController::class, 'classActivity'])->name('classes.activity');
+        Route::get('class/attendance', [ClassManagementController::class, 'classAttendance'])->name('classes.attendance');
+        Route::get('class/grades', [ClassManagementController::class, 'classGrade'])->name('classes.grades');
+        Route::get('class/exports', [ClassManagementController::class, 'classExport'])->name('classes.export');
         // Class Route and Student & Teacher Assignment End =============================================================================================
 
         // Enrollment Routes Start ===================================================================================================================
@@ -178,7 +179,27 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/attendance', [AdminDashboard::class, 'attendance'])->name('attendance');
         // Attendance Routes End =========================================================================================================================
 
-        Route::get('/exams', [AdminDashboard::class, 'exams'])->name('exams');
+        // Exam Routes
+        Route::resource('exams', ExamController::class);
+        // Additional exam routes
+        Route::post('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
+
+        Route::resource('exams.results', ExamResultController::class);
+        // OR
+        Route::get('exams/{exam}/results', [ExamResultController::class, 'index'])->name('exam-results.index');
+        Route::get('exams/{exam}/results/create', [ExamResultController::class, 'create'])->name('exam-results.create');
+        Route::post('exams/{exam}/results', [ExamResultController::class, 'store'])->name('exam-results.store');
+        Route::post('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
+        Route::patch('exams/{exam}/status', [ExamController::class, 'updateStatus'])->name('exams.update-status');
+        Route::get('api/sections-by-class/{classId}', [ExamController::class, 'getSectionsByClass'])->name('api.sections-by-class');
+
+
+
+        Route::patch('exams/{exam}/status', [ExamController::class, 'updateStatus'])->name('exams.update-status');
+        Route::get('api/sections-by-class/{classId}', [ExamController::class, 'getSectionsByClass'])->name('api.sections-by-class');
+
+
+
         Route::get('/exams/report', [AdminDashboard::class, 'examsReport'])->name('exams.export');
         Route::get('/exams/generate', [ExamController::class, 'examGenerate'])->name('exams.generate');
         Route::get('/settings', [AdminDashboard::class, 'settings'])->name('settings');

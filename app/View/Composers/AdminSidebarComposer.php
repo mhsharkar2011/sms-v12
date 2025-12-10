@@ -3,6 +3,7 @@
 namespace App\View\Composers;
 
 use App\Models\Enrollment;
+use App\Models\Exam;
 use App\Models\Guardian;
 use App\Models\SchoolClass;
 use App\Models\Student;
@@ -37,6 +38,7 @@ class AdminSidebarComposer
         $totalTeacher = Teacher::count();
         $totalGuardian = Guardian::count();
         $totalClasses = SchoolClass::count();
+        $totalExams = Exam::count();
 
         $menuItems = [
             [
@@ -123,11 +125,11 @@ class AdminSidebarComposer
                 'badgeColor' => 'bg-red-100',
             ],
             [
-                'route' => 'admin.exams',
+                'route' => 'admin.exams.index',
                 'icon' => '📝',
                 'label' => 'Exams',
                 'description' => 'Tests & results',
-                'badge' => '8',
+                'badge' => $totalExams,
                 'badgeColor' => 'bg-yellow-100',
             ],
             [
