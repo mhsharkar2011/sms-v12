@@ -187,13 +187,13 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('exams.results', ExamResultController::class);
         // OR
         Route::get('exams/{exam}/results', [ExamResultController::class, 'index'])->name('exam-results.index');
-        Route::get('exams/{exam}/results/create', [ExamResultController::class, 'create'])->name('exam-results.create');
+        Route::get('exams/{exam}/results/create', [ExamResultController::class, 'create'])->name('exams.results.create');
         Route::post('exams/{exam}/results', [ExamResultController::class, 'store'])->name('exam-results.store');
         Route::post('exams/{exam}/publish', [ExamController::class, 'publish'])->name('exams.publish');
         Route::patch('exams/{exam}/status', [ExamController::class, 'updateStatus'])->name('exams.update-status');
         // Bulk results upload
         Route::post('exams/{exam}/results/bulk', [ExamResultController::class, 'storeBulk'])->name('exams.results.bulk-store');
-        
+
         Route::get('api/sections-by-class/{classId}', [ExamController::class, 'getSectionsByClass'])->name('api.sections-by-class');
 
 
