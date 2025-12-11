@@ -21,6 +21,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @stack('head')
 </head>
 
 <body class="font-sans antialiased">
@@ -43,6 +44,7 @@
             <div id="notification-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div>
         </main>
     </div>
+    @stack('scripts')
 </body>
 
 </html>

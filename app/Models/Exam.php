@@ -17,7 +17,7 @@ class Exam extends Model
         'type',
         'academic_year',
         'term',
-        'school_class_id',  // Changed
+        'class_id',  // Changed
         'section_id',       // Added
         'subject_id',
         'exam_date',
@@ -41,7 +41,7 @@ class Exam extends Model
 
     public function schoolClass(): BelongsTo
     {
-        return $this->belongsTo(SchoolClass::class, 'school_class_id');
+        return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
     public function section(): BelongsTo

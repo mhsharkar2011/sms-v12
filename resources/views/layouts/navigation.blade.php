@@ -2,34 +2,81 @@
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                @auth
-                    <!-- Add this to your navigation menu -->
-                    <x-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')">
-                        {{ __('Write Post') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')">
-                        {{ __('Posts') }}
-                    </x-nav-link>
-                @endauth
-                
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('home') }}">
-                        <span class="font-bold text-xl text-gray-800">SchoolSystem</span>
+            <div class="flex items-center justify-between w-full">
+                <!-- Logo with modern styling -->
+                <div class="flex items-center">
+                    <a href="{{ route('home') }}" class="flex items-center space-x-2 group">
+                        <div
+                            class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 14l9-5-9-5-9 5 9 5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                            </svg>
+                        </div>
+                        <span
+                            class="font-bold text-2xl bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                            SchoolSystem
+                        </span>
                     </a>
                 </div>
 
-                <!-- Navigation Links - Only show when authenticated -->
+                <!-- Navigation Links Container -->
                 @auth
-                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                            {{ __('Dashboard') }}
+                    <div class="flex items-center space-x-1">
+                        <!-- Dashboard Link -->
+                        <div class="hidden md:flex items-center space-x-1">
+                            <!-- Posts Link -->
+                            <x-nav-link :href="route('posts.index')" :active="request()->routeIs('posts.index')"
+                                class="px-4 py-2.5 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                                    </svg>
+                                    <span class="font-medium">{{ __('Posts') }}</span>
+                                </div>
+                            </x-nav-link>
+
+                            <!-- Write Post Link with accent color -->
+                            <x-nav-link :href="route('posts.create')" :active="request()->routeIs('posts.create')"
+                                class="px-4 py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:shadow-sm group">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-5 h-5 text-gray-600 group-hover:text-gray-700" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                    </svg>
+                                    <span
+                                        class="font-medium text-gray-600 group-hover:text-gray-700">{{ __('Write Post') }}</span>
+                                </div>
+                            </x-nav-link>
+
+                        </div>
+                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')"
+                            class="px-4 py-2.5 rounded-lg transition-all duration-200 hover:bg-gray-50 hover:shadow-sm">
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                </svg>
+                                <span class="font-medium text-gray-600 group-hover:text-gray-700"> {{ __('Dashboard') }}</span>
+                            </div>
                         </x-nav-link>
+                        <!-- Mobile menu button (optional) -->
+                        <div class="md:hidden">
+                            <button type="button" class="p-2 rounded-lg hover:bg-gray-100" id="mobile-menu-button">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 @endauth
             </div>
+
 
             <!-- Settings Dropdown - Only show when authenticated -->
             @auth

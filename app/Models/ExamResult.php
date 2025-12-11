@@ -16,7 +16,7 @@ class ExamResult extends Model
         'student_id',
         'exam_id',
         'subject_id',
-        'school_class_id',  // Changed from class_section_id
+        'class_id',  // Changed from class_section_id
         'section_id',       // Added
         'marks_obtained',
         'total_marks',
@@ -85,7 +85,7 @@ class ExamResult extends Model
      */
     public function schoolClass(): BelongsTo
     {
-        return $this->belongsTo(SchoolClass::class, 'school_class_id');
+        return $this->belongsTo(SchoolClass::class, 'class_id');
     }
 
     /**
@@ -119,7 +119,7 @@ class ExamResult extends Model
      */
     public function scopeForClassAndSection($query, $classId, $sectionId)
     {
-        return $query->where('school_class_id', $classId)
+        return $query->where('class_id', $classId)
                      ->where('section_id', $sectionId);
     }
 }

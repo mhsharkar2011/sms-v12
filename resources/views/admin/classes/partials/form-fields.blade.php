@@ -1,7 +1,3 @@
-{{-- resources/views/admin/classes/partials/form-fields.blade.php --}}
-
-@csrf
-
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Class Name -->
     <div>

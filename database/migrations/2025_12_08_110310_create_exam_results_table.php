@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
 
             // Use your existing class and section tables
-            $table->foreignId('school_class_id')->constrained('school_classes')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->foreignId('section_id')->constrained('sections')->onDelete('cascade');
 
             // Marks and Grades
@@ -55,7 +55,7 @@ return new class extends Migration
             // Indexes for performance
             $table->index(['student_id', 'subject_id']);
             $table->index(['exam_id', 'subject_id']);
-            $table->index(['school_class_id', 'section_id', 'exam_id']);
+            $table->index(['class_id', 'section_id', 'exam_id']);
             $table->index('status');
             $table->index('result_status');
             $table->index('grade');

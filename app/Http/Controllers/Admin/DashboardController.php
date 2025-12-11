@@ -63,11 +63,6 @@ class DashboardController extends Controller
         return view('dashboards.guardian-dashboard', compact('guardians'));
     }
 
-    public function classes()
-    {
-        return view('admin.classes');
-    }
-
     public function subjects()
     {
         return view('admin.subjects');

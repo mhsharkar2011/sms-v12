@@ -93,7 +93,7 @@ class ExamController extends Controller
             'type' => 'required|string|max:255',
             'academic_year' => 'required|string|max:9',
             'term' => 'required|string|max:1',
-            'school_class_id' => 'required|exists:school_classes,id',
+            'class_id' => 'required|exists:school_classes,id',
             'section_id' => 'required|exists:sections,id',
             'subject_id' => 'required|exists:subjects,id',
             'exam_date' => 'required|date',
@@ -137,7 +137,7 @@ class ExamController extends Controller
         $subjects = Subject::orderBy('name')->get();
 
         // If you need sections for the selected class
-        $sections = Section::where('school_class_id', $exam->school_class_id)
+        $sections = Section::where('class_id', $exam->class_id)
             ->orderBy('name')
             ->get();
 
@@ -155,7 +155,7 @@ class ExamController extends Controller
             'type' => 'required|string|max:255',
             'academic_year' => 'required|string|max:9',
             'term' => 'required|string|max:1',
-            'school_class_id' => 'required|exists:school_classes,id',
+            'class_id' => 'required|exists:school_classes,id',
             'section_id' => 'required|exists:sections,id',
             'subject_id' => 'required|exists:subjects,id',
             'exam_date' => 'required|date',
@@ -232,7 +232,7 @@ class ExamController extends Controller
      */
     public function getSectionsByClass($classId)
     {
-        $sections = Section::where('school_class_id', $classId)
+        $sections = Section::where('class_id', $classId)
             ->orderBy('name')
             ->get(['id', 'name']);
 

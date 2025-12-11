@@ -103,18 +103,17 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/students/dashboard', [AdminDashboard::class, 'students'])->name('students.dashboard');
         Route::get('/teachers/dashboard', [AdminDashboard::class, 'teachers'])->name('teachers.dashboard');
         Route::get('/parents/dashboard', [AdminDashboard::class, 'parents'])->name('parents.dashboard');
-        Route::get('/classes/dashboard', [AdminDashboard::class, 'classes'])->name('classes.dashboard');
-        Route::get('/subjects/dashboard', [AdminDashboard::class, 'subjects'])->name('subjects.dashboard');
         // Dashboard End ================================================================================================================================
 
         Route::resource('/users', UserManagementController::class);
+        Route::resource('/subjects', SubjectManagementController::class);
+        Route::resource('/sections', SectionController::class);
+        Route::resource('/rooms', RoomController::class);
         Route::resource('/students', StudentManagementController::class);
         Route::resource('/teachers', TeacherManagementController::class);
-        Route::resource('/sections', SectionController::class);
         Route::patch('sections/{section}/toggle-status', [SectionController::class, 'toggleStatus'])->name('sections.toggle-status');
         Route::post('sections/{section}/restore', [SectionController::class, 'restore'])->name('sections.restore');
         Route::delete('sections/{section}/force-delete', [SectionController::class, 'forceDelete'])->name('sections.force-delete');
-        Route::resource('/subjects', SubjectManagementController::class);
         Route::resource('/guardians', GuardianManagementController::class);
 
         // Class Route and Student & Teacher Assignment Start =============================================================================================

@@ -99,19 +99,19 @@
 
                                     <div class="space-y-4">
                                         <div>
-                                            <label for="school_class_id"
+                                            <label for="class_id"
                                                 class="block text-sm font-medium text-gray-700">Class *</label>
-                                            <select name="school_class_id" id="school_class_id" required
-                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('school_class_id') border-red-300 @enderror">
+                                            <select name="class_id" id="class_id" required
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm @error('class_id') border-red-300 @enderror">
                                                 <option value="">Select Class</option>
                                                 @foreach ($classes as $class)
                                                     <option value="{{ $class->id }}"
-                                                        {{ old('school_class_id') == $class->id ? 'selected' : '' }}>
+                                                        {{ old('class_id') == $class->id ? 'selected' : '' }}>
                                                         {{ $class->name }}
                                                     </option>
                                                 @endforeach
                                             </select>
-                                            @error('school_class_id')
+                                            @error('class_id')
                                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                             @enderror
                                         </div>
@@ -276,7 +276,7 @@
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', function() {
-                const classSelect = document.getElementById('school_class_id');
+                const classSelect = document.getElementById('class_id');
                 const sectionSelect = document.getElementById('section_id');
 
                 classSelect.addEventListener('change', function() {

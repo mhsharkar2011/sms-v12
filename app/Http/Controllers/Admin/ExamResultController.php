@@ -32,7 +32,7 @@ class ExamResultController extends Controller
     public function create(Exam $exam)
     {
         // Get students from the same class and section
-        $students = Student::where('school_class_id', $exam->school_class_id)
+        $students = Student::where('class_id', $exam->class_id)
             ->where('section_id', $exam->section_id)
             ->orderBy('name')
             ->get();
@@ -92,7 +92,7 @@ class ExamResultController extends Controller
     public function edit(Exam $exam, ExamResult $result)
     {
         // Get students from the same class and section
-        $students = Student::where('school_class_id', $exam->school_class_id)
+        $students = Student::where('class_id', $exam->class_id)
             ->where('section_id', $exam->section_id)
             ->orderBy('name')
             ->get();

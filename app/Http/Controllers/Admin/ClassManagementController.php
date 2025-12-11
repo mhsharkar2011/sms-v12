@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SchoolClass;
 use App\Models\Student;
-use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use PhpParser\Node\Expr\FuncCall;
+use Illuminate\Support\Str;
 
 class ClassManagementController extends Controller
 {
@@ -317,71 +316,71 @@ class ClassManagementController extends Controller
         return $colors['default'];
     }
 
-
     public function create()
     {
-        // Debug: Get first user and see available columns
-        $firstUser = User::first();
-        if ($firstUser) {
-            \Log::info('User attributes:', $firstUser->getAttributes());
-            \Log::info('User columns:', array_keys($firstUser->getAttributes()));
-        }
-
-        // For now, get all active users
-        $teachers = Teacher::with('user')->get();
-
+        $teachers = User::whereHas('roles', function ($query) {
+            $query->where('name', 'teacher');
+        })->get();
 
         return view('admin.classes.create', compact('teachers'));
     }
 
-    /**
-     * Store a newly created class in storage.
-     */
     public function store(Request $request)
     {
-        // Validate the request
-        $validated = $request->validate($this->validationRules($request));
-
-        // Convert schedule_days array to JSON
-        if (isset($validated['schedule_days'])) {
-            $validated['schedule_days'] = json_encode($validated['schedule_days']);
-        }
-
-        DB::beginTransaction();
-
         try {
+            // Debug: Log request data
+            Log::info('Class creation request data:', $request->all());
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'code' => 'required|string|max:50|unique:school_classes,code', // Changed to school_classes
+                'grade_level' => 'required|string|max:50',
+                'section' => 'required|string|max:10',
+                'subject' => 'nullable|string|max:255',
+                'teacher_id' => 'nullable|exists:users,id',
+                'status' => 'required|in:active,inactive,completed',
+                'academic_year' => 'required|regex:/^\d{4}-\d{4}$/',
+                'schedule_days' => 'required|array|min:1',
+                'schedule_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+                'start_time' => 'nullable|date_format:H:i',
+                'end_time' => 'nullable|date_format:H:i|after:start_time',
+                'room_number' => 'nullable|string|max:50',
+                'capacity' => 'required|integer|min:1|max:100',
+                'description' => 'nullable|string|max:1000',
+            ]);
+
+            // Debug: Log validated data
+            Log::info('Validated data:', $validated);
+
+            // Convert schedule days to JSON
+            $validated['schedule_days'] = json_encode($validated['schedule_days']);
+
+            // Set default values if not provided
+            $validated['capacity'] = $validated['capacity'] ?? 30;
+
+
             // Create the class
+            Log::info('Creating class with data:', $validated);
             $class = SchoolClass::create($validated);
 
-            // If teacher is assigned
-            if (!empty($validated['teacher_id'])) {
-                // Check if this user has a teacher profile
-                $teacherProfile = Teacher::where('user_id', $validated['teacher_id'])->first();
-
-                if (!$teacherProfile) {
-                    // Create a teacher profile if it doesn't exist
-                    $teacherProfile = Teacher::create([
-                        'user_id' => $validated['teacher_id'],
-                        'class_id' => $class->id,
-                        // Add other default fields if needed
-                    ]);
-                } else {
-                    // Update existing teacher profile
-                    $teacherProfile->update(['class_id' => $class->id]);
-                }
-            }
-
-            DB::commit();
+            // Debug: Log created class
+            Log::info('Class created successfully:', $class->toArray());
 
             return redirect()->route('admin.classes.index')
                 ->with('success', 'Class created successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
 
-            \Log::error('Class creation failed: ' . $e->getMessage());
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Log validation errors
+            Log::error('Validation error:', $e->errors());
+            return back()->withInput()->withErrors($e->errors());
+
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Class creation failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
 
             return back()->withInput()
-                ->with('error', 'Failed to create class. Please try again.');
+                ->with('error', 'Failed to create class. Error: ' . $e->getMessage());
         }
     }
 
@@ -396,14 +395,13 @@ class ClassManagementController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Convert meeting days string back to array
-        if ($class->meeting_days) {
-            $class->meeting_days = explode(',', $class->meeting_days);
+        // Convert schedule days from JSON to array
+        if ($class->schedule_days) {
+            $class->schedule_days = json_decode($class->schedule_days, true);
         }
 
         return view('admin.classes.edit', compact('class', 'teachers'));
     }
-
 
     /**
      * Update the specified class in storage.
@@ -411,23 +409,32 @@ class ClassManagementController extends Controller
     public function update(Request $request, SchoolClass $class)
     {
         // Validate the request
-        $validated = $request->validate($this->validationRules($request, $class->id));
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => 'required|string|max:50|unique:school_classes,code,' . $class->id,
+            'grade_level' => 'required|string|max:50',
+            'section' => 'required|string|max:10',
+            'subject' => 'nullable|string|max:255',
+            'teacher_id' => 'nullable|exists:users,id',
+            'status' => 'required|in:active,inactive,completed',
+            'academic_year' => 'required|regex:/^\d{4}-\d{4}$/',
+            'schedule_days' => 'required|array|min:1',
+            'schedule_days.*' => 'in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'room_number' => 'nullable|string|max:50',
+            'capacity' => 'required|integer|min:1|max:100',
+            'description' => 'nullable|string|max:1000',
+        ]);
 
-        // Convert meeting days array to string
-        if (isset($validated['meeting_days'])) {
-            $validated['meeting_days'] = implode(',', $validated['meeting_days']);
-        } else {
-            $validated['meeting_days'] = null;
-        }
+        // Convert schedule days to JSON
+        $validated['schedule_days'] = json_encode($validated['schedule_days']);
 
         DB::beginTransaction();
 
         try {
             // Update the class
             $class->update($validated);
-
-            // Handle teacher assignment changes
-            $this->handleTeacherAssignment($class, $validated['teacher_id'] ?? null);
 
             DB::commit();
 
@@ -436,54 +443,12 @@ class ClassManagementController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            Log::error('Class update failed: ' . $e->getMessage());
+
             return back()->withInput()
-                ->with('error', 'Failed to update class. Please try again.');
+                ->with('error', 'Failed to update class. Error: ' . $e->getMessage());
         }
     }
-
-
-    /**
-     * Get the validation rules.
-     */
-    private function validationRules(Request $request = null, $classId = null)
-    {
-        $tableName = 'school_classes';
-        $rules = [
-            'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:school_classes,code',
-            'grade_level' => 'required|string|max:255',
-            'section' => 'required|string|max:10',
-            'subject' => 'nullable|string|max:255',
-            'teacher_id' => 'nullable|exists:users,id',
-            'status' => 'required|in:active,inactive,completed',
-            'academic_year' => 'required|string|max:9|regex:/^\d{4}-\d{4}$/',
-            'schedule_days' => 'required|array|min:1',
-            'schedule_days.*' => 'string|in:monday,tuesday,wednesday,thursday,friday,saturday,sunday',
-            'start_time' => 'nullable|date_format:H:i',
-            'end_time' => 'nullable|date_format:H:i|after:start_time',
-            'room_number' => 'nullable|string|max:50',
-            'capacity' => 'nullable|integer|min:1|max:100',
-            'description' => 'nullable|string|max:1000',
-        ];
-        return $rules;
-    }
-
-    /**
-     * Generate a unique slug for the class.
-     */
-    private function generateUniqueSlug($name)
-    {
-        $slug = \Str::slug($name);
-        $originalSlug = $slug;
-        $count = 1;
-
-        while (SchoolClass::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $count++;
-        }
-
-        return $slug;
-    }
-
 
     /**
      * Handle teacher assignment logic.
@@ -516,23 +481,46 @@ class ClassManagementController extends Controller
         }
     }
 
-    public function show(SchoolClass $schoolClass)
+    public function show(SchoolClass $class)
     {
-        $class = SchoolClass::all();
-        return view('admin.classes.show', compact('schoolClass', 'class'));
+        // Load related data
+        $class->load(['students.user', 'teachers.user', 'subjects']);
+
+        return view('admin.classes.show', compact('class'));
     }
 
     public function destroy(SchoolClass $class)
     {
-        if ($class->students()->count() > 0) {
+        DB::beginTransaction();
+
+        try {
+            // Check if class has students
+            if (Schema::hasColumn('students', 'class_id')) {
+                $studentCount = Student::where('class_id', $class->id)->count();
+            } else {
+                $studentCount = $class->students()->count();
+            }
+
+            if ($studentCount > 0) {
+                return redirect()->back()
+                    ->with('error', 'Cannot delete class with ' . $studentCount . ' students. Please reassign students first.');
+            }
+
+            $class->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.classes.index')
+                ->with('success', 'Class deleted successfully!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('Class deletion failed: ' . $e->getMessage());
+
             return redirect()->back()
-                ->with('error', 'Cannot delete class with students. Please reassign students first.');
+                ->with('error', 'Failed to delete class. Please try again.');
         }
-
-        $class->delete();
-
-        return redirect()->route('admin.classes.index')
-            ->with('success', 'Class deleted successfully!');
     }
 
     // Helper method for the view
@@ -544,11 +532,16 @@ class ClassManagementController extends Controller
         return 'General';
     }
 
-
     public function classActivity()
     {
-        //
+        // Your code here
     }
+
+    public function classExport()
+    {
+        // Your code here
+    }
+
     public function getStudentsData(SchoolClass $class)
     {
         $students = Student::where('status', 'active')
@@ -715,7 +708,7 @@ class ClassManagementController extends Controller
         ]);
 
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Assign teacher (adjust based on your relationship)
             if (Schema::hasColumn('school_classes', 'teacher_id')) {
@@ -726,23 +719,19 @@ class ClassManagementController extends Controller
                 $class->teachers()->sync([$request->teacher_id]);
             }
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Teacher assigned successfully!',
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
 
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to assign teacher: ' . $e->getMessage()
             ], 500);
         }
-    }
-    public function classExport()
-    {
-        //
     }
 }

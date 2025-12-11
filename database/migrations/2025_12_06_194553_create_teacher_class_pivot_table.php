@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('teacher_class', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained()->onDelete('cascade');
-            $table->foreignId('school_class_id')->constrained()->onDelete('cascade');
+            $table->foreignId('class_id')->constrained()->onDelete('cascade');
             $table->string('subject')->nullable();
             $table->timestamps();
 
             // Ensure unique combination
-            $table->unique(['teacher_id', 'school_class_id']);
+            $table->unique(['teacher_id', 'class_id']);
         });
     }
 

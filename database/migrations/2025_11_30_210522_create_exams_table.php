@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('type');
             $table->string('academic_year');
             $table->string('term')->nullable();
-            $table->foreignId('school_class_id')->constrained('school_classes')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('school_classes')->onDelete('cascade');
             $table->foreignId('section_id')->constrained('sections')->onDelete('cascade');
             $table->foreignId('subject_id')->constrained()->onDelete('cascade');
             $table->date('exam_date');

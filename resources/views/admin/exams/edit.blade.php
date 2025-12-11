@@ -105,14 +105,14 @@
 
                                     <div class="space-y-4">
                                         <div>
-                                            <label for="school_class_id"
+                                            <label for="class_id"
                                                 class="block text-sm font-medium text-gray-700">Class *</label>
-                                            <select name="school_class_id" id="school_class_id" required
+                                            <select name="class_id" id="class_id" required
                                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                                 <option value="">Select Class</option>
                                                 @foreach ($classes as $class)
                                                     <option value="{{ $class->id }}"
-                                                        {{ old('school_class_id', $exam->school_class_id) == $class->id ? 'selected' : '' }}>
+                                                        {{ old('class_id', $exam->class_id) == $class->id ? 'selected' : '' }}>
                                                         {{ $class->name }}
                                                     </option>
                                                 @endforeach
