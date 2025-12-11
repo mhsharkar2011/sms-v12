@@ -71,6 +71,7 @@
                     <!-- Form Card -->
                     <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                         <form action="{{ route('admin.classes.store') }}" method="POST">
+
                             @include('admin.classes.partials.form-fields')
 
                             <!-- Form Actions -->
@@ -96,7 +97,7 @@
                         </form>
                     </div>
 
-                    <!-- Help Text -->
+                    {{-- <!-- Help Text -->
                     <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
                         <div class="flex items-start space-x-3">
                             <span class="material-icons-sharp text-blue-600 text-sm mt-0.5">info</span>
@@ -110,7 +111,7 @@
                                 </ul>
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
         </div>
@@ -151,16 +152,22 @@
 
             // Only auto-generate if code is empty and name is provided
             if (nameInput && !codeInput.value) {
-                // Generate a simple code from the name
-                const code = nameInput
+                // Generate a simple code from the name and section
+                let code = nameInput
                     .toUpperCase()
                     .replace(/[^A-Z0-9]/g, ' ')
                     .trim()
                     .replace(/\s+/g, '-')
-                    .substring(0, 20);
+                    .substring(0, 15);
+
+                // Add section if available
+                if (sectionInput) {
+                    code += '-' + sectionInput.toUpperCase();
+                }
 
                 codeInput.value = code;
             }
+
         });
 
         // Validate end time is after start time
@@ -196,31 +203,27 @@
 
         // Form submission validation
         document.querySelector('form').addEventListener('submit', function(e) {
-            const requiredFields = ['name', 'code', 'grade_level', 'section', 'academic_year', 'capacity'];
-            let isValid = true;
+                    const requiredFields = ['name', 'code', 'grade_level', 'section', 'academic_year', 'capacity'];
+                    let isValid = true;
 
-            requiredFields.forEach(field => {
-                const element = document.getElementById(field);
-                if (!element.value.trim()) {
-                    isValid = false;
-                    element.classList.add('border-red-500');
-                } else {
-                    element.classList.remove('border-red-500');
-                }
-            });
+                    requiredFields.forEach(field => {
+                        const element = document.getElementById(field);
+                        if (!element.value.trim()) {
+                            isValid = false;
+                            element.classList.add('border-red-500');
+                        } else {
+                            element.classList.remove('border-red-500');
+                        }
+                    });
 
-            // Validate academic year format
-            const academicYear = document.getElementById('academic_year').value;
-            const yearPattern = /^\d{4}-\d{4}$/;
-            if (academicYear && !yearPattern.test(academicYear)) {
-                isValid = false;
-                document.getElementById('academic_year').classList.add('border-red-500');
-            }
-
-            if (!isValid) {
-                e.preventDefault();
-                alert('Please fill in all required fields correctly');
-            }
-        });
+                    // Validate at least one schedule day is selected
+                    document.querySelector('form').addEventListener('submit', function(e) {
+                        const scheduleDays = document.querySelectorAll('input[name="schedule_days[]"]:checked');
+                        if (scheduleDays.length === 0) {
+                            e.preventDefault();
+                            alert('Please select at least one schedule day');
+                            return false;
+                        }
+                    });
     </script>
 @endpush

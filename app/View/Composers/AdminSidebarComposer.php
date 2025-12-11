@@ -6,6 +6,7 @@ use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\Guardian;
 use App\Models\SchoolClass;
+use App\Models\Section;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Teacher;
@@ -38,6 +39,7 @@ class AdminSidebarComposer
         $totalTeacher = Teacher::count();
         $totalGuardian = Guardian::count();
         $totalClasses = SchoolClass::count();
+        $totalSections = Section::count();
         $totalExams = Exam::count();
 
         $menuItems = [
@@ -63,7 +65,7 @@ class AdminSidebarComposer
                 'icon' => '🏫',
                 'label' => 'Sections',
                 'description' => 'Class management',
-                'badge' => $totalClasses,
+                'badge' => $totalSections,
                 'badgeColor' => 'bg-green-100'
 
             ],
@@ -121,7 +123,7 @@ class AdminSidebarComposer
                 'icon' => '📅',
                 'label' => 'Attendance',
                 'description' => 'Track presence',
-                'badge' => '3',
+                'badge' => $totalStudent + $totalTeacher,
                 'badgeColor' => 'bg-red-100',
             ],
             [

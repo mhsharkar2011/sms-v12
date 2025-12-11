@@ -82,8 +82,11 @@
                                 <div>
                                     <p class="text-sm text-gray-600">Active Classes</p>
                                     <p class="text-2xl font-bold text-gray-900">{{ $activeClasses }}</p>
-                                    <p class="text-xs text-gray-500 mt-1">
-                                        {{ number_format(($activeClasses / $totalClasses) * 100, 1) }}% of total</p>
+                                    @if ($activeClasses > 0 || $totalClasses > 0)
+                                        <p class="text-xs text-gray-500 mt-1">
+                                            {{ number_format(($activeClasses / $totalClasses) * 100, 1) ?? '0' }}% of total
+                                        </p>
+                                    @endif
                                 </div>
                                 <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                                     <span class="material-icons-sharp text-green-600">check_circle</span>

@@ -1,4 +1,7 @@
 {{-- resources/views/admin/classes/partials/form-fields.blade.php --}}
+
+@csrf
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- Class Name -->
     <div>
@@ -6,10 +9,24 @@
             Class Name *
         </label>
         <input type="text" name="name" id="name"
-               value="{{ old('name', isset($class) && is_object($class) ? $class->name : '') }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
-               placeholder="e.g., Mathematics 101" required>
+            value="{{ old('name', isset($class) && is_object($class) ? $class->name : '') }}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('name') border-red-500 @enderror"
+            placeholder="e.g., Mathematics 101" required>
         @error('name')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <!-- Class Code -->
+    <div>
+        <label for="code" class="block text-sm font-medium text-gray-700 mb-2">
+            Class Code *
+        </label>
+        <input type="text" name="code" id="code"
+            value="{{ old('code', isset($class) && is_object($class) ? $class->code : '') }}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('code') border-red-500 @enderror"
+            placeholder="e.g., MATH-101-A" required>
+        @error('code')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
@@ -31,6 +48,20 @@
             @endforeach
         </select>
         @error('grade_level')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <!-- Section -->
+    <div>
+        <label for="section" class="block text-sm font-medium text-gray-700 mb-2">
+            Section *
+        </label>
+        <input type="text" name="section" id="section"
+            value="{{ old('section', isset($class) && is_object($class) ? $class->section : '') }}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('section') border-red-500 @enderror"
+            placeholder="e.g., A, B, C" required>
+        @error('section')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
@@ -57,14 +88,66 @@
         <select name="teacher_id" id="teacher_id"
             class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('teacher_id') border-red-500 @enderror">
             <option value="">No Teacher Assigned</option>
-            @foreach ($teachers as $teacher)
-                <option value="{{ $teacher->user->name }}"
-                    {{ old('teacher_id', isset($class) && is_object($class) ? $class->name : '') == $teacher->user->user_id ? 'selected' : '' }}>
-                    {{ $teacher->user->name }} ({{ $teacher->user->email }})
-                </option>
-            @endforeach
+            @if (isset($teachers) && $teachers->count() > 0)
+                @foreach ($teachers as $teacher)
+                    @php
+                        // Determine how to access teacher data based on your structure
+                        $teacherId = $teacher->id ?? ($teacher->user_id ?? null);
+                        $teacherName =
+                            $teacher->user->name ??
+                            ($teacher->name ?? $teacher->first_name . ' ' . $teacher->last_name);
+                        $teacherEmail = $teacher->user->email ?? ($teacher->email ?? '');
+                    @endphp
+                    @if ($teacherId)
+                        <option value="{{ $teacherId }}"
+                            {{ old('teacher_id', isset($class) && is_object($class) ? $class->teacher_id : '') == $teacherId ? 'selected' : '' }}>
+                            {{ $teacherName }} @if ($teacherEmail)
+                                ({{ $teacherEmail }})
+                            @endif
+                        </option>
+                    @endif
+                @endforeach
+            @endif
         </select>
         @error('teacher_id')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <!-- Status -->
+    <div>
+        <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+            Status *
+        </label>
+        <select name="status" id="status"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('status') border-red-500 @enderror"
+            required>
+            <option value="">Select Status</option>
+            <option value="active"
+                {{ old('status', isset($class) && is_object($class) ? $class->status : 'active') == 'active' ? 'selected' : '' }}>
+                Active</option>
+            <option value="inactive"
+                {{ old('status', isset($class) && is_object($class) ? $class->status : '') == 'inactive' ? 'selected' : '' }}>
+                Inactive</option>
+            <option value="completed"
+                {{ old('status', isset($class) && is_object($class) ? $class->status : '') == 'completed' ? 'selected' : '' }}>
+                Completed</option>
+        </select>
+        @error('status')
+            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <!-- Academic Year -->
+    <div>
+        <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-2">
+            Academic Year *
+        </label>
+        <input type="text" name="academic_year" id="academic_year"
+            value="{{ old('academic_year', isset($class) && is_object($class) ? $class->academic_year : date('Y') . '-' . (date('Y') + 1)) }}"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('academic_year') border-red-500 @enderror"
+            placeholder="e.g., 2024-2025" required>
+        @error('academic_year')
             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
         @enderror
     </div>
@@ -77,14 +160,13 @@
         <div class="flex flex-wrap gap-2">
             @foreach (['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] as $day)
                 <label class="inline-flex items-center">
-                    <input type="checkbox" name="schedule_days[]" value="{{ $day }}"
+                    <input type="checkbox" name="schedule_days[]" value="{{ strtolower($day) }}"
                         @php
-                            $scheduleDays = old('schedule_days', []);
+$scheduleDays = old('schedule_days', []);
                             if (isset($class) && is_object($class) && $class->schedule_days) {
                                 $scheduleDays = json_decode($class->schedule_days, true) ?? [];
-                            }
-                        @endphp
-                        {{ in_array($day, $scheduleDays) ? 'checked' : '' }}
+                            } @endphp
+                        {{ in_array(strtolower($day), $scheduleDays) ? 'checked' : '' }}
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                     <span class="ml-2 text-sm text-gray-700">{{ $day }}</span>
                 </label>
@@ -150,29 +232,6 @@
         @enderror
     </div>
 
-    <!-- Academic Year -->
-    <div>
-        <label for="academic_year" class="block text-sm font-medium text-gray-700 mb-2">
-            Academic Year *
-        </label>
-        <input type="text" name="academic_year" id="academic_year"
-            value="{{ old('academic_year', isset($class) && is_object($class) ? $class->academic_year : date('Y') . '-' . (date('Y') + 1)) }}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('academic_year') border-red-500 @enderror"
-            placeholder="e.g., 2024-2025" required>
-        @error('academic_year')
-            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-        @enderror
-    </div>
-
-    <!-- Status -->
-    <div class="flex items-center space-x-3">
-        <input type="checkbox" name="is_active" id="is_active" value="1"
-            {{ old('is_active', isset($class) && is_object($class) ? $class->is_active : true) ? 'checked' : '' }}
-            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-        <label for="is_active" class="text-sm font-medium text-gray-700">
-            Active Class
-        </label>
-    </div>
 </div>
 
 <!-- Description -->
