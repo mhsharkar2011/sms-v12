@@ -19,9 +19,9 @@ return new class extends Migration
 
         Schema::create('floors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('building_id')->nullable()->index();
+            $table->foreignId('building_id')->nullable()->constrained('buildings')->onDelete('set null');
             $table->string('name');
-            $table->text('description')->nullable;
+            $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
@@ -31,7 +31,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('floor_id')->nullable()->index();
             $table->string('name');
-            $table->text('description')->nullable;
+            $table->text('description')->nullable();
+             $table->enum('room_type', ['classroom', 'lab', 'office', 'auditorium', 'other'])->default('classroom');
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
@@ -41,7 +42,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('room_id')->nullable()->index();
             $table->string('name');
-            $table->text('description')->nullable;
+            $table->text('description')->nullable();
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
@@ -52,7 +53,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('code');
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->text('description')->nullable;
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
