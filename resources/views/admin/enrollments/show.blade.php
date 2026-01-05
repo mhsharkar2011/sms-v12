@@ -97,8 +97,13 @@
                                     <div class="flex items-start space-x-4">
                                         <div class="flex-shrink-0">
                                             <div
-                                                class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                                                <span class="material-icons-sharp text-blue-600 text-2xl">person</span>
+                                                class="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center shadow-sm overflow-hidden border-2 border-white">
+                                                @if ($enrollment->student->user->avatar_url)
+                                                    <img src="{{ $enrollment->student->user->avatar_url }}" alt="{{ $enrollment->student->user->full_name }}"
+                                                        class="h-full w-full object-cover">
+                                                @else
+                                                    <i class="fas fa-user text-blue-500 text-lg"></i>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="flex-1">
@@ -362,13 +367,13 @@
                                     <div class="inline-block relative">
                                         <svg class="w-32 h-32" viewBox="0 0 36 36">
                                             <path d="M18 2.0845
-                                                    a 15.9155 15.9155 0 0 1 0 31.831
-                                                    a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#e5e7eb"
-                                                stroke-width="3" stroke-dasharray="100, 100" />
-                                            @if ($enrollment->total_classes > 0)
-                                                <path d="M18 2.0845
                                                         a 15.9155 15.9155 0 0 1 0 31.831
                                                         a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+                                                stroke="#e5e7eb" stroke-width="3" stroke-dasharray="100, 100" />
+                                            @if ($enrollment->total_classes > 0)
+                                                <path d="M18 2.0845
+                                                            a 15.9155 15.9155 0 0 1 0 31.831
+                                                            a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
                                                     stroke="#10b981" stroke-width="3"
                                                     stroke-dasharray="{{ $enrollment->attendance_percentage }}, 100" />
                                             @endif
