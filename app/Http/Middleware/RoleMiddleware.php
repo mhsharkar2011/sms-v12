@@ -16,9 +16,7 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        $roles = is_array($role)
-            ? $role
-            : explode('|', $role);
+        $roles = is_array($role) ? $role : explode('|', $role);
 
         if (! $authGuard->user()->hasAnyRole($roles)) {
             abort(403);

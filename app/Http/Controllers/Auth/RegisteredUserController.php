@@ -9,8 +9,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Models\Role;
 
 class RegisteredUserController extends Controller
@@ -59,7 +59,7 @@ class RegisteredUserController extends Controller
             return redirect(route('dashboard'));
         } catch (\Exception $e) {
             // Log the error for debugging
-            \Log::error('Registration error: ' . $e->getMessage());
+            Log::error('Registration error: ' . $e->getMessage());
 
             return back()->withErrors([
                 'email' => 'Registration failed. Please try again or contact support.',
