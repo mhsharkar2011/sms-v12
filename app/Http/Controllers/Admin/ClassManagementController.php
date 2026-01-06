@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use PhpParser\Node\Expr\FuncCall;
 
 class ClassManagementController extends Controller
@@ -323,8 +324,8 @@ class ClassManagementController extends Controller
         // Debug: Get first user and see available columns
         $firstUser = User::first();
         if ($firstUser) {
-            \Log::info('User attributes:', $firstUser->getAttributes());
-            \Log::info('User columns:', array_keys($firstUser->getAttributes()));
+            Log::info('User attributes:', $firstUser->getAttributes());
+            Log::info('User columns:', array_keys($firstUser->getAttributes()));
         }
 
         // For now, get all active users
@@ -378,7 +379,7 @@ class ClassManagementController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Class creation failed: ' . $e->getMessage());
+            Log::error('Class creation failed: ' . $e->getMessage());
 
             return back()->withInput()
                 ->with('error', 'Failed to create class. Please try again.');
@@ -473,7 +474,7 @@ class ClassManagementController extends Controller
      */
     private function generateUniqueSlug($name)
     {
-        $slug = \Str::slug($name);
+        $slug = Str::slug($name);
         $originalSlug = $slug;
         $count = 1;
 
@@ -723,7 +724,7 @@ class ClassManagementController extends Controller
         ]);
 
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             // Assign teacher (adjust based on your relationship)
             if (Schema::hasColumn('school_classes', 'teacher_id')) {
@@ -734,14 +735,14 @@ class ClassManagementController extends Controller
                 $class->teachers()->sync([$request->teacher_id]);
             }
 
-            \DB::commit();
+            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Teacher assigned successfully!',
             ]);
         } catch (\Exception $e) {
-            \DB::rollBack();
+            DB::rollBack();
 
             return response()->json([
                 'success' => false,
