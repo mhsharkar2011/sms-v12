@@ -31,6 +31,8 @@ class DatabaseSeeder extends Seeder
             SchoolClassSeeder::class,
             StudentSeeder::class,
             GuardianSeeder::class,
+            EventAttendeeSeeder::class,
+            EventSeeder::class,
             // StudentAddressSeeder::class,
         ]);
     }
