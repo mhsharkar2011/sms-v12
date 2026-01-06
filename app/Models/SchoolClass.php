@@ -46,21 +46,18 @@ class SchoolClass extends Model
     /**
      * Get the teacher assigned to this class.
      */
-    public function teacher(): BelongsTo
+    public function teacherClass(): HasMany
     {
-        return $this->belongsTo(Teacher::class, 'teacher_id');
+        return $this->hasMany(TeacherClass::class, 'teacher_id');
     }
 
-    public function classTeacher()
+     public function classTeacher(): BelongsTo
     {
-        // // This assumes you have a 'is_primary' flag in your pivot table
-        // return $this->belongsToMany(Teacher::class, 'teacher_class')
-        //     ->wherePivot('is_primary', true)
-        //     ->withPivot('subject')
-        //     ->withTimestamps()
-        //     ->first(); // Returns the first/primary teacher
+        // If you still have class_teacher_id column on school_classes table
+        // return $this->belongsTo(User::class, 'class_teacher_id');
 
-        return $this->teachers()->first();
+        // OR if using pivot table with is_primary flag
+        return $this->belongsTo(TeacherClass::class, 'teacher_id');
     }
 
     public function classTeachers()
@@ -80,6 +77,11 @@ class SchoolClass extends Model
         return $this->belongsToMany(Teacher::class, 'teacher_class')
             ->withPivot('subject')
             ->withTimestamps();
+    }
+
+     public function teacherClasses(): HasMany
+    {
+        return $this->hasMany(TeacherClass::class, 'school_class_id');
     }
 
 

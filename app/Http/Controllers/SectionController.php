@@ -90,7 +90,7 @@ class SectionController extends Controller
     public function update(Request $request, Section $section)
     {
         $validated = $request->validate([
-            'class_id' => 'required|exists:classes,id',
+            'class_id' => 'required|exists:school_classes,id',
             'teacher_id' => 'nullable|exists:teachers,id',
             'name' => 'required|string|max:100',
             'code' => 'required|string|max:10|unique:sections,code,' . $section->id,

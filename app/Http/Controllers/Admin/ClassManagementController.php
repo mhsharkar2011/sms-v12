@@ -516,10 +516,18 @@ class ClassManagementController extends Controller
         }
     }
 
-    public function show(SchoolClass $schoolClass)
+    public function show(SchoolClass $class)
     {
-        $class = SchoolClass::all();
-        return view('admin.classes.show', compact('schoolClass', 'class'));
+        // Get all classes for dropdown or navigation if needed
+        $allClasses = SchoolClass::all();
+
+        // Get students in this class
+        $students = $class->students()->paginate(10);
+
+        // Get class teacher if assigned
+        // $classTeacher = $class->classTeacher;
+
+        return view('admin.classes.show', compact('class', 'allClasses', 'students'));
     }
 
     public function destroy(SchoolClass $class)

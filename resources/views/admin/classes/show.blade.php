@@ -127,7 +127,7 @@
                                 <div>
                                     <label class="text-sm font-medium text-gray-600">Class Teacher</label>
                                     <p class="text-gray-900 font-semibold">
-                                        {{ $class->classTeacher ? $class->classTeacher->name : 'Not assigned' }}
+                                        {{ $class->teacher ? $class->teacher->name : 'Not assigned' }}
                                     </p>
                                     @if($class->classTeacher)
                                     <p class="text-sm text-gray-600">{{ $class->classTeacher->email ?? '' }}</p>

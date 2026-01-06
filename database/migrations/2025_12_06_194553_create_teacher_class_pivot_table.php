@@ -16,10 +16,12 @@ return new class extends Migration
             $table->foreignId('teacher_id')->constrained()->onDelete('cascade');
             $table->foreignId('school_class_id')->constrained()->onDelete('cascade');
             $table->string('subject')->nullable();
+             $table->boolean('is_primary')->default(false); // Add this column
             $table->timestamps();
 
             // Ensure unique combination
             $table->unique(['teacher_id', 'school_class_id']);
+             $table->index('is_primary');
         });
     }
 
